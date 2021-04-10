@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3FABE901-F9AA-4A29-A1AA-A699D99421E7}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>pasms64</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_NO_SECURE_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_NO_SECURE_WARNINGS;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\dictionary.c" />
+    <ClCompile Include="..\..\error.c" />
+    <ClCompile Include="..\..\genlist.c" />
+    <ClCompile Include="..\..\genoutput.c" />
+    <ClCompile Include="..\..\main.c" />
+    <ClCompile Include="..\..\node.c" />
+    <ClCompile Include="..\..\opcodes.c" />
+    <ClCompile Include="..\..\pasm64.c" />
+    <ClCompile Include="..\..\pasm64.flex.c" />
+    <ClCompile Include="..\..\pasm64.tab.c" />
+    <ClCompile Include="..\..\str.c" />
+    <ClCompile Include="..\..\symbol.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\dictionary.h" />
+    <ClInclude Include="..\..\error.h" />
+    <ClInclude Include="..\..\genlist.h" />
+    <ClInclude Include="..\..\genoutput.h" />
+    <ClInclude Include="..\..\node.h" />
+    <ClInclude Include="..\..\opcodes.h" />
+    <ClInclude Include="..\..\pasm64.h" />
+    <ClInclude Include="..\..\pasm64.tab.h" />
+    <ClInclude Include="..\..\str.h" />
+    <ClInclude Include="..\..\symbol.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Flex Include="..\..\pasm64.l">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).flex.c</OutputFile>
+      <Noline Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</Noline>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).flex.c</OutputFile>
+      <Noline Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</Noline>
+      <CaseInsensitive Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CaseInsensitive>
+    </Flex>
+  </ItemGroup>
+  <ItemGroup>
+    <Bison Include="..\..\pasm64.y">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).tab.c</OutputFile>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</NoLines>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).tab.c</OutputFile>
+      <NoLines Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</NoLines>
+    </Bison>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.targets" />
+  </ImportGroup>
+</Project>

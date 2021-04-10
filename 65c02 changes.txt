@@ -1,0 +1,148 @@
+72 2   5 a (zp) NV....ZC ADC ($12)
+32 2   5   (zp) N.....Z. AND ($12)
+D2 2   5   (zp) N.....ZC CMP ($12)
+52 2   5   (zp) N.....Z. EOR ($12)
+B2 2   5   (zp) N.....Z. LDA ($12)
+12 2   5   (zp) N.....Z. ORA ($12)
+F2 2   5 a (zp) NV....ZC SBC ($12)
+92 2   5   (zp) ........ STA ($12)
+
+ BIT - imm abs,X zp,X addressing modes
+
+OP LEN CYC MODE  FLAGS    SYNTAX
+-- --- --- ----  ------   ------
+89 2   2   imm   ......Z. BIT #$12
+34 2   4   zp,X  NV....Z. BIT $34,X
+3C 3   4 a abs,X NV....Z. BIT $5678,X
+
+DEC INC - acc addressing mode
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- ------   ------
+3A 1   2   acc  N.....Z. DEC
+1A 1   2   acc  N.....Z. INC
+
+
+JMP - (abs,X) addressing mode
+
+Flags affected: none (same as before)
+
+OP LEN CYC MODE    FLAGS    SYNTAX
+-- --- --- ----    -----    ------
+7C 3   6   (abs,X) ........ JMP ($1234,X)
+
+
+BRA - BRanch Always
+
+Flags affected: none
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- ------   ------
+80 2   3 a rel  ........ BRA LABEL
+
+PHX PHY PLX PLY - PusH or PulL X or Y register
+
+Flags affected: see table
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- -----    ------
+DA 1   3   imp  ........ PHX
+5A 1   3   imp  ........ PHY
+FA 1   4   imp  N.....Z. PLX
+7A 1   4   imp  N.....Z. PLY
+
+STZ - STore Zero
+
+Flags affected: none
+
+OP LEN CYC MODE  FLAGS    SYNTAX
+-- --- --- ----  -----    ------
+64 2   3   zp    ........ STZ $12
+74 2   4   zp,X  ........ STZ $12,X
+9C 3   4   abs   ........ STZ $3456
+9E 3   5   abs,X ........ STZ $3456,X
+
+
+ TRB - Test and Reset Bits
+
+Flags affected: Z
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- -----    ------
+14 2   5   zp   ......Z. TRB $12
+1C 3   6   abs  ......Z. TRB $3456
+
+ TSB - Test and Set Bits
+
+Flags affected: Z
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- -----    ------
+04 2   5   zp   ......Z. TSB $12
+0C 3   6   abs  ......Z. TSB $3456
+
+
+
+BBR BBS - Branch on Bit Reset or Set
+
+Flags affected: none
+
+OP LEN CYC MODE   FLAGS    SYNTAX
+-- --- --- ----   -----    ------
+0F 3   5   zp,rel ........ BBR0 $12,LABEL
+1F 3   5   zp,rel ........ BBR1 $12,LABEL
+2F 3   5   zp,rel ........ BBR2 $12,LABEL
+3F 3   5   zp,rel ........ BBR3 $12,LABEL
+4F 3   5   zp,rel ........ BBR4 $12,LABEL
+5F 3   5   zp,rel ........ BBR5 $12,LABEL
+6F 3   5   zp,rel ........ BBR6 $12,LABEL
+7F 3   5   zp,rel ........ BBR7 $12,LABEL
+8F 3   5   zp,rel ........ BBS0 $12,LABEL
+9F 3   5   zp,rel ........ BBS1 $12,LABEL
+AF 3   5   zp,rel ........ BBS2 $12,LABEL
+BF 3   5   zp,rel ........ BBS3 $12,LABEL
+CF 3   5   zp,rel ........ BBS4 $12,LABEL
+DF 3   5   zp,rel ........ BBS5 $12,LABEL
+EF 3   5   zp,rel ........ BBS6 $12,LABEL
+FF 3   5   zp,rel ........ BBS7 $12,LABEL
+
+ RMB SMB - Reset or Set Memory Bit
+
+Flags affected: none
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- -----    ------
+07 2   5   zp   ........ RMB0 $12
+17 2   5   zp   ........ RMB1 $12
+27 2   5   zp   ........ RMB2 $12
+37 2   5   zp   ........ RMB3 $12
+47 2   5   zp   ........ RMB4 $12
+57 2   5   zp   ........ RMB5 $12
+67 2   5   zp   ........ RMB6 $12
+77 2   5   zp   ........ RMB7 $12
+87 2   5   zp   ........ SMB0 $12
+97 2   5   zp   ........ SMB1 $12
+A7 2   5   zp   ........ SMB2 $12
+B7 2   5   zp   ........ SMB3 $12
+C7 2   5   zp   ........ SMB4 $12
+D7 2   5   zp   ........ SMB5 $12
+E7 2   5   zp   ........ SMB6 $12
+F7 2   5   zp   ........ SMB7 $12
+
+ STP - STop the Processor
+
+Flags affected: none
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- ------   ------
+DB 1   3   imp  ........ STP
+
+
+ WAI - WAit for Interrupt
+
+Flags affected: none
+
+OP LEN CYC MODE FLAGS    SYNTAX
+-- --- --- ---- ------   ------
+CB 1   3   imp  ........ WAI
+
