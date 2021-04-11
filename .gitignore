@@ -4,3 +4,5 @@
 
 *.user
 /windows/pasms64/.vs/pasms64/v16
+/windows/pasms64/.vs/pasm64/v16/Browse.VC.opendb
+/windows/pasms64/.vs/pasm64/v16

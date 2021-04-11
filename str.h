@@ -1,3 +1,4 @@
+#pragma once
 // ***********************************************************************
 // Author           : Paul Baxter
 // Created          : 11-29-2015
@@ -8,6 +9,6 @@
 // Last Modified On : 11-29-2015
 // ***********************************************************************
 
-extern char* Strdup(const char* string);
-extern int Stricmp(const char* str1, const char*str2);
-extern char* Strlower(const char* string);
+extern char* StrDup(const char* string);
+extern int StrICmp(const char* str1, const char*str2);
+extern char* StrLower(const char* string);

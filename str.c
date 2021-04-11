@@ -19,10 +19,10 @@
 /// </summary>
 /// <param name="string">The string.</param>
 /// <returns>char *.</returns>
-char* Strdup(const char* string)
+char* StrDup(const char* string)
 {
     const int len = (int)strlen(string);
-    const char* module = "Strdup";
+    const char* module = "StrDup";
     char* buffer = (char*)malloc(len + 1);
 
     if (buffer == NULL)
@@ -39,7 +39,7 @@ char* Strdup(const char* string)
 /// <param name="pStr1">STR1.</param>
 /// <param name="pStr2">STR2.</param>
 /// <returns>int.</returns>
-int Stricmp(const char* pStr1, const char* pStr2)
+int StrICmp(const char* pStr1, const char* pStr2)
 {
     char c1;
     int v;
@@ -60,9 +60,9 @@ int Stricmp(const char* pStr1, const char* pStr2)
 /// </summary>
 /// <param name="string">The string.</param>
 /// <returns>char *.</returns>
-char* Strlower(const char* string)
+char* StrLower(const char* string)
 {
-    const char* module = "Strlower";
+    const char* module = "StrLower";
     const int len = (int) strlen(string);
     char* buffer = (char*)malloc(len + 1);
 

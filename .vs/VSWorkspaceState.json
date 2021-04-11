@@ -1,11 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\FlexBison",
-    "\\FlexBison\\GeneratedCode",
-    "\\windows",
-    "\\windows\\pasms64"
+    ""
   ],
-  "SelectedNode": "\\windows\\pasms64\\pasms64.sln",
+  "SelectedNode": "\\pasms64.sln",
   "PreviewInSolutionExplorer": false
 }

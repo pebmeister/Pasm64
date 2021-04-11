@@ -95,7 +95,7 @@ parseNodePtr Str(char* value)
 {
     const char* module = "str";
     parseNodePtr p = AllocateNode();
-	char* str = Strdup(value);	
+	char* str = StrDup(value);	
 
     if (str == NULL || p == NULL)
     {
@@ -141,7 +141,7 @@ parseNodePtr Id(char* name)
 
     /* copy information */
     p->type = typeId;
-    p->id.name = Strdup(name);
+    p->id.name = StrDup(name);
     if (p->id.name == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -170,7 +170,7 @@ parseNodePtr MacroId(char* name)
 
     /* copy information */
     p->type = typeMacroId;
-    p->id.name = Strdup(name);
+    p->id.name = StrDup(name);
     if (p->id.name == NULL)
     {
         FatalError(module, ErrorOutofMemory);

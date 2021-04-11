@@ -43,7 +43,7 @@
 %token WHILE ENDDO REPEAT UNTIL IF PRINT PRINTALL EQU ORG PCASSIGN 
 %token END DO MACRO ENDMACRO ENDIF WEND STATEMENT EXPRLIST STR
 %token FOR NEXT TO DOWNTO STEP NOT
-%token BYTE WORD LOBYTE HIBYTE DS INC
+%token BYTE WORD LOBYTE HIBYTE DS INC LOAD
 %token REGX REGY VAR
 %token SECTION ENDSECTION
 
@@ -55,7 +55,7 @@
 %left '+' '-'
 %left '*' '/'
 
-%type <nPtr> stmt_list stmt include_file 
+%type <nPtr> stmt_list stmt include_file load_file
 %type <nPtr> opcode regloopexpr
 %type <nPtr> macrodef macrocall expr_list symbol_list
 %type <nPtr> symbol_assign symbol_value var_def pc_assign 
@@ -83,6 +83,7 @@ stmt
     | endsection '\n'                   { $$ = $1;                                      }
     | var_def '\n'                      { $$ = $1;                                      }
     | include_file '\n'                 { $$ = $1;                                      }
+    | load_file '\n'                    { $$ = $1;                                      }
     | '\n'                              { $$ = Opr(STATEMENT, 0);                       }
     ;
 
@@ -101,6 +102,10 @@ endsection
 
 include_file
     : INC STRING_LITERAL                { $$ = Opr(INC, 1, Str($2));                    }
+    ;
+
+load_file
+    : LOAD STRING_LITERAL               { $$ = Opr(LOAD, 1, Str($2));                   }
     ;
 
 ifexpr 

@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct  MacroStackEntry
 {
-    int NumNodes;
+    int num_nodes;
     int* values; 
 } MacroStackEntry;
 
@@ -41,7 +41,7 @@ MacroStackEntry * MacroStack = NULL;
 
 int MacroIndex = 0;
 void SanitizeSymbol(SymbolTablePtr symbol);
-int symCmpfunc (const void * a, const void * b);
+int SymCmpFunction (const void * a, const void * b);
 
 /// <summary>
 /// Add a symbol to the SymbolTable.
@@ -83,7 +83,7 @@ SymbolTablePtr AddSymbol(char* name)
         return tmpPtr;
     }
 
-    sym.name = Strdup(name);
+    sym.name = StrDup(name);
     if (sym.name == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -92,7 +92,7 @@ SymbolTablePtr AddSymbol(char* name)
     sym.ismacroparam = name[0] == '@';
     if (CurrentSection)
     {
-        sym.section = Strdup(CurrentSection);
+        sym.section = StrDup(CurrentSection);
         if (sym.section == NULL)
         {
             FatalError(module, ErrorOutofMemory);
@@ -112,7 +112,7 @@ SymbolTablePtr AddSymbol(char* name)
     }
     else
     {
-        sym.fullname = Strdup(sym.name);
+        sym.fullname = StrDup(sym.name);
         if (sym.fullname == NULL)
         {
             FatalError(module, ErrorOutofMemory);
@@ -154,7 +154,7 @@ void SanitizeSymbol(SymbolTablePtr symbol)
         len--;
     symbol->name[len] = 0;
     char* tempSection = symbol->name;
-    char* tempName = Strdup(&symbol->name[len + 1]);
+    char* tempName = StrDup(&symbol->name[len + 1]);
     if (tempName == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -312,7 +312,7 @@ void DumpSymbols(FILE* symFile)
         }
     }
 
-    qsort(symbolArray, count, sizeof(Sym), symCmpfunc);
+    qsort(symbolArray, count, sizeof(Sym), SymCmpFunction);
 
     for (index = 0; index < count; index++)
     {
@@ -332,7 +332,7 @@ void DumpSymbols(FILE* symFile)
 /// <param name="a">a.</param>
 /// <param name="b">The b.</param>
 /// <returns>int.</returns>
-int symCmpfunc(const void * a, const void * b)
+int SymCmpFunction(const void * a, const void * b)
 {
     return (((SymPtr)a)->value - ((SymPtr)b)->value);  // NOLINT(clang-diagnostic-cast-qual)
 }
@@ -446,11 +446,11 @@ void PushMacroParams(void)
     }
     if (maxMacro < 0)
     {
-        MacroStack[MacroIndex].NumNodes = 0;
+        MacroStack[MacroIndex].num_nodes = 0;
     }
     else
     {
-        MacroStack[MacroIndex].NumNodes = maxMacro + 1;
+        MacroStack[MacroIndex].num_nodes = maxMacro + 1;
         MacroStack[MacroIndex].values = (int*) malloc((maxMacro + 1) * sizeof(long));
         if (MacroStack[MacroIndex].values == NULL)
         {
@@ -491,7 +491,7 @@ void PopMacroParams(void)
         return;
     }
  
-    for (int index = 0; index < MacroStack[MacroIndex].NumNodes; index++)
+    for (int index = 0; index < MacroStack[MacroIndex].num_nodes; index++)
     {
         // ReSharper disable once CppLocalVariableMayBeConst
         SymbolTablePtr tmpPtr = LookUpMacroParam(index);
@@ -505,12 +505,12 @@ void PopMacroParams(void)
             return;
         }
     }
-    if (MacroStack[MacroIndex].NumNodes > 0)
+    if (MacroStack[MacroIndex].num_nodes > 0)
     {
         free(MacroStack[MacroIndex].values);
         MacroStack[MacroIndex].values = NULL;
     }
-    MacroStack[MacroIndex].NumNodes = 0; 
+    MacroStack[MacroIndex].num_nodes = 0; 
 }
 
 //

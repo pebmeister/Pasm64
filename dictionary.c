@@ -160,7 +160,7 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
     }
     memset(e, 0, sizeof(*e));
 
-    e->key = Strlower(key);
+    e->key = StrLower(key);
     if (e->key == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -202,7 +202,7 @@ void * DictSearch(DictionaryPtr d, const char *key)
 {
     const char* module = "DictSearch";
 
-    char* lowerKey = Strlower(key);
+    char* lowerKey = StrLower(key);
     if (lowerKey == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -231,7 +231,7 @@ void * DictSearch(DictionaryPtr d, const char *key)
 void DictDelete(DictionaryPtr d, const char *key)
 {
     const char* module = "DictDelete";
-    char* lowerKey = Strlower(key);
+    char* lowerKey = StrLower(key);
 
     if (lowerKey == NULL)
     {

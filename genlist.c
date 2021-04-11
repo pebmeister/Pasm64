@@ -44,7 +44,7 @@ FileLine* GetFileLine(char* file, const int line)
     const char* module = "GetFileLine";
     FileEntry* fileEntry = SourceFileList;
     FileEntry* prev = NULL;
-    for (; fileEntry != NULL && Stricmp(fileEntry->filename, file) != 0; fileEntry = fileEntry->next)
+    for (; fileEntry != NULL && StrICmp(fileEntry->filename, file) != 0; fileEntry = fileEntry->next)
         prev = fileEntry;
 
     if (!fileEntry)
@@ -53,7 +53,7 @@ FileLine* GetFileLine(char* file, const int line)
         if (fileEntry)
         {
             memset(fileEntry, 0, sizeof(FileEntry));
-            fileEntry->filename = Strdup(file);
+            fileEntry->filename = StrDup(file);
             fileEntry->lines = ReadFile(file);
             if (prev)
                 prev->next = fileEntry;
@@ -64,7 +64,7 @@ FileLine* GetFileLine(char* file, const int line)
         if (SourceFileList == NULL)
             SourceFileList = fileEntry;
 
-        if (strcmp(fileEntry->filename, file) == 0)
+        if (StrICmp(fileEntry->filename, file) == 0)
         {
             FileLine* lineEntry = fileEntry->lines;
             for (; lineEntry && lineEntry->lineNumber < line; lineEntry = lineEntry->next)
@@ -114,7 +114,7 @@ FileLine* ReadFile(const char* fileName)
                 return NULL;
             }
             memset(fileNode, 0, sizeof(FileLine));
-            fileNode->line = Strdup(InternalBuffer);
+            fileNode->line = StrDup(InternalBuffer);
             fileNode->lineNumber = line++;
         }
     }
@@ -511,14 +511,14 @@ ListTablePtr AddList(char* file, const int line, char* output)
     }
     memset(varPtr, 0, sizeof(ListTable));
 
-    varPtr->filename = Strdup(file);
+    varPtr->filename = StrDup(file);
     if (varPtr->filename == NULL)
     {
         FatalError(module, ErrorOutofMemory);
         return NULL;
     }
     varPtr->line = line + 1;
-    varPtr->output = Strdup(output);
+    varPtr->output = StrDup(output);
     if (varPtr->output == NULL)
     {
         FatalError(module, ErrorOutofMemory);
@@ -554,7 +554,7 @@ void GenerateListFile(FILE* lstFile)
     // loop through all list  nodes
     for (; listNode; listNode = listNode->next)
     {
-        if (CurFileName == NULL || Stricmp(CurFileName, listNode->filename))
+        if (CurFileName == NULL || StrICmp(CurFileName, listNode->filename))
         {
             CurFileName = listNode->filename;
             fprintf(lstFile, "\nProcessing %s\n\n", CurFileName);
@@ -562,7 +562,7 @@ void GenerateListFile(FILE* lstFile)
 
         const int startLine = listNode->line;
         int endLine = startLine;
-        if (listNode->next && Stricmp(listNode->filename, listNode->next->filename) == 0 && listNode->next->line > listNode->line)
+        if (listNode->next && StrICmp(listNode->filename, listNode->next->filename) == 0 && listNode->next->line > listNode->line)
             endLine = listNode->next->line - 1;
 
         FileLine* lst = GetFileLine(listNode->filename, startLine);

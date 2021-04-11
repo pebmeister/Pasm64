@@ -193,6 +193,7 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
  ".SECT"                    return SECTION;
  ".ENDS"                    return ENDSECTION;
  ".INC"                     return INC;
+ ".LOAD"                    return LOAD;
 ".WHILE"                    { 
                                 if (inDoLoop > 0) 
                                 { 
@@ -224,7 +225,7 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 [@][0-9]+                   {
                                 if (!inMacroDef)
                                     REJECT;
-                                yylval.strValue = Strdup(yytext); 
+                                yylval.strValue = StrDup(yytext); 
                                 return SYMBOL;
                             }
 [\'].[\']                   INT_1BYTE
@@ -236,12 +237,12 @@ $[0-9A-Fa-f]*               INT(1, 16)
 0b[0-1]*                    INT(2, 2)
 [\'][\\][0-7]{3}[\']        INT(2, 8)
 
-{STRVALUE}					{ yylval.strValue = Strdup(yytext); return STRING_LITERAL; }
+{STRVALUE}					{ yylval.strValue = StrDup(yytext); return STRING_LITERAL; }
 "*"[ /t]*[=]                { unput('='); return PCASSIGN; }
 "*"[ /t]*".EQU"             { unput('='); return PCASSIGN; }
 "X"                         { return 'X'; }
 "Y"                         { return 'Y'; }
-[A-Za-z_][A-Za-z0-9_.]*:?   { yylval.strValue = Strdup(yytext); return SYMBOL; }
+[A-Za-z_][A-Za-z0-9_.]*:?   { yylval.strValue = StrDup(yytext); return SYMBOL; }
 "/*"                        { BEGIN(C_COMMENT); }
 <C_COMMENT>"*/"             { BEGIN(INITIAL); }
 <C_COMMENT>.|[\n]           { /* ignore comments */ }

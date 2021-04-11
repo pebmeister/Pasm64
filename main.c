@@ -145,13 +145,13 @@ int main(const int argc, char* argv[])
 
     while (argIndex < argc)
     {
-        if ((Stricmp(argv[argIndex], "-?") == 0) || (Stricmp(argv[argIndex], "/?") == 0))
+        if ((StrICmp(argv[argIndex], "-?") == 0) || (StrICmp(argv[argIndex], "/?") == 0))
         {
             Usage();
             continue;
         }
         // get output file
-        if ((Stricmp(argv[argIndex], "-o") == 0) || (Stricmp(argv[argIndex], "/o") == 0))
+        if ((StrICmp(argv[argIndex], "-o") == 0) || (StrICmp(argv[argIndex], "/o") == 0))
         {
             argIndex ++;
             if (argIndex >= argc)
@@ -172,7 +172,7 @@ int main(const int argc, char* argv[])
         }
 
         // get symbol file
-        if ((Stricmp(argv[argIndex], "-s") == 0) || (Stricmp(argv[argIndex], "/s") == 0))
+        if ((StrICmp(argv[argIndex], "-s") == 0) || (StrICmp(argv[argIndex], "/s") == 0))
         {
             argIndex ++;
             if (argIndex >= argc)
@@ -193,7 +193,7 @@ int main(const int argc, char* argv[])
         }
 
         // get log file
-        if ((Stricmp(argv[argIndex], "-log") == 0) || (Stricmp(argv[argIndex], "/log") == 0))
+        if ((StrICmp(argv[argIndex], "-log") == 0) || (StrICmp(argv[argIndex], "/log") == 0))
         {
             argIndex ++;
             if (argIndex >= argc)
@@ -215,7 +215,7 @@ int main(const int argc, char* argv[])
         }
 
         // get list file
-        if ((Stricmp(argv[argIndex], "-l") == 0) || (Stricmp(argv[argIndex], "/l") == 0))
+        if ((StrICmp(argv[argIndex], "-l") == 0) || (StrICmp(argv[argIndex], "/l") == 0))
         {
             argIndex ++;
             if (argIndex >= argc)
@@ -236,7 +236,7 @@ int main(const int argc, char* argv[])
         }
 
         // C64 mode - write load address
-        if ((Stricmp(argv[argIndex], "-c64") == 0) || (Stricmp(argv[argIndex], "/c64") == 0))
+        if ((StrICmp(argv[argIndex], "-c64") == 0) || (StrICmp(argv[argIndex], "/c64") == 0))
         {
             if (OutFileFormat != none)
             {
@@ -250,7 +250,7 @@ int main(const int argc, char* argv[])
         }
 
         // 65c02 opcodes enabled
-        if ((Stricmp(argv[argIndex], "-65c02") == 0) || (Stricmp(argv[argIndex], "/65c02") == 0))
+        if ((StrICmp(argv[argIndex], "-65c02") == 0) || (StrICmp(argv[argIndex], "/65c02") == 0))
         {
             if (CPUSpecifed)
             {
@@ -265,7 +265,7 @@ int main(const int argc, char* argv[])
         }
 
         // 6502 opcodes specified
-        if ((Stricmp(argv[argIndex], "-6502") == 0) || (Stricmp(argv[argIndex], "/6502") == 0))
+        if ((StrICmp(argv[argIndex], "-6502") == 0) || (StrICmp(argv[argIndex], "/6502") == 0))
         {
             if (CPUSpecifed)
             {
@@ -280,7 +280,7 @@ int main(const int argc, char* argv[])
         }
 
         // illegal opcodes allowed specified
-        if ((Stricmp(argv[argIndex], "-i") == 0) || (Stricmp(argv[argIndex], "/i") == 0))
+        if ((StrICmp(argv[argIndex], "-i") == 0) || (StrICmp(argv[argIndex], "/i") == 0))
         {
             if (IllegalSpecifed)
             {
@@ -295,7 +295,7 @@ int main(const int argc, char* argv[])
         }
 
         // no warnings
-        if ((Stricmp(argv[argIndex], "-nowarn") == 0) || (Stricmp(argv[argIndex], "/nowarn") == 0))
+        if ((StrICmp(argv[argIndex], "-nowarn") == 0) || (StrICmp(argv[argIndex], "/nowarn") == 0))
         {
             if (NoWarnings)
             {
@@ -485,12 +485,9 @@ int main(const int argc, char* argv[])
                 FatalError(module, ErrorOpeningSymbolFile);
                 return -1;
             }
-            else
-            {
-                // display the symbols
-                DumpSymbols(SymFile);
-                fclose(SymFile);
-            }
+            // display the symbols
+            DumpSymbols(SymFile);
+            fclose(SymFile);
         }
 
         // generate the list file

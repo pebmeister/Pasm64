@@ -145,6 +145,7 @@ int ExOprSection(parseNodePtr p);
 int ExOprEndSection(parseNodePtr p);
 int ExOprVar(parseNodePtr p);
 int ExOprInclude(parseNodePtr p);
+int ExOprLoad(parseNodePtr p);
 
 //
 // Program Counter
@@ -246,6 +247,7 @@ struct OpTable ExOprTable [] =
     { SHIFT_RIGHT,  ExOprShiftRight         },    
     { VAR,          ExOprVar                },
     { INC,          ExOprInclude            },
+    { LOAD,         ExOprLoad               },
 };
 #define NUM_OPR_EXP (sizeof(ExOprTable) / sizeof(struct OpTable))
 
@@ -336,6 +338,39 @@ int ExOprInclude(parseNodePtr p)
 
     OpenIncludeFile(file);
 
+    return 1;
+}
+
+int ExOprLoad(parseNodePtr p)
+{
+    const char* module = "ExOprLoad";
+    CHECK_OPS(1, 1);
+
+    char* file = p->op[0]->str.value;
+    FILE* fd = fopen(file, "rb");
+    if (fd == NULL)
+    {
+        FatalError(module, ErrorOpeningInputFile);
+    }
+
+    fseek(fd, 0, SEEK_END);
+    const size_t len = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+
+    while (!feof(fd))
+    {
+        const size_t pos = ftell(fd);
+        if (len - pos > 1)
+        {
+            const char a = (char)fgetc(fd);
+            const char b = (char)fgetc(fd);
+            Ex(Data(2, Opr(EXPRLIST, 1, Con(a | b << 8, 0))));
+            continue;
+        }
+        const char ch = (char) fgetc(fd);
+        Ex(Data(1, Opr(EXPRLIST, 1, Con(ch, 0))));
+    }
+    fclose(fd);
     return 1;
 }
 
@@ -556,7 +591,7 @@ int ExOprSection(parseNodePtr p)
     }
     else
     {
-        CurrentSection = Strdup(name);
+        CurrentSection = StrDup(name);
         if (CurrentSection == NULL)
         {
             FatalError(module, ErrorOutofMemory);
@@ -665,7 +700,7 @@ int ExOpCode(parseNodePtr p)
         {
             const int opValue = Ex(p->op[index]);
             largeOp = largeOp | ((opValue & ~0xFF) != 0);
-            outOfRange =  outOfRange | (((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp));
+            outOfRange =  outOfRange | ((((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp)));
             if (outOfRange)
             {
                 Error(module, ErrorValueOutofRange);
