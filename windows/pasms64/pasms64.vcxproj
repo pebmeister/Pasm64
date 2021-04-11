@@ -31,7 +31,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.props" />
+    <Import Project="..\..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -126,6 +126,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.targets" />
+    <Import Project="..\..\..\..\..\..\Perforce\paul\depot\6502\winflexbison3\custom_build_rules\win_flex_bison_custom_build.targets" />
   </ImportGroup>
 </Project>

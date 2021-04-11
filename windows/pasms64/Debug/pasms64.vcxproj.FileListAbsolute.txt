@@ -1,0 +1,2 @@
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\pasms64.exe
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\pasms64.pdb
