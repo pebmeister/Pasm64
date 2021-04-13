@@ -111,11 +111,6 @@ int GenerateOut(parseNodePtr p)
 
         if ((hi != 0 && DataSize < 2) || overflow)
         {
-            
-            printf("NODE type %d\n", p->type);
-
-            printf("Op %4X Hi %-4X DataSize %d  Overflow %d\n", op, hi, DataSize, overflow);
-
             Error(module, ErrorValueOutofRange);
             return 0;
         }
