@@ -30,7 +30,7 @@ typedef struct
     int value;
 } Sym, *SymPtr;
 
-typedef struct  MacroStackEntry
+typedef struct  macro_stack_entry
 {
     int num_nodes;
     int* values; 

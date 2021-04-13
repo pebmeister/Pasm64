@@ -239,7 +239,7 @@ parseNodePtr Data(const int dataSize, parseNodePtr data)
 /// </summary>
 /// <param name="op">The operator.</param>
 /// <param name="nops">The number of ops.</param>
-/// <param name="...">The .</param>
+/// <param name="...">...</param>
 /// <returns>parseNodePtr.</returns>
 parseNodePtr Opr(int op, int nops, ...) 
 {
@@ -863,7 +863,7 @@ char* SantizeString(char* str, int* outlen)
     const int len = (int)strlen(str) + 1;
     char* outStr = (char*) malloc(len);
     char* tmpStr = outStr;
-    unsigned char esc_char = 0;
+    unsigned char escChar = 0;
     const char* module = "SantizeString";
 
     if (outStr == NULL)
@@ -886,31 +886,31 @@ char* SantizeString(char* str, int* outlen)
             switch(tolower(*(++str)))
             {
                 case 'a':
-                    esc_char = '\a';
+                    escChar = '\a';
                     break;
 
                 case 'b':
-                    esc_char = '\b';
+                    escChar = '\b';
                     break;
 
                 case 'f':
-                    esc_char = '\f';
+                    escChar = '\f';
                     break;
 
                 case 'v':
-                    esc_char = '\v';
+                    escChar = '\v';
                     break;
 
                 case 'r':
-                    esc_char = '\r';
+                    escChar = '\r';
                     break;
 
                 case 'n':
-                    esc_char = '\n';
+                    escChar = '\n';
                     break;
 
                 case 't':
-                    esc_char = '\t';
+                    escChar = '\t';
                     break;
 
                 case 'x':
@@ -934,15 +934,15 @@ char* SantizeString(char* str, int* outlen)
                 case '\'':
                 case '\"':
                 case '\\':
-                    esc_char = *str;		
+                    escChar = *str;		
                     break;
 
                 default:
-                    esc_char = '?';
+                    escChar = '?';
                     Error(module, ErrorUnrecognizedEscapeSequence);
                     break;                                      
             }
-            *tmpStr++ = (char)esc_char;
+            *tmpStr++ = (char)escChar;
             outputLen++;
             str++;
         }

@@ -3,7 +3,9 @@
     
     .ORG $1000
 
-    .inc "C:\\Users\\jaret\\Desktop\\pasm64\\pasm64\\test\\test.a"
+    .inc "test/test.a"
+    
+    .load "test/textfile.txt"
     
     .illegal OFF    ; no illegal opcodes
 

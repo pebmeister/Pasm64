@@ -24,7 +24,7 @@ ListTablePtr AddList(char* file, int line, char* output);
 typedef struct file_line
 {
     char* line;
-    int lineNumber;
+    int line_number;
     int displayed;
     struct file_line* next;
 } FileLine;
@@ -67,7 +67,7 @@ FileLine* GetFileLine(char* file, const int line)
         if (StrICmp(fileEntry->filename, file) == 0)
         {
             FileLine* lineEntry = fileEntry->lines;
-            for (; lineEntry && lineEntry->lineNumber < line; lineEntry = lineEntry->next)
+            for (; lineEntry && lineEntry->line_number < line; lineEntry = lineEntry->next)
                 ;
             return lineEntry;
         }
@@ -115,7 +115,7 @@ FileLine* ReadFile(const char* fileName)
             }
             memset(fileNode, 0, sizeof(FileLine));
             fileNode->line = StrDup(InternalBuffer);
-            fileNode->lineNumber = line++;
+            fileNode->line_number = line++;
         }
     }
     fclose(file);
@@ -581,7 +581,7 @@ void GenerateListFile(FILE* lstFile)
         }
         fputs(InternalBuffer, lstFile);
 
-        for (lst = lst->next;  lst && lst->lineNumber <= endLine; lst = lst->next)
+        for (lst = lst->next;  lst && lst->line_number <= endLine; lst = lst->next)
         {
             InternalBuffer[0] = 0;
             sprintf(InternalBuffer, "%-50s", " ");

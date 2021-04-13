@@ -356,19 +356,27 @@ int ExOprLoad(parseNodePtr p)
     fseek(fd, 0, SEEK_END);
     const size_t len = ftell(fd);
     fseek(fd, 0, SEEK_SET);
+    size_t pos = ftell(fd);
 
-    while (!feof(fd))
+    while (!feof(fd) && len - pos > 0)
     {
-        const size_t pos = ftell(fd);
+        pos = ftell(fd);
         if (len - pos > 1)
         {
-            const char a = (char)fgetc(fd);
-            const char b = (char)fgetc(fd);
-            Ex(Data(2, Opr(EXPRLIST, 1, Con(a | b << 8, 0))));
+            const unsigned char a = (unsigned char)fgetc(fd);
+            const unsigned char b = (unsigned char)fgetc(fd);
+
+            DataSize = 2;
+            Ex(Data(DataSize, Opr(EXPRLIST, 1, Con(((a | b << 8) & 0xFFFF), 0))));
             continue;
         }
-        const char ch = (char) fgetc(fd);
-        Ex(Data(1, Opr(EXPRLIST, 1, Con(ch, 0))));
+        if (len - pos > 0)
+        {
+            DataSize = 1;
+            const unsigned char ch = (unsigned char)fgetc(fd);
+            Ex(Data(DataSize, Opr(EXPRLIST, 1, Con(ch, 0))));
+        }
+        pos = ftell(fd);
     }
     fclose(fd);
     return 1;

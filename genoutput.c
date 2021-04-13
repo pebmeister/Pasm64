@@ -15,6 +15,7 @@
 #include "pasm64.h"
 #include "genoutput.h"
 #include "error.h"
+#include "node.h"
 
 // number of byte written to output file
 int TotalBytesWritten = 0;
@@ -96,6 +97,7 @@ int GenerateOut(parseNodePtr p)
     // 0 signifies a string value which is dealt with above
     if (p->type != typeOpCode)
     {
+
         unsigned char hi;
         unsigned char lo;
 
@@ -109,6 +111,11 @@ int GenerateOut(parseNodePtr p)
 
         if ((hi != 0 && DataSize < 2) || overflow)
         {
+            
+            printf("NODE type %d\n", p->type);
+
+            printf("Op %4X Hi %-4X DataSize %d  Overflow %d\n", op, hi, DataSize, overflow);
+
             Error(module, ErrorValueOutofRange);
             return 0;
         }
