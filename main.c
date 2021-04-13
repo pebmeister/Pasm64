@@ -26,7 +26,6 @@
 
 // If we have this many passes there is an infinite loop
 const int MaxPasses =  20;
-
 enum OutputFileType OutFileFormat = none;
 
 int WarningCount = 0;
@@ -49,6 +48,7 @@ char* SymFileName = NULL;
 char* OutputFileName = NULL;
 char* InternalBuffer = NULL;
 char* ListFileName = NULL;
+char* Directories = NULL;
 
 // ReSharper disable once CppInconsistentNaming
 // ReSharper disable once IdentifierTypo
@@ -94,9 +94,6 @@ void ResetLex(void)
         return;
     }
     memset(HeadNode, 0, sizeof(parseNode));
-
-    fprintf(stdout, "Pass %d\n", Pass);
-    Pass++;
 }
 
 //
@@ -105,8 +102,9 @@ void ResetLex(void)
 void Usage(void)
 {
     printf("Usage:\n");
-    printf("  pasm64 [-o outputfile] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
+    printf("  pasm64 [-o outputfile] [-dir directory] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
     printf("         -o outputfile   specifies output file\n");
+    printf("         -dir directory  specifies directories to search for source files and include files separated by ';'\n");
     printf("         -s symbolfile   specifies symbol file\n");
     printf("         -l listfile     specifies listing file\n");
     printf("         -log logfile    specifies log file\n");
@@ -116,6 +114,34 @@ void Usage(void)
     printf("         -65C02          use 65C02 instruction set\n");
     printf("         -nowarn         turn off warnings\n");
     printf("         -?              print this help\n");
+}
+
+FILE* OpenFile(const char* file, char* mode)
+{
+    FILE* fd = fopen(file, mode);
+    if (fd != NULL) return fd;
+
+    if (Directories == NULL) return NULL;
+
+    char path[1024] = { 0 };
+
+    for  (char* dir = Directories; *dir != 0;)
+    {
+        char* p = path;
+        while (*dir != 0 && *dir != ';')
+        {
+            *p++ = *dir++;
+        }
+        *p = 0;
+        strcat(path, file);
+        fd = fopen(path, mode);
+        if (fd != NULL)
+            return fd;
+
+        if (*dir == ';')
+            dir++;
+    }
+    return NULL;
 }
 
 //
@@ -188,6 +214,26 @@ int main(const int argc, char* argv[])
                 return -1;
             }
             SymFileName = argv[argIndex];
+            argIndex++;
+            continue;
+        }
+
+        if ((StrICmp(argv[argIndex], "-dir") == 0) || (StrICmp(argv[argIndex], "/dir") == 0))
+        {
+            argIndex++;
+            if (argIndex >= argc)
+            {
+                Error(module, ErrorMissingParameter);
+                Usage();
+                return -1;
+            }
+            if (Directories != NULL)
+            {
+                Error(module, ErrorSymbolFileSpecifiedMoreThanOnce);
+                Usage();
+                return -1;
+            }
+            Directories = argv[argIndex];
             argIndex++;
             continue;
         }
@@ -337,6 +383,9 @@ int main(const int argc, char* argv[])
 
     do
     {
+        fprintf(stdout, "Pass %d\n", Pass);
+        Pass++;
+
         if (LogFileSpecified)
         {
             fprintf(LogFile, "PASS %d\n", Pass);
@@ -352,7 +401,7 @@ int main(const int argc, char* argv[])
             yylineno = 0;
 
             CurFileName = inputFiles[inFileIndex];
-            yyin = fopen(CurFileName, "r");
+            yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {
                 FatalError(module, ErrorOpeningInputFile);
@@ -418,6 +467,8 @@ int main(const int argc, char* argv[])
     }
     else
     {
+        printf("Final Pass\n");
+
         // Make a FinalPass
         ResetLex();
 
@@ -425,7 +476,7 @@ int main(const int argc, char* argv[])
         FinalPass = TRUE;
         if (LogFileSpecified)
         {
-            fprintf(LogFile, "Final PASS\n");
+            fprintf(LogFile, "Final Pass\n");
         }
 
         // create the output file
@@ -444,7 +495,7 @@ int main(const int argc, char* argv[])
         {
             yylineno = 0;
             CurFileName = inputFiles[inFileIndex];
-            yyin = fopen(CurFileName, "r");
+            yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {                
                 FatalError(module, ErrorOpeningInputFile);

@@ -3,9 +3,9 @@
     
     .ORG $1000
 
-    .inc "test/test.a"
+    .inc "test.a"
     
-    .load "test/textfile.txt"
+    .load "textfile.txt"
     
     .illegal OFF    ; no illegal opcodes
 

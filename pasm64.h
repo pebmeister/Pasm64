@@ -11,6 +11,8 @@
 
 #define MAXLINE_LEN  102400
 
+FILE* OpenFile(const char* file, char* mode);
+
 enum OutputFileType
 {
     none,

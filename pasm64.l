@@ -280,7 +280,7 @@ int OpenIncludeFile(char* file)
     fileStack[fileStackIndex++] = CurFileName;
     CurFileName = file;
 
-    yyin = fopen( file, "r" );
+    yyin = OpenFile( file, "r" );
     yylineno = 0;
 
     if (FinalPass) GenerateListNode(NULL);

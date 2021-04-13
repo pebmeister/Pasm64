@@ -87,7 +87,7 @@ FileLine* ReadFile(const char* fileName)
     const char* module = "ReadFile";
     FileLine* headFileNode = NULL;
     FileLine* fileNode = NULL;
-    FILE* file = fopen(fileName, "r");
+    FILE* file = OpenFile(fileName, "r");
     if (file == NULL)
     {
         Error(module, ErrorOpeningListFile);

@@ -1,12 +1,8 @@
 
+ora $1A,x
+ora (229,x)
 
-.print "HI"
-
-
-    ora $1A,x
-    ora (229,x)
-
-    nop
+nop
 
 nop
 asl

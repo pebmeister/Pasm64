@@ -15,7 +15,6 @@
 #include "pasm64.h"
 #include "genoutput.h"
 #include "error.h"
-#include "node.h"
 
 // number of byte written to output file
 int TotalBytesWritten = 0;

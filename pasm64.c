@@ -19,6 +19,7 @@
 #include "genoutput.h"
 #include "str.h"
 #include "error.h"
+#include "pasm64.tab.h"
 
 #ifndef INT16_MAX
 #define INT16_MAX 32767
@@ -347,7 +348,7 @@ int ExOprLoad(parseNodePtr p)
     CHECK_OPS(1, 1);
 
     char* file = p->op[0]->str.value;
-    FILE* fd = fopen(file, "rb");
+    FILE* fd = OpenFile(file, "rb");
     if (fd == NULL)
     {
         FatalError(module, ErrorOpeningInputFile);
