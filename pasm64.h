@@ -11,8 +11,6 @@
 
 #define MAXLINE_LEN  102400
 
-FILE* OpenFile(const char* file, char* mode);
-
 enum OutputFileType
 {
     none,
@@ -143,6 +141,7 @@ extern char* OutputFileName;
 extern char* CurrentSection;
 extern char* ListFileName;
 extern int MaxAddress;
+extern char* Directories;
 
 extern enum OutputFileType OutFileFormat;
 

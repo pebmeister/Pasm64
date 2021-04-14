@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pasm64.h"
+
 // ***********************************************************************
 // Author           : Paul Baxter
 // Created          : 11-29-2015
@@ -9,7 +11,6 @@
 // Last Modified By : Paul
 // Last Modified On : 11-29-2015
 // ***********************************************************************
-#pragma once
 
 typedef struct ListTable
 {
@@ -23,3 +24,22 @@ extern void GenerateListFile(FILE* lstFile);
 extern int GenerateListNode(parseNodePtr p);
 extern void FreeListTable(void);
 
+ListTablePtr AddList(char* file, int line, char* output);
+
+
+typedef struct file_line
+{
+    char* line;
+    int line_number;
+    int displayed;
+    struct file_line* next;
+} FileLine;
+
+typedef struct file_entry
+{
+    char* filename;
+    FileLine* lines;
+    struct file_entry* next;
+} FileEntry;
+
+extern FileEntry* SourceFileList;

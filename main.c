@@ -23,6 +23,7 @@
 #include "symbol.h"
 #include "str.h"
 #include "error.h"
+#include "file.h"
 
 // If we have this many passes there is an infinite loop
 const int MaxPasses =  20;
@@ -114,34 +115,6 @@ void Usage(void)
     printf("         -65C02          use 65C02 instruction set\n");
     printf("         -nowarn         turn off warnings\n");
     printf("         -?              print this help\n");
-}
-
-FILE* OpenFile(const char* file, char* mode)
-{
-    FILE* fd = fopen(file, mode);
-    if (fd != NULL) return fd;
-
-    if (Directories == NULL) return NULL;
-
-    char path[1024] = { 0 };
-
-    for  (char* dir = Directories; *dir != 0;)
-    {
-        char* p = path;
-        while (*dir != 0 && *dir != ';')
-        {
-            *p++ = *dir++;
-        }
-        *p = 0;
-        strcat(path, file);
-        fd = fopen(path, mode);
-        if (fd != NULL)
-            return fd;
-
-        if (*dir == ';')
-            dir++;
-    }
-    return NULL;
 }
 
 //

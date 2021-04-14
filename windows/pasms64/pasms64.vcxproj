@@ -90,6 +90,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\dictionary.c" />
     <ClCompile Include="..\..\error.c" />
+    <ClCompile Include="..\..\file.c" />
     <ClCompile Include="..\..\genlist.c" />
     <ClCompile Include="..\..\genoutput.c" />
     <ClCompile Include="..\..\main.c" />
@@ -104,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\dictionary.h" />
     <ClInclude Include="..\..\error.h" />
+    <ClInclude Include="..\..\file.h" />
     <ClInclude Include="..\..\genlist.h" />
     <ClInclude Include="..\..\genoutput.h" />
     <ClInclude Include="..\..\node.h" />

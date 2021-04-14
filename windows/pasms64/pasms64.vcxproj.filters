@@ -60,6 +60,9 @@
     <ClCompile Include="..\..\str.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\file.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\node.h">
@@ -90,6 +93,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\str.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

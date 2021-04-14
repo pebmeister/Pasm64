@@ -11,33 +11,15 @@
 
 #include "opcodes.h"
 #include "pasm64.h"
-#include "genlist.h"
 #include "genoutput.h"
 #include "str.h"
 #include "error.h"
+#include "file.h"
+#include "genlist.h"
 
 #define SRC_LST_INDENT  25
 
-ListTablePtr AddList(char* file, int line, char* output);
-
-
-typedef struct file_line
-{
-    char* line;
-    int line_number;
-    int displayed;
-    struct file_line* next;
-} FileLine;
-
-typedef struct file_entry
-{
-    char* filename;
-    FileLine* lines;
-    struct file_entry* next;
-} FileEntry;
-
 FileEntry* SourceFileList = NULL;
-FileLine* ReadFile(const char* fileName);
 
 FileLine* GetFileLine(char* file, const int line)
 {
@@ -81,46 +63,6 @@ FileLine* GetFileLine(char* file, const int line)
 /// </summary>
 ListTablePtr ListHead = NULL;
 
-FileLine* ReadFile(const char* fileName)
-{
-    int line = 1;
-    const char* module = "ReadFile";
-    FileLine* headFileNode = NULL;
-    FileLine* fileNode = NULL;
-    FILE* file = OpenFile(fileName, "r");
-    if (file == NULL)
-    {
-        Error(module, ErrorOpeningListFile);
-        return NULL;
-    }
-    while (!feof(file))
-    {
-        InternalBuffer[0] = 0;
-        if (fgets(InternalBuffer, MAXLINE_LEN, file))
-        {
-            if (fileNode == NULL)
-            {
-                fileNode = (FileLine*)malloc(sizeof(FileLine));
-                headFileNode = fileNode;
-            }
-            else
-            {
-                fileNode->next = (FileLine*)malloc(sizeof(FileLine));
-                fileNode = fileNode->next;
-            }
-            if (fileNode == NULL)
-            {
-                Error(module, ErrorOutofMemory);
-                return NULL;
-            }
-            memset(fileNode, 0, sizeof(FileLine));
-            fileNode->line = StrDup(InternalBuffer);
-            fileNode->line_number = line++;
-        }
-    }
-    fclose(file);
-    return headFileNode;
-}
 
 // 
 // Generate a list node entry

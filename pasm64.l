@@ -16,6 +16,7 @@
 #include "node.h"
 #include "str.h"
 #include "genlist.h"
+#include "file.h"
 
 extern char* CurFileName;
 char* fileStack [1000] = { 0 };

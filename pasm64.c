@@ -19,7 +19,7 @@
 #include "genoutput.h"
 #include "str.h"
 #include "error.h"
-#include "pasm64.tab.h"
+#include "file.h"
 
 #ifndef INT16_MAX
 #define INT16_MAX 32767

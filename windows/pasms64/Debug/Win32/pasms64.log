@@ -2,6 +2,7 @@
   Process "pasm64.l" flex file
   dictionary.c
   error.c
+  file.c
   genlist.c
   genoutput.c
   main.c
