@@ -29,9 +29,10 @@ OBJS = $(OBJ_DIR)pasm64.tab.o \
 	$(OBJ_DIR)error.o \
 	$(OBJ_DIR)str.o \
 	$(OBJ_DIR)dictionary.o \
+	$(OBJ_DIR)file.o \
 	$(OBJ_DIR)main.o
  
-INLUDES = genlist.h genoutput.h error.h pasm64.h node.h opcodes.h symbol.h pasm64.tab.h str.h dictionary.h
+INLUDES = genlist.h genoutput.h error.h pasm64.h node.h opcodes.h symbol.h pasm64.tab.h str.h dictionary.h file.h
 
 all: $(TARGET)
 
@@ -58,6 +59,9 @@ $(OBJ_DIR)main.o: main.c $(INLUDES)
 
 $(OBJ_DIR)dictionary.o: dictionary.c $(INLUDES)
 	$(CC) $(CFLAGS) -c -o $(OBJ_DIR)dictionary.o dictionary.c
+
+$(OBJ_DIR)file.o: file.c $(INLUDES)
+	$(CC) $(CFLAGS) -c -o $(OBJ_DIR)file.o file.c
 
 $(OBJ_DIR)error.o: error.c $(INLUDES)
 	$(CC) $(CFLAGS) -c -o $(OBJ_DIR)error.o error.c
