@@ -85,9 +85,9 @@ const int Dec[] =
     _dex
 };
 
-#define CHECK_OPS(mn, mx) if (ExLevel == 1) LOG(module,p); \
-    if ((p->nops < (mn)) || (p->nops >(mx))) FatalError(module, ErrorInvalidNumberOfOps); \
-    if (PC > MaxAddress) FatalError(module, ErrorProgramCounterOutOfRange)
+#define CHECK_OPS(mn, mx) if (ExLevel == 1) LOG(method,p); \
+    if ((p->nops < (mn)) || (p->nops >(mx))) FatalError(method, error_invalid_number_of_ops); \
+    if (PC > MaxAddress) FatalError(method, error_program_counter_out_of_range)
 
 char* CurrentSection = NULL;
 
@@ -257,13 +257,13 @@ struct OpTable ExOprTable [] =
 //
 struct OpTable ExTable[] =
 {
-    { typeCon,      ExConstant              },
-    { typeId,       ExSymbol                },
-    { typeMacroId,  ExMacroSymbol           },
-    { typeMacroEx,  ExMacroExpansion        },
-    { typeData,     ExData                  },
-    { typeOpCode,   ExOpCode                },
-    { typeOpr,      ExOperator              }
+    { type_con,      ExConstant              },
+    { type_id,       ExSymbol                },
+    { type_macro_id,  ExMacroSymbol           },
+    { type_macro_ex,  ExMacroExpansion        },
+    { type_data,     ExData                  },
+    { type_op_code,   ExOpCode                },
+    { type_opr,      ExOperator              }
 };
 #define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct OpTable))
 
@@ -316,7 +316,7 @@ struct OpTable* BSearch(const int search, struct OpTable* table, const int size)
 //
 int ExConstant(parseNodePtr p)
 {
-    const char* module = "ExConstant";
+    const char* method = "ExConstant";
     CHECK_OPS(0, 0);
 
     if (p->con.IsPC)
@@ -332,7 +332,7 @@ int ExConstant(parseNodePtr p)
 
 int ExOprInclude(parseNodePtr p)
 {
-    const char* module = "ExOprInclude";
+    const char* method = "ExOprInclude";
     CHECK_OPS(1, 1);
 
     char* file = p->op[0]->str.value;
@@ -344,14 +344,14 @@ int ExOprInclude(parseNodePtr p)
 
 int ExOprLoad(parseNodePtr p)
 {
-    const char* module = "ExOprLoad";
+    const char* method = "ExOprLoad";
     CHECK_OPS(1, 1);
 
     char* file = p->op[0]->str.value;
     FILE* fd = OpenFile(file, "rb");
     if (fd == NULL)
     {
-        FatalError(module, ErrorOpeningInputFile);
+        FatalError(method, error_opening_input_file);
     }
 
     fseek(fd, 0, SEEK_END);
@@ -388,7 +388,7 @@ int ExOprLoad(parseNodePtr p)
 //
 int ExOprVar(parseNodePtr p)
 {
-    const char* module = "ExOprVar";
+    const char* method = "ExOprVar";
 
     CHECK_OPS(1, 2);
 
@@ -398,27 +398,46 @@ int ExOprVar(parseNodePtr p)
         ExpansionType = symbol;
         return Ex(pp);
     }
-    Error(module, ErrorInvalidParameters);
+    Error(method, error_invalid_parameters);
     return 0;
 }
+
 
 //
 // symbol
 //
 int ExSymbol(parseNodePtr p)
 {
-    const char* module = "ExSymbol";
-    SymbolTablePtr sym = p->id.i;
+    const char* method = "ExSymbol";
 
     CHECK_OPS(0, 0);
 
+    if (p->id.name[0] == '-')
+    {
+        const int index = FindMinusSym((int)strlen(p->id.name), CurFileName, yylineno);
+        if (index >= 0)
+            return MinusSymTable[index].value;
+
+        return 0;
+    }
+
+    if (p->id.name[0] == '+')
+    {
+        const int index = FindPlusSym((int)strlen(p->id.name), CurFileName, yylineno);
+        if (index >= 0)
+            return PlusSymTable[index].value;
+
+        return 0;
+    }
+
+    SymbolTablePtr sym = p->id.i;
     if (sym == NULL)
     {
         p->id.i = AddSymbol(p->id.name);    
         sym = p->id.i;
         if (sym == NULL)
         {
-            FatalError(module, ErrorOutofMemory);
+            FatalError(method, error_outof_memory);
             return 0;
         }
     }
@@ -430,7 +449,7 @@ int ExSymbol(parseNodePtr p)
 //
 int ExOprForReg(parseNodePtr p)
 {
-    const char* module = "ExOprForReg";
+    const char* method = "ExOprForReg";
 
     // must convert to 1 or 0
     const int isRegX = p->opr.oper == REGX ? 1 : 0;
@@ -449,7 +468,7 @@ int ExOprForReg(parseNodePtr p)
     // check for nested loop
     if (*(forLoopCounter) > 0)
     {
-        Error(module, ErrorForRegCantBeNested);
+        Error(method, error_for_reg_cant_be_nested);
         return 0;
     }
 
@@ -459,7 +478,7 @@ int ExOprForReg(parseNodePtr p)
     // range check
     if (start < 0 || start > 255)
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
         return 0;
     }
 
@@ -469,7 +488,7 @@ int ExOprForReg(parseNodePtr p)
     // range check
     if (end < 0 || end > 255)
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
         return 0;
     }
 
@@ -486,7 +505,7 @@ int ExOprForReg(parseNodePtr p)
     // increment nest level
     if ( ++(*forLoopCounter) != 1)
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
     }
 
     // inject (ldx | ldy) #start opcode node
@@ -504,7 +523,7 @@ int ExOprForReg(parseNodePtr p)
     {
         if (--(*forLoopCounter) != 0)
         {
-            Error(module, ErrorValueOutofRange);
+            Error(method, error_value_outof_range);
         }
         return 0;
     }
@@ -547,7 +566,7 @@ int ExOprForReg(parseNodePtr p)
 
     if (--(*forLoopCounter) != 0)
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
     }
     return 0;
 }
@@ -557,7 +576,7 @@ int ExOprForReg(parseNodePtr p)
 //
 int ExData(parseNodePtr p)
 {
-    const char* module = "ExData";
+    const char* method = "ExData";
 
     CHECK_OPS(0, 0);
 
@@ -579,7 +598,7 @@ int ExData(parseNodePtr p)
 // Section
 int ExOprSection(parseNodePtr p)
 {
-    const char* module = "ExOprSection";
+    const char* method = "ExOprSection";
 
     CHECK_OPS(1, 1);
 
@@ -590,7 +609,7 @@ int ExOprSection(parseNodePtr p)
         char* tempName = (char*)malloc(len);
         if (tempName == NULL)
         {
-            FatalError(module, ErrorOutofMemory);
+            FatalError(method, error_outof_memory);
             return 0;
         }
 
@@ -603,7 +622,7 @@ int ExOprSection(parseNodePtr p)
         CurrentSection = StrDup(name);
         if (CurrentSection == NULL)
         {
-            FatalError(module, ErrorOutofMemory);
+            FatalError(method, error_outof_memory);
             return 0;
         }
     }
@@ -618,13 +637,13 @@ int ExOprSection(parseNodePtr p)
 /// <returns>int.</returns>
 int ExOprEndSection(parseNodePtr p)
 {
-    const char* module = "ExOprSection";
+    const char* method = "ExOprSection";
 
     CHECK_OPS(0, 0);
 
     if (CurrentSection == NULL)
     {
-        Error(module, ErrorEndSectionWithoutSection);
+        Error(method, error_end_section_without_section);
         return 0;
     }
 
@@ -653,7 +672,7 @@ int ExOpCode(parseNodePtr p)
     int opBytes;
     int largeOp = 0;
     int outOfRange = 0;
-    const char* module = "ExOpCode";
+    const char* method = "ExOpCode";
 
     p->opcode.pc = PC;
 
@@ -712,7 +731,7 @@ int ExOpCode(parseNodePtr p)
             outOfRange =  outOfRange | ((((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp)));
             if (outOfRange)
             {
-                Error(module, ErrorValueOutofRange);
+                Error(method, error_value_outof_range);
                 break;
             }
 
@@ -761,7 +780,7 @@ int ExOpCode(parseNodePtr p)
 
                         if (target == NULL || jmp == NULL)
                         {
-                            FatalError(module, ErrorOutofMemory);
+                            FatalError(method, error_outof_memory);
                             return 0;
                         }
 
@@ -779,7 +798,7 @@ int ExOpCode(parseNodePtr p)
                             GenerateListNode(jmp);
                             GenerateOut(jmp);
 
-                            Warning(module, ErrrorBranchOutofRange);
+                            Warning(method, error_branch_outof_range);
                         }
                         PC += (GetOpByteCount(jmp) + 1);
                         p->opcode.opcode = saveOpCode;
@@ -825,7 +844,7 @@ int ExOpCode(parseNodePtr p)
 //
 int ExOprNot(parseNodePtr p)
 {
-    const char* module = "ExOprNot"; 
+    const char* method = "ExOprNot"; 
     CHECK_OPS(1, 1);
     return ! Ex(p->op[0]);
 }
@@ -835,7 +854,7 @@ int ExOprNot(parseNodePtr p)
 //
 int ExOprShiftLeft(parseNodePtr p)
 {
-    const char* module = "ExOprShiftLeft";
+    const char* method = "ExOprShiftLeft";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) << Ex(p->op[1]);
 }
@@ -845,7 +864,7 @@ int ExOprShiftLeft(parseNodePtr p)
 //
 int ExOprShiftRight(parseNodePtr p)
 {
-    const char* module = "ExOprShiftRight";
+    const char* method = "ExOprShiftRight";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) >> Ex(p->op[1]);
 }
@@ -855,7 +874,7 @@ int ExOprShiftRight(parseNodePtr p)
 //
 int ExOprLoByte(parseNodePtr p)
 {
-    const char* module = "ExOprLoByte";
+    const char* method = "ExOprLoByte";
 
     CHECK_OPS(1, 1);
 
@@ -869,7 +888,7 @@ int ExOprLoByte(parseNodePtr p)
 //
 int ExOprHiByte(parseNodePtr p)
 {
-    const char* module = "ExOprHiByte";
+    const char* method = "ExOprHiByte";
 
     CHECK_OPS(1, 1);
 
@@ -883,7 +902,7 @@ int ExOprHiByte(parseNodePtr p)
 //
 int ExOprPcAssign(parseNodePtr p)
 {
-    const char* module = "ExOprPcAssign";
+    const char* method = "ExOprPcAssign";
 
     CHECK_OPS(1, 1);
 
@@ -893,7 +912,7 @@ int ExOprPcAssign(parseNodePtr p)
     {
         if (op < PC)
         {
-            Error(module, ErrorValueOutofRange);
+            Error(method, error_value_outof_range);
         }
         else if (op > PC)
         {
@@ -923,13 +942,13 @@ int ExOprPcAssign(parseNodePtr p)
 //
 int ExOprOrg(parseNodePtr p)
 {
-    const char* module = "ExOprOrg";
+    const char* method = "ExOprOrg";
 
     CHECK_OPS(1, 1);
 
     if (OriginSpecified)
     {
-        Error(module, ErrorOrgSpecifiedMoreThanOnce);
+        Error(method, error_org_specified_more_than_once);
         return 0;
     }
     const int op = Ex(p->op[0]);
@@ -944,7 +963,7 @@ int ExOprOrg(parseNodePtr p)
 int ExOprExpressionList(parseNodePtr p)
 {
     SymbolTablePtr sym = NULL;
-    const char* module = "ExOprExpressionList";
+    const char* method = "ExOprExpressionList";
     char symName[MAX_MACRO_PARAM_NAME_LEN] = { 0 };
 
     CHECK_OPS(0, INT16_MAX);
@@ -952,7 +971,7 @@ int ExOprExpressionList(parseNodePtr p)
     for (int index = 0; index < p->nops; index++)
     {
         const parseNodePtr pp = p->op[index];
-        if (pp->type == typeOpr && pp->opr.oper == EXPRLIST)
+        if (pp->type == type_opr && pp->opr.oper == EXPRLIST)
         {
             Ex(pp);
             continue;
@@ -962,7 +981,7 @@ int ExOprExpressionList(parseNodePtr p)
             case symbol:
                 switch (pp->type)  // NOLINT(clang-diagnostic-switch-enum)
                 {
-                    case typeId:
+                    case type_id:
                         sym = pp->id.i;
                         if (sym == NULL)
                         {
@@ -970,7 +989,7 @@ int ExOprExpressionList(parseNodePtr p)
                             sym = pp->id.i;
                             if (sym == NULL)
                             {
-                                Error(module, ErrorAddingSymbol);
+                                Error(method, error_adding_symbol);
                                 break;
                             }
                             sym->isvar = TRUE;
@@ -987,7 +1006,7 @@ int ExOprExpressionList(parseNodePtr p)
                         }
                         else
                         {
-                            Error(module, ErrorInitializingVariable);
+                            Error(method, error_initializing_variable);
                             return 0;
                         }
                         break;
@@ -997,17 +1016,17 @@ int ExOprExpressionList(parseNodePtr p)
             case macro_parameter:
                 switch (pp->type)  // NOLINT(clang-diagnostic-switch-enum)
                 {
-                    case typeCon:
-                    case typeId:
-                    case typeOpr:
+                    case type_con:
+                    case type_id:
+                    case type_opr:
                         break;
 
-                    case typeMacroId:
-                    case typeMacroEx:
-                    case typeData:
-                    case typeStr:
+                    case type_macro_id:
+                    case type_macro_ex:
+                    case type_data:
+                    case type_str:
                     default:
-                        Error(module, ErrorValueOutofRange);
+                        Error(method, error_value_outof_range);
                         return 0;
                 }
                 if (MacroParameterIndex > MaxMacroParam)
@@ -1022,7 +1041,7 @@ int ExOprExpressionList(parseNodePtr p)
                 }
                 else
                 {
-                    FatalError(module, ErrorOutofMemory);
+                    FatalError(method, error_outof_memory);
                 }
                 break;
 
@@ -1033,24 +1052,24 @@ int ExOprExpressionList(parseNodePtr p)
                     {
                         switch (pp->type)  // NOLINT(clang-diagnostic-switch-enum)
                         {
-                            case typeCon:
-                            case typeId:
-                            case typeOpr:
-                            case typeStr:
+                            case type_con:
+                            case type_id:
+                            case type_opr:
+                            case type_str:
                                 break;
 
-                            case typeMacroId:
-                            case typeMacroEx:
-                            case typeData:
+                            case type_macro_id:
+                            case type_macro_ex:
+                            case type_data:
                             default:
-                                Error(module, ErrorValueOutofRange);
+                                Error(method, error_value_outof_range);
                                 return 0;
                         }
                         GenerateListNode(pp);
                         GenerateOut(pp);
                     }
                 }
-                if (pp->type == typeStr)
+                if (pp->type == type_str)
                 {
                     int length = pp->str.len;
                     if (length % 2 && DataSize == 2)
@@ -1062,9 +1081,9 @@ int ExOprExpressionList(parseNodePtr p)
                 break;
 
             case data_string:
-                if (pp->type != typeStr)
+                if (pp->type != type_str)
                 {
-                    Error(module, ErrorValueOutofRange);
+                    Error(method, error_value_outof_range);
                     return 0;
                 }
                 if (FinalPass)
@@ -1077,7 +1096,7 @@ int ExOprExpressionList(parseNodePtr p)
 
             case print_all:
             case print:
-                if (pp->type == typeStr)
+                if (pp->type == type_str)
                 {
                     if (FinalPass || ExpansionType == print_all)
                     {
@@ -1115,16 +1134,16 @@ int ExOprExpressionList(parseNodePtr p)
 int ExMacroSymbol(parseNodePtr p)
 {
     
-    const char* module = "ExMacroSymbol";
+    const char* method = "ExMacroSymbol";
 
     CHECK_OPS(0, 0);
 
     ExSymbol(p);
 
     const SymbolTablePtr sym = p->id.i;
-    if (! sym  || !sym->macroNode)
+    if (! sym  || !sym->macro_node)
         return 0;
-    Ex((parseNodePtr)(sym->macroNode));
+    Ex((parseNodePtr)(sym->macro_node));
     return sym->value;
 }
 
@@ -1133,7 +1152,7 @@ int ExMacroSymbol(parseNodePtr p)
 //
 int ExMacroExpansion(parseNodePtr p)
 {
-    const char* module = "ExMacroExpansion";
+    const char* method = "ExMacroExpansion";
     CHECK_OPS(0, 0);
 
     PushMacroParams();
@@ -1157,20 +1176,20 @@ int ExMacroExpansion(parseNodePtr p)
 //
 int ExOprMacroDefinition(parseNodePtr p)
 {
-    const char* module = "ExOprMacroDefinition";
+    const char* method = "ExOprMacroDefinition";
 
     CHECK_OPS(2, 2);
 
     const SymbolTablePtr sym = AddSymbol(p->op[0]->id.name);
     if (sym == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(method, error_outof_memory);
         return 0;
     }
     p->id.i = sym;
     sym->ismacroname = TRUE;
     sym->initialized = TRUE;
-    sym->macroNode = p->op[1];
+    sym->macro_node = p->op[1];
      
     return 0;
 }
@@ -1180,7 +1199,7 @@ int ExOprMacroDefinition(parseNodePtr p)
 //
 int ExOprWhile(parseNodePtr p)
 {
-    const char* module = "ExOprWhile";
+    const char* method = "ExOprWhile";
 
     CHECK_OPS(2, 2);
 
@@ -1190,7 +1209,7 @@ int ExOprWhile(parseNodePtr p)
             
         if (PC > MaxAddress)
         {
-            Error(module, ErrorInfiniteLoopDetected);
+            Error(method, error_infinite_loop_detected);
             return 0;
         }
     }
@@ -1202,7 +1221,7 @@ int ExOprWhile(parseNodePtr p)
 //
 int ExOprRepeat(parseNodePtr p)
 {
-    const char* module = "ExOprRepeat";
+    const char* method = "ExOprRepeat";
 
     CHECK_OPS(2, 2);
 
@@ -1212,7 +1231,7 @@ int ExOprRepeat(parseNodePtr p)
 
         if (PC > MaxAddress)
         {
-            Error(module, ErrorInfiniteLoopDetected);
+            Error(method, error_infinite_loop_detected);
             return 0;
         }
     } while (Ex(p->op[1]) == 0);
@@ -1224,7 +1243,7 @@ int ExOprRepeat(parseNodePtr p)
 //
 int ExOprDo(parseNodePtr p)
 {
-    const char* module = "ExOprDo";
+    const char* method = "ExOprDo";
 
     CHECK_OPS(2, 2);
 
@@ -1233,7 +1252,7 @@ int ExOprDo(parseNodePtr p)
         Ex(p->op[0]);
         if (PC > MaxAddress)
         {
-            Error(module, ErrorInfiniteLoopDetected);
+            Error(method, error_infinite_loop_detected);
             return 0;
         }
     } while (Ex(p->op[1]));
@@ -1247,7 +1266,7 @@ int ExOprFor(parseNodePtr p)
 {
     SymbolTablePtr startSym = NULL;
     int val = 1;
-    const char* module = "ExOprFor";
+    const char* method = "ExOprFor";
 
     CHECK_OPS(4, 5);
 
@@ -1255,14 +1274,14 @@ int ExOprFor(parseNodePtr p)
         val = Ex(p->op[4]);
 
     const parseNodePtr pp = p->op[0];
-    if (pp->op[0]->type == typeId)
+    if (pp->op[0]->type == type_id)
     {
         if (pp->op[0]->id.i == NULL)
             pp->op[0]->id.i = AddSymbol(pp->op[0]->id.name);
         startSym = pp->op[0]->id.i;
         if (startSym == NULL)
         {
-            FatalError(module, ErrorOutofMemory);
+            FatalError(method, error_outof_memory);
             return 0;
         }
     }
@@ -1273,19 +1292,19 @@ int ExOprFor(parseNodePtr p)
     const SymbolTablePtr sym = p->op[3]->id.i;
     if (sym == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(method, error_outof_memory);
         return 0;
     }
     const int endval = Ex(p->op[1]);
 
     if (startSym && startSym != sym)
     {
-        Error(module, ErrorExpectedNext);
+        Error(method, error_expected_next);
         return 0;
     }
     if (UnRollLoop && (endval < 0) && (endval > 255))
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
         return 0;
     }
     if (UnRollLoop)
@@ -1301,7 +1320,7 @@ int ExOprFor(parseNodePtr p)
 
             if (PC > MaxAddress)
             {
-                Error(module, ErrorInfiniteLoopDetected);
+                Error(method, error_infinite_loop_detected);
                 return 0;
             }
             SetSymbolValue(sym, sym->value + val);
@@ -1309,7 +1328,7 @@ int ExOprFor(parseNodePtr p)
     }
     else
     {
-        Error(module, ErrorValueOutofRange);
+        Error(method, error_value_outof_range);
     }
     return 0;
 }
@@ -1319,7 +1338,7 @@ int ExOprFor(parseNodePtr p)
 //
 int ExOprIf(parseNodePtr p)
 {
-    const char* module = "ExOprIf";
+    const char* method = "ExOprIf";
     CHECK_OPS(2, 3);
 
     if (Ex(p->op[0]))
@@ -1338,7 +1357,7 @@ int ExOprIf(parseNodePtr p)
 //
 int ExOprPrintAll(parseNodePtr p)
 {
-    const char* module = "ExOprPrintAll";
+    const char* method = "ExOprPrintAll";
 
     CHECK_OPS(0, 1);
 
@@ -1356,7 +1375,7 @@ int ExOprPrintAll(parseNodePtr p)
 //
 int ExOprPrint(parseNodePtr p)
 {
-    const char* module = "ExOprPrint";
+    const char* method = "ExOprPrint";
 
     CHECK_OPS(0, 1);
 
@@ -1375,7 +1394,7 @@ int ExOprPrint(parseNodePtr p)
 //
 int ExOprDs(parseNodePtr p)
 {
-    const char* module = "ExOprDs";
+    const char* method = "ExOprDs";
 
     CHECK_OPS(0, 1);
 
@@ -1404,7 +1423,7 @@ int ExOprDs(parseNodePtr p)
 //
 int ExOprStatement(parseNodePtr p)
 {
-    const char* module = "ExOprStatement";
+    const char* method = "ExOprStatement";
 
     if (p->nops < 1)
         return 0;
@@ -1423,7 +1442,7 @@ int ExOprStatement(parseNodePtr p)
 //
 int ExOprEnd(parseNodePtr p)
 {
-    const char* module = "ExOprEnd";
+    const char* method = "ExOprEnd";
  
     CHECK_OPS(0, 0);
     End = -1;
@@ -1435,16 +1454,48 @@ int ExOprEnd(parseNodePtr p)
 //
 int ExOprEqu(parseNodePtr p)
 {
-    const char* module = "ExOprEqu";
+    const char* method = "ExOprEqu";
 
     CHECK_OPS(2, 2);
+
+    if (StrICmp(p->op[0]->id.name, "-" ) == 0)
+    {
+        int index = FindMinusSymDef(CurFileName, yylineno);
+        if (index < 0) AddMinusSym(CurFileName, yylineno);
+
+        index = FindMinusSym((int)strlen(p->op[0]->id.name), CurFileName, yylineno);
+
+        const int op = Ex(p->op[1]);
+        if (MinusSymTable[index].value != op)
+        {
+            MinusSymTable[index].value = op;
+            SymbolValueChanged++;
+        }
+        return op;
+    }
+
+    if (StrICmp(p->op[0]->id.name, "+") == 0)
+    {
+        int index = FindPlusSymDef(CurFileName, yylineno);
+        if (index < 0) AddPlusSym(CurFileName, yylineno);
+
+        index = FindPlusSym((int)strlen(p->op[0]->id.name), CurFileName, yylineno - 1);
+
+        const int op = Ex(p->op[1]);
+        if (PlusSymTable[index].value != op)
+        {
+            PlusSymTable[index].value = op;
+            SymbolValueChanged++;
+        }
+        return op;
+    }
 
     if ((p->op[0])->id.i == NULL)
         (p->op[0])->id.i = AddSymbol((p->op[0])->id.name);
     SymbolTablePtr sym = (p->op[0])->id.i;
     if (sym == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(method, error_outof_memory);
         return 0;
     }
     const int op = Ex(p->op[1]);
@@ -1456,7 +1507,7 @@ int ExOprEqu(parseNodePtr p)
             char* temp = (char*)malloc(len);
             if (temp == NULL)
             {
-                FatalError(module, ErrorOutofMemory);
+                FatalError(method, error_outof_memory);
                 return 0;
             }
 
@@ -1475,7 +1526,7 @@ int ExOprEqu(parseNodePtr p)
 //
 int ExOprUMinus(parseNodePtr p)
 {
-    const char* module = "ExOprUMinus";
+    const char* method = "ExOprUMinus";
     CHECK_OPS(1, 1);
     return -Ex(p->op[0]);
 }
@@ -1485,7 +1536,7 @@ int ExOprUMinus(parseNodePtr p)
 //
 int ExOprOnesComp(parseNodePtr p)
 {
-    const char* module = "ExOprOnesComp";
+    const char* method = "ExOprOnesComp";
     CHECK_OPS(1, 1);
     return (~ Ex(p->op[0])) & 0xFFFF;
 }
@@ -1495,7 +1546,7 @@ int ExOprOnesComp(parseNodePtr p)
 //
 int ExOprPlus(parseNodePtr p)
 {
-    const char* module = "ExOprPlus";
+    const char* method = "ExOprPlus";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) + Ex(p->op[1]);
 }
@@ -1505,7 +1556,7 @@ int ExOprPlus(parseNodePtr p)
 //
 int ExOprMinus(parseNodePtr p)
 {
-    const char* module = "ExOprMinus";
+    const char* method = "ExOprMinus";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) - Ex(p->op[1]);
 }
@@ -1515,7 +1566,7 @@ int ExOprMinus(parseNodePtr p)
 //
 int ExOprMultiply(parseNodePtr p)
 {
-    const char* module = "ExOprMultiply";
+    const char* method = "ExOprMultiply";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) * Ex(p->op[1]);
 }
@@ -1525,12 +1576,12 @@ int ExOprMultiply(parseNodePtr p)
 //
 int ExOprDivide(parseNodePtr p)
 {
-    const char* module = "ExOprDivide";
+    const char* method = "ExOprDivide";
     CHECK_OPS(2, 2);
 
     if (Ex(p->op[1]) == 0)
     {
-        Error(module, ErrorDivideByZero);
+        Error(method, error_divide_by_zero);
         return 0;
     }
     return Ex(p->op[0]) / Ex(p->op[1]);
@@ -1541,7 +1592,7 @@ int ExOprDivide(parseNodePtr p)
 //
 int ExOprBitOr(parseNodePtr p)
 {
-    const char* module = "ExOprBitOr";
+    const char* method = "ExOprBitOr";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) | Ex(p->op[1]);
 }
@@ -1551,7 +1602,7 @@ int ExOprBitOr(parseNodePtr p)
 //
 int ExOprBitAnd(parseNodePtr p)
 {
-    const char* module = "ExOprBitAnd";
+    const char* method = "ExOprBitAnd";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) & Ex(p->op[1]);
 }
@@ -1561,7 +1612,7 @@ int ExOprBitAnd(parseNodePtr p)
 //
 int ExOprXor(parseNodePtr p)
 {
-    const char* module = "ExOprXor";
+    const char* method = "ExOprXor";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) ^ Ex(p->op[1]);
 }
@@ -1571,7 +1622,7 @@ int ExOprXor(parseNodePtr p)
 //
 int ExOprLessThan(parseNodePtr p)
 {
-    const char* module = "ExOprLessThan";
+    const char* method = "ExOprLessThan";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) < Ex(p->op[1]);
 }
@@ -1581,7 +1632,7 @@ int ExOprLessThan(parseNodePtr p)
 //
 int ExOprGreaterThan(parseNodePtr p)
 {
-    const char* module = "ExOprGreaterThan";
+    const char* method = "ExOprGreaterThan";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) > Ex(p->op[1]);
 }
@@ -1591,7 +1642,7 @@ int ExOprGreaterThan(parseNodePtr p)
 //
 int ExOprOr(parseNodePtr p)
 {
-    const char* module = "ExOprOr";
+    const char* method = "ExOprOr";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) || Ex(p->op[1]);
 }
@@ -1601,7 +1652,7 @@ int ExOprOr(parseNodePtr p)
 //
 int ExOprAnd(parseNodePtr p)
 {
-    const char* module = "ExOprAnd";
+    const char* method = "ExOprAnd";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) && Ex(p->op[1]);
 }
@@ -1611,7 +1662,7 @@ int ExOprAnd(parseNodePtr p)
 //
 int ExOprEqual(parseNodePtr p)
 {
-    const char* module = "ExOprEqual";
+    const char* method = "ExOprEqual";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) == Ex(p->op[1]);
 }
@@ -1621,7 +1672,7 @@ int ExOprEqual(parseNodePtr p)
 //
 int ExOprNotEqual(parseNodePtr p)
 {
-    const char* module = "ExOprNotEqual";
+    const char* method = "ExOprNotEqual";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) != Ex(p->op[1]);
 }
@@ -1631,7 +1682,7 @@ int ExOprNotEqual(parseNodePtr p)
 //
 int ExOprGreaterThanOrEqual(parseNodePtr p)
 {
-    const char* module = "ExOprGreaterThanOrEqual";
+    const char* method = "ExOprGreaterThanOrEqual";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) >= Ex(p->op[1]);
 }
@@ -1641,7 +1692,7 @@ int ExOprGreaterThanOrEqual(parseNodePtr p)
 //
 int ExOprLessThanOrEqual(parseNodePtr p)
 {
-    const char* module = "ExOprLessThanOrEqual";
+    const char* method = "ExOprLessThanOrEqual";
     CHECK_OPS(2, 2);
     return Ex(p->op[0]) <= Ex(p->op[1]);
 }
@@ -1651,13 +1702,13 @@ int ExOprLessThanOrEqual(parseNodePtr p)
 //
 int ExOperator(parseNodePtr p)
 {
-    const char* module = "ExOperator";
+    const char* method = "ExOperator";
 
     struct OpTable* entry = BSearch(p->opr.oper, ExOprTable, NUM_OPR_EXP);
     if (entry)
         return entry->function(p);
 
-    Error(module, ErrorUnknownOperatorType);
+    Error(method, error_unknown_operator_type);
     return 0;
 }
 
@@ -1668,7 +1719,7 @@ int ExOperator(parseNodePtr p)
 /// <returns>int.</returns>
 int Ex(parseNodePtr p)
 {
-    const char* module = "Ex";
+    const char* method = "Ex";
 
     ExLevel++;
 
@@ -1686,7 +1737,7 @@ int Ex(parseNodePtr p)
         return result;
     }
 
-    Error(module, ErrorUnknownNodeType);
+    Error(method, error_unknown_node_type);
 
     ExLevel--;
     return 0;
@@ -1698,7 +1749,7 @@ int Ex(parseNodePtr p)
 /// <param name="p">The node pointer.</param>
 int IsUnInitializedSymbol(parseNodePtr p)
 {
-    if (p->type == typeId)
+    if (p->type == type_id)
     {
         if (p->id.i == NULL)
              return TRUE;

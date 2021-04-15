@@ -48,7 +48,7 @@ int GenerateOut(parseNodePtr p)
         bytesWritten = fwrite(&lo, 1, 1, OutputFile);
         if (bytesWritten < 1)
         {
-            Error(module, ErrorWritingOutputFile);
+            Error(module, error_writing_output_file);
             return 0;
         }
         TotalBytesWritten += bytesWritten;
@@ -56,21 +56,21 @@ int GenerateOut(parseNodePtr p)
         bytesWritten = fwrite(&hi, 1, 1, OutputFile);
         if (bytesWritten < 1)
         {
-            Error(module, ErrorWritingOutputFile);
+            Error(module, error_writing_output_file);
             return 0;
         }
         TotalBytesWritten += bytesWritten;
     }
 
     // output a string
-    if (p->type == typeStr)
+    if (p->type == type_str)
     {
         char* str = p->str.value;
         const int outlen = p->str.len;
         bytesWritten = fwrite(str, 1, outlen, OutputFile);
         if (bytesWritten < 1)
         {
-            Error(module, ErrorWritingOutputFile);
+            Error(module, error_writing_output_file);
             return 0;
         }
         TotalBytesWritten += bytesWritten;
@@ -82,7 +82,7 @@ int GenerateOut(parseNodePtr p)
             bytesWritten = fwrite((char*)&op, 1, 1, OutputFile);
             if (bytesWritten < 1)
             {
-                Error(module, ErrorWritingOutputFile);
+                Error(module, error_writing_output_file);
                 return 0;
             }
             TotalBytesWritten += bytesWritten;
@@ -94,9 +94,8 @@ int GenerateOut(parseNodePtr p)
     // must evaluate to an integer value
     // DataSize will contain the max number of bytes 0,1, or 2
     // 0 signifies a string value which is dealt with above
-    if (p->type != typeOpCode)
+    if (p->type != type_op_code)
     {
-
         unsigned char hi;
         unsigned char lo;
 
@@ -110,13 +109,13 @@ int GenerateOut(parseNodePtr p)
 
         if ((hi != 0 && DataSize < 2) || overflow)
         {
-            Error(module, ErrorValueOutofRange);
+            Error(module, error_value_outof_range);
             return 0;
         }
         bytesWritten = fwrite(&lo, 1, 1, OutputFile);
         if (bytesWritten < 1)
         {
-            Error(module, ErrorWritingOutputFile);
+            Error(module, error_writing_output_file);
             return 0;
         }
         TotalBytesWritten += bytesWritten;
@@ -126,7 +125,7 @@ int GenerateOut(parseNodePtr p)
             bytesWritten = fwrite(&hi, 1, 1, OutputFile);
             if (bytesWritten < 1)
             {
-                Error(module, ErrorWritingOutputFile);
+                Error(module, error_writing_output_file);
                 return 0;
             }
             TotalBytesWritten += bytesWritten;
@@ -144,7 +143,7 @@ int GenerateOut(parseNodePtr p)
     bytesWritten = fwrite(&byte, 1, 1, OutputFile);
     if (bytesWritten < 1)
     {
-        Error(module, ErrorWritingOutputFile);
+        Error(module, error_writing_output_file);
         return 0;
     }
     TotalBytesWritten += bytesWritten;
@@ -161,7 +160,7 @@ int GenerateOut(parseNodePtr p)
         {            
             if (p->nops != 2)
             {
-                Error(module, ErrorMissingParameter);
+                Error(module, error_missing_parameter);
                 return 0;
             }
             op = Ex(p->op[1]);
@@ -169,14 +168,14 @@ int GenerateOut(parseNodePtr p)
             op -= (p->opcode.pc + 2);               
             if (op > 128 || op < -127)
             {
-                Error(module, ErrorValueOutofRange);
+                Error(module, error_value_outof_range);
                 return 0;
             }
             op &= 0xFF;
             bytesWritten = fwrite(&op, 1, 1, OutputFile);
             if (bytesWritten < 1)
             {
-                Error(module, ErrorWritingOutputFile);
+                Error(module, error_writing_output_file);
                 return 0;
             }
             TotalBytesWritten += bytesWritten;
@@ -186,13 +185,13 @@ int GenerateOut(parseNodePtr p)
             lo = (unsigned char)(op & 0xFF);
             if (hi != 0)
             {
-                Error(module, ErrorValueOutofRange);
+                Error(module, error_value_outof_range);
                 return 0;
             }
             bytesWritten = fwrite(&lo, 1, 1, OutputFile);
             if (bytesWritten < 1)
             {
-                Error(module, ErrorWritingOutputFile);
+                Error(module, error_writing_output_file);
                 return 0;
             }
             TotalBytesWritten += bytesWritten;
@@ -206,7 +205,7 @@ int GenerateOut(parseNodePtr p)
 
             if (op > 128 || op < -127)
             {
-                Error(module, ErrorValueOutofRange);
+                Error(module, error_value_outof_range);
                 return 0;
             }
             op &= 0xFF;
@@ -220,7 +219,7 @@ int GenerateOut(parseNodePtr p)
         bytesWritten = fwrite(&lo, 1, 1, OutputFile);
         if (bytesWritten < 1)
         {
-            Error(module, ErrorWritingOutputFile);
+            Error(module, error_writing_output_file);
             return 0;
         }
         TotalBytesWritten += bytesWritten;
@@ -230,7 +229,7 @@ int GenerateOut(parseNodePtr p)
             bytesWritten = fwrite(&hi, 1, 1, OutputFile);
             if (bytesWritten < 1)
             {
-                Error(module, ErrorWritingOutputFile);
+                Error(module, error_writing_output_file);
                 return 0;
             }
             TotalBytesWritten += bytesWritten;
@@ -251,7 +250,7 @@ int GetOpByteCount(parseNodePtr p)
     int byteCount;
     const char* module = "GetOpByteCount";
 
-    if (p->type != typeOpCode)
+    if (p->type != type_op_code)
         return 0;
 
     switch (p->opcode.mode)
@@ -282,9 +281,8 @@ int GetOpByteCount(parseNodePtr p)
             break;
 
         default:
-            Error(module, ErrorInvalidOpcodeMode);
+            Error(module, error_invalid_opcode_mode);
             return 0;
     }
-
     return byteCount;
 }

@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #include "error.h"
 #include "genlist.h"
 #include "pasm64.h"
 #include "str.h"
 
+char Path[4096] = { 0 };
 
 FILE* OpenFile(const char* file, char* mode)
 {
@@ -16,18 +16,16 @@ FILE* OpenFile(const char* file, char* mode)
 
     if (Directories == NULL) return NULL;
 
-    char path[1024] = { 0 };
-
     for (char* dir = Directories; *dir != 0;)
     {
-        char* p = path;
+        char* p = Path;
         while (*dir != 0 && *dir != ';')
         {
             *p++ = *dir++;
         }
         *p = 0;
-        strcat(path, file);
-        fd = fopen(path, mode);
+        strcat(Path, file);
+        fd = fopen(Path, mode);
         if (fd != NULL)
             return fd;
 
@@ -46,13 +44,13 @@ FileLine* ReadFile(const char* fileName)
     FILE* file = OpenFile(fileName, "r");
     if (file == NULL)
     {
-        Error(module, ErrorOpeningListFile);
+        Error(module, error_opening_list_file);
         return NULL;
     }
     while (!feof(file))
     {
         InternalBuffer[0] = 0;
-        if (fgets(InternalBuffer, MAXLINE_LEN, file))
+        if (fgets(InternalBuffer, MAX_LINE_LEN, file))
         {
             if (fileNode == NULL)
             {
@@ -66,7 +64,7 @@ FileLine* ReadFile(const char* fileName)
             }
             if (fileNode == NULL)
             {
-                Error(module, ErrorOutofMemory);
+                Error(module, error_outof_memory);
                 return NULL;
             }
             memset(fileNode, 0, sizeof(FileLine));

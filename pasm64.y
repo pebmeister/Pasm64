@@ -44,7 +44,7 @@
 %token END DO MACRO ENDMACRO ENDIF WEND STATEMENT EXPRLIST STR
 %token FOR NEXT TO DOWNTO STEP NOT
 %token BYTE WORD LOBYTE HIBYTE DS INC LOAD
-%token REGX REGY VAR
+%token REGX REGY VAR MSYM PSYM
 %token SECTION ENDSECTION
 
 %nonassoc ELSE UMINUS '~'
@@ -187,7 +187,20 @@ opcode
     | OPCODE '(' subexpr ')'            { $$ = Opcode($1, ind, 1, $3);                  }
     | OPCODE '(' subexpr ',' 'X' ')'    { $$ = Opcode($1, aix, 1, $3);                  }
     | OPCODE '(' subexpr ')' ',' 'Y'    { $$ = Opcode($1, zpiy, 1, $3);                 }
-    | OPCODE expr ',' subexpr           { $$ = Opcode($1, zr, 2, $2, $4);               }
+    | OPCODE expr ',' subexpr           { $$ = Opcode($1, zr, 2, $2, $4);               }    
+
+    | OPCODE '-'                        { $$ = Opcode($1, a, 1, Id("-"));               }
+    | OPCODE '-' ',' 'X'                { $$ = Opcode($1, ax, 1, Id("-"));              }
+    | OPCODE '-' ',' 'Y'                { $$ = Opcode($1, ay, 1, Id("-"));              }
+    | OPCODE '(' '-' ')'                { $$ = Opcode($1, ind, 1, Id("-"));             }
+    | OPCODE '(' '-' ',' 'X' ')'        { $$ = Opcode($1, aix, 1, Id("-"));             }
+
+    | OPCODE '+'                        { $$ = Opcode($1, a, 1, Id("+"));               }
+    | OPCODE '+' ',' 'X'                { $$ = Opcode($1, ax, 1, Id("+"));              }
+    | OPCODE '+' ',' 'Y'                { $$ = Opcode($1, ay, 1, Id("+"));              }
+    | OPCODE '(' '+' ')'                { $$ = Opcode($1, ind, 1, Id("+"));             }
+    | OPCODE '(' '+' ',' 'X' ')'        { $$ = Opcode($1, aix, 1, Id("+"));             }
+
     | ORG subexpr                       { $$ = Opr(ORG, 1, $2);                         }
     | DS subexpr                        { $$ = Opr(DS, 1, $2);                          }
     | BYTE expr_list                    { $$ = Data(1, $2);                             }

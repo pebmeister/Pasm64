@@ -11,6 +11,12 @@ Processing wintest.a
 
 Processing test.a
 
+                                                      ; test backwards
+                                                  -
+                                                  
+                                                      ; test fowards
+                                                  +
+                                                  
                                                   
                                                   ora $1A,x
 $1000: $15 $1A           ora $1A,x                ora (229,x)

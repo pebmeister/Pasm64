@@ -9,7 +9,7 @@
 // ***********************************************************************
 #pragma once
 
-#define MAXLINE_LEN  102400
+#define MAX_LINE_LEN  102400
 
 enum OutputFileType
 {
@@ -17,20 +17,22 @@ enum OutputFileType
     c64
 };
 
+typedef enum { type_con = 1, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
 
-typedef enum { typeCon = 1, typeId, typeMacroId, typeMacroEx, typeOpr, typeOpCode, typeData, typeStr } nodeEnum;
-
-typedef struct SymbolTable
+typedef struct symbol_table
 {
     int value;
     int initialized;
     int ismacroname;
     int ismacroparam;
     int isvar;
+    int isminus;
     char* section;
     char* name;
     char* fullname;
-    void* macroNode;
+    void* macro_node;
+
+
 } SymbolTable, *SymbolTablePtr;
 
 #ifndef FALSE
@@ -45,27 +47,27 @@ typedef struct
 {
     int value;                  /* value of constant */
     int IsPC;                   /* TRUE is value is PC */
-} conParseNode;
+} ConParseNode;
 
 typedef struct 
 {
     char* value;                 /* value of string */
 	char* allocated;			 /* allocated string */
 	int len;
-} strParseNode;
+} StrParseNode;
 
 /* identifiers */
 typedef struct 
 {
     char*  name;
     SymbolTablePtr i;          /* symbol entry */
-} idParseNode;
+} IdParseNode;
 
 /* operators */
 typedef struct 
 {
     int oper;                   /* operator */
-} oprParseNode;
+} OprParseNode;
 
 /* opcodes */
 typedef struct 
@@ -81,29 +83,29 @@ typedef struct
 {
     void* macro;
     void* macroParams;
-} macParseNode;
+} MacParseNode;
 
 /* data definition node */
 typedef struct 
 {
     int size;                   /* 1 = byte 2 = word, 0 = string */
     void* data;
-} dataParseNode;
+} DataParseNode;
 
 /* nodes union */
 typedef struct parseNode
 {
-    nodeEnum type;              /* type of node */
+    NodeEnum type;              /* type of node */
 
     union 
     {
-        conParseNode con;        /* constants */
-        idParseNode id;          /* identifiers */
-        oprParseNode opr;        /* operators */
+        ConParseNode con;        /* constants */
+        IdParseNode id;          /* identifiers */
+        OprParseNode opr;        /* operators */
         opParseNode opcode;      /* opcodes */
-        macParseNode macro;      /* macro execution */
-        dataParseNode data;      /* numeric data node */
-		strParseNode str;		 /* string node */
+        MacParseNode macro;      /* macro execution */
+        DataParseNode data;      /* numeric data node */
+		StrParseNode str;		 /* string node */
     };
 
     int nops;                    /* number of operands */
@@ -114,7 +116,6 @@ typedef struct parseNode
 
 extern int yylineno;
 extern FILE* yyin;
-extern int yylineno;
 extern int yylex(void);
 extern void yyerror(const char *s);
 extern void yyrestart(FILE * input_file );

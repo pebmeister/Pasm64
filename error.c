@@ -62,7 +62,9 @@ const char* Errors[] =
     "Branch out range. Creating branch island.",
     "Program counter out of range.",
     "Missing .EndSection",
-    "Circular symbol definition(s) detected"
+    "Circular symbol definition(s) detected",
+    "Include file stack overflow",
+    "Unable to open include file"
 };
 #define NUM_ERRORS (sizeof(Errors)/sizeof(char*))
 
@@ -80,25 +82,25 @@ char* MessageBase(const char* module, int error)
     {
         switch (error)
         {
-            case ErrorWritingListFile:
-            case ErrorOpeningListFile:
+            case error_writing_list_file:
+            case error_opening_list_file:
                 sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], ListFileName);
                 break;
 
-            case ErrorOpeningOutputFile:
+            case error_opening_output_file:
                 sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], OutputFileName);
                 break;
 
-            case ErrorOpeningSymbolFile:
+            case error_opening_symbol_file:
                 sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], SymFileName);
                 break;
 
-            case ErrorOpeningLogFile:
+            case error_opening_log_file:
                 sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], LogFileName);
                 break;
 
-            case ErrorReadingSourceFile:
-            case ErrorOpeningInputFile:
+            case error_reading_source_file:
+            case error_opening_input_file:
                 sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], CurFileName);
                 break;
 

@@ -17,10 +17,14 @@
 #include "str.h"
 #include "genlist.h"
 #include "file.h"
+#include "error.h"
 
 extern char* CurFileName;
-char* fileStack [1000] = { 0 };
-int fileLineStack [1000] = { 0 };
+
+#define MAX_INCLUDE_STACK   100
+
+char* fileStack [MAX_INCLUDE_STACK] = { 0 };
+int fileLineStack [MAX_INCLUDE_STACK] = { 0 };
 int fileStackIndex = 0;
 
 int inDoLoop = 0;
@@ -223,11 +227,24 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 ".WARN"[ /t]*"ON"           { NoWarnings = FALSE; }
 ".WARN"[ /t]*"OFF"          { NoWarnings = TRUE; }
 ".C64"                      { OutFileFormat = c64; }
+^"-"                        { yylval.strValue = StrDup(yytext); return SYMBOL; }
+^"+"                        { yylval.strValue = StrDup(yytext); return SYMBOL; }
 [@][0-9]+                   {
                                 if (!inMacroDef)
                                     REJECT;
                                 yylval.strValue = StrDup(yytext); 
                                 return SYMBOL;
+                            }
+[\+|\-]+                    {
+                                if (strlen(yytext) > 1)
+                                {
+                                    yylval.strValue = StrDup(yytext); 
+                                    return SYMBOL;
+                                }
+                                else
+                                {
+                                    return *yytext;
+                                }
                             }
 [\'].[\']                   INT_1BYTE
 [\'][\\].[\']               INT_1BYTE
@@ -275,8 +292,14 @@ $[0-9A-Fa-f]*               INT(1, 16)
 
 int OpenIncludeFile(char* file)
 {
+    const char* module = "OpenIncludeFile";
+
     if (FinalPass) GenerateListNode(NULL);
 
+    if (fileStackIndex + 1 >= MAX_INCLUDE_STACK)
+    {
+        FatalError(module, error_include_file_stack_overflow);
+    }
     fileLineStack[fileStackIndex] = yylineno;
     fileStack[fileStackIndex++] = CurFileName;
     CurFileName = file;
@@ -288,18 +311,8 @@ int OpenIncludeFile(char* file)
 
     if ( ! yyin )
     {
-        char *buffer = (char*)yyalloc(10240);
-        if (buffer != NULL)
-        {
-            sprintf(buffer, "Unable to open include file %s.", file);
-            yyerror(buffer);
-            yyfree(buffer);
-        }
-        else
-        {
-            yyerror( "Unable to open include file" );
-        }
-        return -1;
+        yyerror(file);
+        FatalError(module, error_cant_open_include_file);
     }
 	yypush_buffer_state(yy_create_buffer( yyin, YY_BUF_SIZE ));
     return 0;

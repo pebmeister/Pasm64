@@ -27,7 +27,7 @@ char* StrDup(const char* string)
 
     if (buffer == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     return strcpy(buffer, string);
@@ -68,7 +68,7 @@ char* StrLower(const char* string)
 
     if (buffer == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     char* strOut = buffer;

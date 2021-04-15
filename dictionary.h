@@ -2,19 +2,16 @@
 // Author           : Paul Baxter
 // Created          : 11-29-2015
 //
-// copyright (c) 2015 Paul Baxter
-//
-// Last Modified By : Paul
-// Last Modified On : 11-29-2015
 // ***********************************************************************
 
 /// <summary>
 /// element structure
 /// </summary>
+#pragma once
 typedef struct element 
 {
     /// <summary>
-    /// The next
+    /// The next element
     /// </summary>
     struct element *next;
     /// <summary>
@@ -25,7 +22,7 @@ typedef struct element
     /// The value
     /// </summary>
     void *value;
-} element, *elementPtr;
+} Element, *ElementPtr;
 
 /// <summary>
 /// dict struct
@@ -39,11 +36,11 @@ typedef struct dict
     /// <summary>
     /// The number elements stored
     /// </summary>
-    int numberElements;
+    int number_elements;
     /// <summary>
     /// The element size
     /// </summary>
-    int elementSize;
+    int element_size;
     /// <summary>
     /// The number of collisions
     /// </summary>
@@ -52,24 +49,24 @@ typedef struct dict
     /// The table
     /// </summary>    
     struct element **table;
-} dict, *DictionaryPtr; 
+} Dict, *DictionaryPtr; 
 
 /* create a new empty dictionary */
-DictionaryPtr DictCreate(int elementSize);
+extern DictionaryPtr DictCreate(int elementSize);
 
 /* destroy a dictionary */
-void DictDestroy(DictionaryPtr);
+extern void DictDestroy(DictionaryPtr);
 
 /*
    insert a new key-value pair into an existing dictionary
    the dictionary may expanded which why address of pointer is passed 
 */
-void* DictInsert(DictionaryPtr*, const char *key, void *value);
+extern void* DictInsert(DictionaryPtr*, const char *key, void *value);
 
 /* return the most recently inserted value associated with a key */
 /* or 0 if no matching key is present */
-void *DictSearch(DictionaryPtr, const char *key);
+extern void *DictSearch(DictionaryPtr, const char *key);
 
 /* delete the most recently inserted record with the given key */
 /* if there is no such record, has no effect */
-void DictDelete(DictionaryPtr, const char *key);
+extern void DictDelete(DictionaryPtr, const char *key);

@@ -1,3 +1,11 @@
+    ; test backwards
+-
+
+bne -
+bpl +
+    ; test fowards
++
+
 
 ora $1A,x
 ora (229,x)

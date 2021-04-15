@@ -12,20 +12,13 @@
 // Last Modified On : 11-29-2015
 // ***********************************************************************
 
-typedef struct ListTable
+typedef struct list_table
 {
     int line;
     char* filename;
     char* output;
-    struct ListTable* next;
+    struct list_table* next;
 } ListTable, *ListTablePtr;
-
-extern void GenerateListFile(FILE* lstFile);
-extern int GenerateListNode(parseNodePtr p);
-extern void FreeListTable(void);
-
-ListTablePtr AddList(char* file, int line, char* output);
-
 
 typedef struct file_line
 {
@@ -41,5 +34,11 @@ typedef struct file_entry
     FileLine* lines;
     struct file_entry* next;
 } FileEntry;
+
+extern void GenerateListFile(FILE* lstFile);
+extern int GenerateListNode(parseNodePtr p);
+extern FileLine* GetFileLine(char* file, const int line);
+extern void FreeListTable(void);
+extern ListTablePtr AddList(char* file, int line, char* output);
 
 extern FileEntry* SourceFileList;

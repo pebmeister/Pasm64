@@ -54,7 +54,7 @@ FileLine* GetFileLine(char* file, const int line)
             return lineEntry;
         }
     }
-    Error(module, ErrorOpeningListFile);
+    Error(module, error_opening_list_file);
     return NULL;
 }
 
@@ -84,7 +84,7 @@ int GenerateListNode(parseNodePtr p)
     {
         if (AddList(CurFileName, yylineno, "") == NULL)
         {
-            Error(module, ErrorCreatingListNode);
+            Error(module, error_creating_list_node);
         }
         return 0;
     }
@@ -92,12 +92,12 @@ int GenerateListNode(parseNodePtr p)
     // get the program counter
     // if the node is an opcode get the PC from the opcode itself
     // otherwise use PC
-    int op = p->type == typeOpCode ? p->opcode.pc & 0xFFFF : PC & 0xFFFF;
+    int op = p->type == type_op_code ? p->opcode.pc & 0xFFFF : PC & 0xFFFF;
     sprintf(curptr, "$%02X%02X:", ((op) >> 8), op & 0xFF);
     curptr += strlen(curptr);
 
     // generate a list node for a string
-    if (p->type == typeStr)
+    if (p->type == type_str)
     {
         char* strStart = NULL;
         char* str = p->str.value;
@@ -144,7 +144,7 @@ int GenerateListNode(parseNodePtr p)
 
                 if (AddList(CurFileName, yylineno, InternalBuffer) == NULL)
                 {
-                    Error(module, ErrorCreatingListNode);
+                    Error(module, error_creating_list_node);
                     return 0;
                 }
                 col = 0;
@@ -190,7 +190,7 @@ int GenerateListNode(parseNodePtr p)
 
             if (AddList(CurFileName, yylineno, InternalBuffer) == NULL)
             {
-                Error(module, ErrorCreatingListNode);
+                Error(module, error_creating_list_node);
                 return 0;
             }
         }
@@ -199,7 +199,7 @@ int GenerateListNode(parseNodePtr p)
 
     // output numeric value
     // DataSize contain number of bytes to output
-    if (p->type != typeOpCode)
+    if (p->type != type_op_code)
     {
         // expand the node
         op = Ex(p);
@@ -254,7 +254,7 @@ int GenerateListNode(parseNodePtr p)
         // add the node
         if (AddList(CurFileName, yylineno, InternalBuffer) == NULL)
         {
-            Error(module, ErrorCreatingListNode);
+            Error(module, error_creating_list_node);
             return 0;
         }
         return 0;
@@ -279,7 +279,7 @@ int GenerateListNode(parseNodePtr p)
         {            
             if (p->nops != 2)
             {
-                Error(module, ErrorMissingParameter);
+                Error(module, error_missing_parameter);
                 return 0;
             }
             op = Ex(p->op[1]);
@@ -427,7 +427,7 @@ int GenerateListNode(parseNodePtr p)
     // add the node
     if (AddList(CurFileName, yylineno, InternalBuffer) == NULL)
     {
-        Error(module, ErrorCreatingListNode);
+        Error(module, error_creating_list_node);
         return 0;
     }
     return bytes + 1;
@@ -448,7 +448,7 @@ ListTablePtr AddList(char* file, const int line, char* output)
     ListTablePtr varPtr = (ListTablePtr)malloc(sizeof(ListTable));
     if (varPtr == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     memset(varPtr, 0, sizeof(ListTable));
@@ -456,14 +456,14 @@ ListTablePtr AddList(char* file, const int line, char* output)
     varPtr->filename = StrDup(file);
     if (varPtr->filename == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     varPtr->line = line + 1;
     varPtr->output = StrDup(output);
     if (varPtr->output == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     ListTablePtr tmpPtr = ListHead;

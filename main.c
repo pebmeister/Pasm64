@@ -79,10 +79,10 @@ void ResetLex(void)
 
     if (InternalBuffer == NULL)
     {
-        InternalBuffer = (char*)malloc(MAXLINE_LEN);
+        InternalBuffer = (char*)malloc(MAX_LINE_LEN);
         if (InternalBuffer == NULL)
         {
-            FatalError(module, ErrorOutofMemory);
+            FatalError(module, error_outof_memory);
             return;
         }
     }
@@ -91,7 +91,7 @@ void ResetLex(void)
     CurrentNode = HeadNode = (parseNode *) malloc(sizeof(parseNode));
     if (CurrentNode == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return;
     }
     memset(HeadNode, 0, sizeof(parseNode));
@@ -133,7 +133,7 @@ int main(const int argc, char* argv[])
 
     if (inputFiles == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return -1;
     }
 
@@ -155,13 +155,13 @@ int main(const int argc, char* argv[])
             argIndex ++;
             if (argIndex >= argc)
             {
-                Error(module, ErrorMissingOutputFile);
+                Error(module, error_missing_output_file);
                 Usage();
                 return -1;
             }
             if (OutputFileName != NULL)
             {
-                Error(module, ErrorOutputFileSpecifiedMoreThanOnce);
+                Error(module, error_output_file_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -176,13 +176,13 @@ int main(const int argc, char* argv[])
             argIndex ++;
             if (argIndex >= argc)
             {
-                Error(module, ErrorMissingSymbolFile);
+                Error(module, error_missing_symbol_file);
                 Usage();
                 return -1;
             }
             if (SymFileName != NULL)
             {
-                Error(module, ErrorSymbolFileSpecifiedMoreThanOnce);
+                Error(module, error_symbol_file_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -196,13 +196,13 @@ int main(const int argc, char* argv[])
             argIndex++;
             if (argIndex >= argc)
             {
-                Error(module, ErrorMissingParameter);
+                Error(module, error_missing_parameter);
                 Usage();
                 return -1;
             }
             if (Directories != NULL)
             {
-                Error(module, ErrorSymbolFileSpecifiedMoreThanOnce);
+                Error(module, error_symbol_file_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -217,13 +217,13 @@ int main(const int argc, char* argv[])
             argIndex ++;
             if (argIndex >= argc)
             {
-                Error(module, ErrorMissingLogFile);
+                Error(module, error_missing_log_file);
                 Usage();
                 return -1;
             }
             if (LogFileName != NULL)
             {
-                Error(module, ErrorLogFileSpecifiedMoreThanOnce);
+                Error(module, error_log_file_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -239,13 +239,13 @@ int main(const int argc, char* argv[])
             argIndex ++;
             if (argIndex >= argc)
             {
-                Error(module, ErrorMissingListFile);
+                Error(module, error_missing_list_file);
                 Usage();
                 return -1;
             }
             if (ListFileName != NULL)
             {
-                Error(module, ErrorListFileSpecifiedMoreThanOnce);
+                Error(module, error_list_file_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -259,7 +259,7 @@ int main(const int argc, char* argv[])
         {
             if (OutFileFormat != none)
             {
-                Error(module, ErrorC64OutputFormatSpecifiedMoreThanOnce);
+                Error(module, error_c64_output_format_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -273,7 +273,7 @@ int main(const int argc, char* argv[])
         {
             if (CPUSpecifed)
             {
-                Error(module, ErrorInstructionSetSpecifiedMoreThanOnce);
+                Error(module, error_instruction_set_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -288,7 +288,7 @@ int main(const int argc, char* argv[])
         {
             if (CPUSpecifed)
             {
-                Error(module, ErrorInstructionSetSpecifiedMoreThanOnce);
+                Error(module, error_instruction_set_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -303,7 +303,7 @@ int main(const int argc, char* argv[])
         {
             if (IllegalSpecifed)
             {
-                Error(module, ErrorIllegalOpcodesSpecifiedMoreThanOnce);
+                Error(module, error_illegal_opcodes_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -318,7 +318,7 @@ int main(const int argc, char* argv[])
         {
             if (NoWarnings)
             {
-                Error(module, ErrorIllegalOpcodesSpecifiedMoreThanOnce);
+                Error(module, error_illegal_opcodes_specified_more_than_once);
                 Usage();
                 return -1;
             }
@@ -335,7 +335,7 @@ int main(const int argc, char* argv[])
     // make sure we have at least 1 input file
     if (inputFileCount == 0)
     {
-        Error(module, ErrorNoInputFileSpecified);
+        Error(module, error_no_input_file_specified);
         Usage();
         return -1;
     }        
@@ -349,7 +349,7 @@ int main(const int argc, char* argv[])
         LogFile = fopen(LogFileName, "w");
         if (LogFile == NULL)
         {
-            Error(module, ErrorOpeningLogFile);
+            Error(module, error_opening_log_file);
             return -1;
         }
     }
@@ -377,7 +377,7 @@ int main(const int argc, char* argv[])
             yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {
-                FatalError(module, ErrorOpeningInputFile);
+                FatalError(module, error_opening_input_file);
                 return -1;
             }
             if (LogFileSpecified)
@@ -432,7 +432,7 @@ int main(const int argc, char* argv[])
 
     if (Pass >= MaxPasses)
     {
-        Error(module, ErrorCircularSymbolDefiniions);
+        Error(module, error_circular_symbol_definitions);
     }
     if (ErrorCount > 0)
     {
@@ -458,7 +458,7 @@ int main(const int argc, char* argv[])
             OutputFile = fopen(OutputFileName, "wb");
             if (OutputFile == NULL)
             {
-                FatalError(module, ErrorOpeningOutputFile);
+                FatalError(module, error_opening_output_file);
                 return -1;
             }
         }
@@ -471,7 +471,7 @@ int main(const int argc, char* argv[])
             yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {                
-                FatalError(module, ErrorOpeningInputFile);
+                FatalError(module, error_opening_input_file);
                 return -1;
             }
             if (LogFileSpecified)
@@ -491,7 +491,7 @@ int main(const int argc, char* argv[])
 
         if (CurrentSection)
         {
-            Warning(module, ErrorMissingEndSection);
+            Warning(module, error_missing_end_section);
             free(CurrentSection);
             CurrentSection = NULL;
         }
@@ -506,7 +506,7 @@ int main(const int argc, char* argv[])
             SymFile = fopen(SymFileName, "w");
             if (SymFile == NULL)
             {
-                FatalError(module, ErrorOpeningSymbolFile);
+                FatalError(module, error_opening_symbol_file);
                 return -1;
             }
             // display the symbols
@@ -520,7 +520,7 @@ int main(const int argc, char* argv[])
             ListFile = fopen(ListFileName, "w");
             if (ListFile == NULL)
             {
-                Error(module, ErrorOpeningListFile);
+                Error(module, error_opening_list_file);
             }
             else
             {
@@ -585,14 +585,14 @@ void yymessage(const char* s)
         const size_t curpos = ftell(yyin);
         fseek(yyin, 0, SEEK_SET);
         for (curline = 1; curline < yylineno - 2; curline++)
-            fgets(InternalBuffer, MAXLINE_LEN, yyin);
+            fgets(InternalBuffer, MAX_LINE_LEN, yyin);
 
         for (; curline < yylineno + 3; curline++)
         {
             if (!feof(yyin))
             {
                 *InternalBuffer = 0;
-                fgets(InternalBuffer, MAXLINE_LEN, yyin);
+                fgets(InternalBuffer, MAX_LINE_LEN, yyin);
                 fprintf(stderr, "%-5d  ", curline);
                 fputs(InternalBuffer, stderr);
             }

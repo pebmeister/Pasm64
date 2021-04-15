@@ -49,7 +49,7 @@ parseNodePtr AllocateNode(void)
     const size_t size = sizeof(parseNode);
     if ((p = (parseNode *) malloc(size)) == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
@@ -74,10 +74,10 @@ parseNodePtr Con(const int value, const int isPc)
     parseNodePtr p = AllocateNode();
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
-    p->type = typeCon;
+    p->type = type_con;
     
     /* copy information */
     p->con.value = value;
@@ -99,11 +99,11 @@ parseNodePtr Str(char* value)
 
     if (str == NULL || p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
-    p->type = typeStr;
+    p->type = type_str;
 	p->str.allocated = str;
 	
     str[strlen(str)-1] = 0;
@@ -113,7 +113,7 @@ parseNodePtr Str(char* value)
     p->str.value = SantizeString(str, &p->str.len);
     if (p->str.value == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
@@ -135,16 +135,16 @@ parseNodePtr Id(char* name)
 
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     /* copy information */
-    p->type = typeId;
+    p->type = type_id;
     p->id.name = StrDup(name);
     if (p->id.name == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     return p;
@@ -164,16 +164,16 @@ parseNodePtr MacroId(char* name)
 
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     /* copy information */
-    p->type = typeMacroId;
+    p->type = type_macro_id;
     p->id.name = StrDup(name);
     if (p->id.name == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     
@@ -196,12 +196,12 @@ parseNodePtr MacroEx(char* name, parseNodePtr macroParams)
 
     if (p == NULL || macro == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     /* copy information */
-    p->type = typeMacroEx;
+    p->type = type_macro_ex;
     p->macro.macro = macro;
     p->macro.macroParams = macroParams;
 
@@ -222,12 +222,12 @@ parseNodePtr Data(const int dataSize, parseNodePtr data)
 
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     /* copy information */
-    p->type = typeData;
+    p->type = type_data;
     p->data.size = dataSize;
     p->data.data = data;
 
@@ -250,18 +250,18 @@ parseNodePtr Opr(int op, int nops, ...)
     parseNodePtr p = AllocateNode();
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     const size_t size = nops * sizeof(parseNodePtr);
     if ((p->op = (struct parseNode **) malloc(size)) == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     /* copy information */
-    p->type = typeOpr;
+    p->type = type_opr;
     p->opr.oper = op;
     p->nops = nops;
     va_start(ap, nops);
@@ -290,13 +290,13 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
 
     if (p == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     const size_t size = nops * sizeof(parseNode*);
     if ((p->op = (struct parseNode **) malloc(size)) == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
@@ -319,7 +319,7 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     }
 
     /* copy information */    
-    p->type = typeOpCode;
+    p->type = type_op_code;
     p->opcode.mode = mode;
     p->opcode.instruction = opr;
     p->nops = nops;
@@ -379,13 +379,19 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     }
     for (index = 0; index < nops; index++)
     {
+        //if (mode == r)
+        //{
+        //    LogFile = stdout;
+        //    PrintNode(p->op[index]);
+        //    LogFile = NULL;
+        //}
         Ex(p->op[index]);
     }    
 
     p->opcode.opcode = code;
     if (code < 0)
     {
-        Error(module, ErrorInvalidOpcodeOrMode);
+        Error(module, error_invalid_opcode_or_mode);
     }
     
     return p;
@@ -432,10 +438,10 @@ void PrintNode(parseNodePtr p)
     PrintNestLevel++;
     switch (p->type)
     {
-        case typeId:
-        case typeMacroId:
+        case type_id:
+        case type_macro_id:
             PrintIndent();
-            fprintf(LogFile, "type %s\n", p->type == typeId ? "typeId" : "typeMacroId");
+            fprintf(LogFile, "type %s\n", p->type == type_id ? "typeId" : "typeMacroId");
             PrintIndent();
             fprintf(LogFile, "name %s\n", p->id.name);
             PrintIndent();
@@ -455,7 +461,7 @@ void PrintNode(parseNodePtr p)
                 PrintIndent();
                 fprintf(LogFile, "     isvar        %d\n", p->id.i->isvar);
                 PrintIndent();
-                fprintf(LogFile, "     macroNode    %p\n", p->id.i->macroNode);
+                fprintf(LogFile, "     macroNode    %p\n", p->id.i->macro_node);
                 PrintIndent();
                 fprintf(LogFile, "     section      %s\n", p->id.i->section ? p->id.i->section : "NULL");
                 PrintIndent();
@@ -463,14 +469,28 @@ void PrintNode(parseNodePtr p)
             }
             break;
 
-        case typeMacroEx:
+        case type_macro_ex:
             break;
 
-        case typeOpr:
+        case type_opr:
             PrintIndent();
             fprintf(LogFile, "type typeOpr\n");
             switch (p->opr.oper)
             {
+                case INC:
+                    PrintIndent();
+                    fprintf(LogFile, "opr INC\n");
+                    for (index = 0; index < p->nops; index++)
+                        PrintNode(p->op[index]);
+                    break;
+
+                case LOAD:
+                    PrintIndent();
+                    fprintf(LogFile, "opr LOAD\n");
+                    for (index = 0; index < p->nops; index++)
+                        PrintNode(p->op[index]);
+                    break;
+
                 case LOBYTE:
                     PrintIndent();
                     fprintf(LogFile, "opr LOBYTE\n");
@@ -763,7 +783,7 @@ void PrintNode(parseNodePtr p)
             }
             break;
 
-        case typeOpCode:
+        case type_op_code:
             PrintIndent();
             fprintf(LogFile, "type typeOpCode\n");
             PrintIndent();
@@ -778,7 +798,7 @@ void PrintNode(parseNodePtr p)
                 PrintNode(p->op[index]);
             break;
 
-        case typeCon:
+        case type_con:
             PrintIndent();
             fprintf(LogFile, "type typeCon\n");
             PrintIndent();
@@ -792,7 +812,7 @@ void PrintNode(parseNodePtr p)
                 PrintNode(p->op[index]);
             break;
 
-        case typeData:
+        case type_data:
             PrintIndent();
             fprintf(LogFile, "type typeData\n");
             PrintIndent();
@@ -802,7 +822,7 @@ void PrintNode(parseNodePtr p)
                 PrintNode(p->op[index]);
             break;
 
-        case typeStr:
+        case type_str:
             PrintIndent();
             fprintf(LogFile, "type typeStr\n");
             PrintIndent();
@@ -814,6 +834,7 @@ void PrintNode(parseNodePtr p)
             for (index = 0; index < p->nops; index++)
                 PrintNode(p->op[index]);
             break;
+
     }
     
     fprintf(LogFile, "\n");
@@ -832,19 +853,19 @@ void FreeNode(parseNodePtr p)
 
     switch (p->type)
     {
-        case typeMacroId:
-        case typeId:
+        case type_macro_id:
+        case type_id:
             free(p->id.name);
             break;
 
-        case typeMacroEx:
-        case typeOpr:
-        case typeOpCode:
-        case typeCon:
-        case typeData:
+        case type_macro_ex:
+        case type_opr:
+        case type_op_code:
+        case type_con:
+        case type_data:
             break;
 
-        case typeStr:
+        case type_str:
             free(CurrentNode->str.allocated);
             free(CurrentNode->str.value);
             break;
@@ -868,14 +889,14 @@ char* SantizeString(char* str, int* outlen)
 
     if (outStr == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     memset(outStr, 0, len); 
 
     if (str == NULL)
     {
-        Error(module, ErrorSourceStringNull);
+        Error(module, error_source_string_null);
         return NULL;
     }
 
@@ -917,7 +938,7 @@ char* SantizeString(char* str, int* outlen)
                     str++;
                     if (*str == 0)
                     {
-                        Error(module, ErrorUnrecognizedEscapeSequence);
+                        Error(module, error_unrecognized_escape_sequence);
                         break;                                      
                     }
                     while (isxdigit((unsigned char)*str) && isxdigit((unsigned char)*(str+1)))
@@ -939,7 +960,7 @@ char* SantizeString(char* str, int* outlen)
 
                 default:
                     escChar = '?';
-                    Error(module, ErrorUnrecognizedEscapeSequence);
+                    Error(module, error_unrecognized_escape_sequence);
                     break;                                      
             }
             *tmpStr++ = (char)escChar;

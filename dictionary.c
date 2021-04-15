@@ -34,21 +34,21 @@ DictionaryPtr InternalDictCreate(int size, int elementSize)
 
     if (dictionary == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
 
     memset(dictionary, 0, sizeof(*dictionary));
     dictionary->size = size;
-    dictionary->elementSize = elementSize;
+    dictionary->element_size = elementSize;
 
-    dictionary->table = (elementPtr*) malloc(sizeof(elementPtr) * dictionary->size);
+    dictionary->table = (ElementPtr*) malloc(sizeof(ElementPtr) * dictionary->size);
     if (dictionary->table == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
-    memset(dictionary->table, 0, sizeof(elementPtr) * dictionary->size);
+    memset(dictionary->table, 0, sizeof(ElementPtr) * dictionary->size);
 
     return dictionary;
 }
@@ -70,11 +70,11 @@ void DictDestroy(DictionaryPtr d)
 {
     if (d == NULL) return;
 
-    elementPtr next;
+    ElementPtr next;
 
     for (int index = 0; index < d->size; index++) 
     {
-        for (elementPtr element = d->table[index]; element != 0; element = next) 
+        for (ElementPtr element = d->table[index]; element != 0; element = next) 
         {
             next = element->next;
 
@@ -117,16 +117,16 @@ static DictionaryPtr Grow(DictionaryPtr d)
 {
     const char* module = "grow";
 
-    DictionaryPtr d2 = InternalDictCreate(d->size * GROWTH_FACTOR, d->elementSize);
+    DictionaryPtr d2 = InternalDictCreate(d->size * GROWTH_FACTOR, d->element_size);
     if (d2 == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     d2->collisions = d->collisions;
     for (int index = 0; index < d->size; index++) 
     {
-        for (elementPtr element = d->table[index]; element != 0; element = element->next) 
+        for (ElementPtr element = d->table[index]; element != 0; element = element->next) 
         {
             /* note: this recopies everything */
             /* a more efficient implementation would
@@ -152,10 +152,10 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
     DictionaryPtr d = *dd;
     const char* module = "DictInsert";
 
-    elementPtr e = (elementPtr)malloc(sizeof(*e));
+    ElementPtr e = (ElementPtr)malloc(sizeof(*e));
     if (e == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     memset(e, 0, sizeof(*e));
@@ -163,16 +163,16 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
     e->key = StrLower(key);
     if (e->key == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
-    e->value = malloc(d->elementSize);
+    e->value = malloc(d->element_size);
     if (e->value == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
-    memcpy(e->value, value, d->elementSize);
+    memcpy(e->value, value, d->element_size);
 
     const unsigned long h = HashFunction(e->key) % d->size;
     e->next = d->table[h];
@@ -180,10 +180,10 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
         d->collisions++;
 
     d->table[h] = e;
-    d->numberElements++;
+    d->number_elements++;
 
     /* grow table if there is not enough room */
-    if ((double)(d->numberElements) >= (d->size * MAX_LOAD_FACTOR))
+    if ((double)(d->number_elements) >= (d->size * MAX_LOAD_FACTOR))
     {
         *dd = Grow(d);        
         return DictSearch(*dd, key);
@@ -205,11 +205,11 @@ void * DictSearch(DictionaryPtr d, const char *key)
     char* lowerKey = StrLower(key);
     if (lowerKey == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return NULL;
     }
     const unsigned long h = HashFunction(lowerKey) % d->size;
-    for (elementPtr e = d->table[h]; e != 0; e = e->next)
+    for (ElementPtr e = d->table[h]; e != 0; e = e->next)
     {
         if (!strcmp(e->key, lowerKey)) 
         {
@@ -235,19 +235,19 @@ void DictDelete(DictionaryPtr d, const char *key)
 
     if (lowerKey == NULL)
     {
-        FatalError(module, ErrorOutofMemory);
+        FatalError(module, error_outof_memory);
         return;
     }
 
     const unsigned long h = HashFunction(lowerKey) % d->size;
 
-    for (elementPtr* prev = &(d->table[h]); *prev != 0; prev = &((*prev)->next)) 
+    for (ElementPtr* prev = &(d->table[h]); *prev != 0; prev = &((*prev)->next)) 
     {
         if (!StrICmp((*prev)->key, lowerKey)) 
         {
             /* got it */
             // ReSharper disable once CppLocalVariableMayBeConst
-            elementPtr e = *prev;
+            ElementPtr e = *prev;
             *prev = e->next;
 
             free(e->key);
