@@ -51,7 +51,7 @@ int GenerateOut(parseNodePtr p)
             Error(module, error_writing_output_file);
             return 0;
         }
-        TotalBytesWritten += bytesWritten;
+        TotalBytesWritten += (int)bytesWritten;
 
         bytesWritten = fwrite(&hi, 1, 1, OutputFile);
         if (bytesWritten < 1)
@@ -59,7 +59,7 @@ int GenerateOut(parseNodePtr p)
             Error(module, error_writing_output_file);
             return 0;
         }
-        TotalBytesWritten += bytesWritten;
+        TotalBytesWritten += (int)bytesWritten;
     }
 
     // output a string
@@ -73,7 +73,7 @@ int GenerateOut(parseNodePtr p)
             Error(module, error_writing_output_file);
             return 0;
         }
-        TotalBytesWritten += bytesWritten;
+        TotalBytesWritten += (int)bytesWritten;
 
         // if using a string with WORD then pad to a word boundary
         if (DataSize == 2 && outlen % 2)
@@ -85,7 +85,7 @@ int GenerateOut(parseNodePtr p)
                 Error(module, error_writing_output_file);
                 return 0;
             }
-            TotalBytesWritten += bytesWritten;
+            TotalBytesWritten += (int)bytesWritten;
         }
         return TotalBytesWritten - startBytes;
     }
@@ -118,7 +118,7 @@ int GenerateOut(parseNodePtr p)
             Error(module, error_writing_output_file);
             return 0;
         }
-        TotalBytesWritten += bytesWritten;
+        TotalBytesWritten += (int)bytesWritten;
 
         if (DataSize > 1)
         {
@@ -128,7 +128,7 @@ int GenerateOut(parseNodePtr p)
                 Error(module, error_writing_output_file);
                 return 0;
             }
-            TotalBytesWritten += bytesWritten;
+            TotalBytesWritten += (int)bytesWritten;
         }
         return TotalBytesWritten - startBytes;
     }
@@ -146,7 +146,7 @@ int GenerateOut(parseNodePtr p)
         Error(module, error_writing_output_file);
         return 0;
     }
-    TotalBytesWritten += bytesWritten;
+    TotalBytesWritten += (int)bytesWritten;
 
     if (bytes > 0)
     {
@@ -178,7 +178,7 @@ int GenerateOut(parseNodePtr p)
                 Error(module, error_writing_output_file);
                 return 0;
             }
-            TotalBytesWritten += bytesWritten;
+            TotalBytesWritten += (int)bytesWritten;
 
             op = Ex(p->op[0]);
             hi = (unsigned char)((op & 0xFF00) >> 8);
@@ -194,7 +194,7 @@ int GenerateOut(parseNodePtr p)
                 Error(module, error_writing_output_file);
                 return 0;
             }
-            TotalBytesWritten += bytesWritten;
+            TotalBytesWritten += (int)bytesWritten;
 
             return TotalBytesWritten - startBytes;
         }
@@ -222,7 +222,7 @@ int GenerateOut(parseNodePtr p)
             Error(module, error_writing_output_file);
             return 0;
         }
-        TotalBytesWritten += bytesWritten;
+        TotalBytesWritten += (int)bytesWritten;
 
         if (bytes > 1)
         {
@@ -232,7 +232,7 @@ int GenerateOut(parseNodePtr p)
                 Error(module, error_writing_output_file);
                 return 0;
             }
-            TotalBytesWritten += bytesWritten;
+            TotalBytesWritten += (int)bytesWritten;
         }
     }
 

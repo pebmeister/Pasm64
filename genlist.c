@@ -36,7 +36,7 @@ FileLine* GetFileLine(char* file, const int line)
         {
             memset(fileEntry, 0, sizeof(FileEntry));
             fileEntry->filename = StrDup(file);
-            fileEntry->lines = ReadFile(file);
+            fileEntry->lines = ReadFileLines(file);
             if (prev)
                 prev->next = fileEntry;
         }

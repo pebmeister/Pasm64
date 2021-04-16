@@ -585,7 +585,7 @@ void yymessage(const char* s)
 
         fprintf(stderr, "%s File %s near line %d\n", s, CurFileName, yylineno + 1);
 
-        const size_t curpos = ftell(yyin);
+        const long curpos = ftell(yyin);
         fseek(yyin, 0, SEEK_SET);
         for (curline = 1; curline < yylineno - 2; curline++)
             fgets(InternalBuffer, MAX_LINE_LEN, yyin);

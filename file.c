@@ -35,10 +35,10 @@ FILE* OpenFile(const char* file, char* mode)
     return NULL;
 }
 
-FileLine* ReadFile(const char* fileName)
+FileLine* ReadFileLines(const char* fileName)
 {
     int line = 1;
-    const char* module = "ReadFile";
+    const char* module = "ReadFileLines";
     FileLine* headFileNode = NULL;
     FileLine* fileNode = NULL;
     FILE* file = OpenFile(fileName, "r");
