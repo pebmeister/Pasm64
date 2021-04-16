@@ -51,7 +51,7 @@ enum ExprExpansionType
 //
 // function pointer to expand node
 //
-typedef int (*expr)(parseNodePtr p);
+typedef int (*Expr)(parseNodePtr p);
 
 //
 // table lookup for operators
@@ -59,7 +59,7 @@ typedef int (*expr)(parseNodePtr p);
 struct OpTable
 {
     int tag;
-    expr function;
+    Expr function;
 };
 
 //
@@ -285,6 +285,17 @@ void InitEx(void)
     qsort(&ExTable, NUM_EX_EXP, sizeof(struct OpTable), OpCmpfunc);
 }
 
+int PlusMinusSymNameIsValid(char* name)
+{
+    if (name == NULL) return 0;
+    if (name[0] != '-' && name[0] != '+') return 0;
+
+    for (char* ptr = name; *ptr; ++ptr)
+        if (name[0] != *ptr)
+            return 0;
+    return -1;
+}
+
 //
 // search a an entry in a table
 //
@@ -402,7 +413,6 @@ int ExOprVar(parseNodePtr p)
     return 0;
 }
 
-
 //
 // symbol
 //
@@ -414,6 +424,12 @@ int ExSymbol(parseNodePtr p)
 
     if (p->id.name[0] == '-')
     {
+        if (!PlusMinusSymNameIsValid(p->id.name))
+        {
+            Error(method, error_adding_symbol);
+            return 0;
+        }
+
         const int index = FindMinusSym((int)strlen(p->id.name), CurFileName, yylineno);
         if (index >= 0)
             return MinusSymTable[index].value;
@@ -423,6 +439,12 @@ int ExSymbol(parseNodePtr p)
 
     if (p->id.name[0] == '+')
     {
+        if (!PlusMinusSymNameIsValid(p->id.name))
+        {
+            Error(method, error_adding_symbol);
+            return 0;
+        }
+
         const int index = FindPlusSym((int)strlen(p->id.name), CurFileName, yylineno);
         if (index >= 0)
             return PlusSymTable[index].value;
@@ -1744,7 +1766,7 @@ int Ex(parseNodePtr p)
 }
 
 /// <summary>
-/// Determines whether [is uninitialized symbol] [the specified parseNodePtr p].
+/// Determines if p IS an initialized symbol.
 /// </summary>
 /// <param name="p">The node pointer.</param>
 int IsUnInitializedSymbol(parseNodePtr p)
@@ -1763,7 +1785,7 @@ int IsUnInitializedSymbol(parseNodePtr p)
 }
 
 /// <summary>
-/// Determines whether [has uninitialized symbol] [the specified parseNodePtr p].
+/// Determines p has uninitialized symbol
 /// </summary>
 /// <param name="p">The p.</param>
 int HasUnInitializedSymbol(parseNodePtr p)

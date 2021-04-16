@@ -128,7 +128,8 @@ int main(const int argc, char* argv[])
     int inFileIndex;
     int lastUnresolvedCount = INT_MAX;
 
-    const char* module = "";
+    const char* module = "main";
+    
     char** inputFiles = (char**) malloc(sizeof(char*) * argc);
 
     if (inputFiles == NULL)
@@ -380,6 +381,7 @@ int main(const int argc, char* argv[])
                 FatalError(module, error_opening_input_file);
                 return -1;
             }
+
             if (LogFileSpecified)
             {
                 fprintf(LogFile, "Current File %s\n", CurFileName);
@@ -432,7 +434,8 @@ int main(const int argc, char* argv[])
 
     if (Pass >= MaxPasses)
     {
-        Error(module, error_circular_symbol_definitions);
+        FatalError(module, error_circular_symbol_definitions);
+        return 0;
     }
     if (ErrorCount > 0)
     {

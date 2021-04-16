@@ -31,8 +31,6 @@ typedef struct symbol_table
     char* name;
     char* fullname;
     void* macro_node;
-
-
 } SymbolTable, *SymbolTablePtr;
 
 #ifndef FALSE

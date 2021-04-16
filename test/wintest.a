@@ -4,7 +4,7 @@
     .ORG $1000
 
     .inc "test.a"
-    
+    .inc "branchtest.a"
     .load "textfile.txt"
     
     .illegal OFF    ; no illegal opcodes

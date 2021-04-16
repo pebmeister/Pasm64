@@ -100,7 +100,7 @@ int FindPlusSymDef(char* file, const int line)
     return -1;
 }
 
-int FindMinusSym(const int depth, char* file, int line)
+int FindMinusSym(const int depth, char* file, const int line)
 {
     if (MinusSymTableSize <= 0) return -1;
     int foundIndex = -1;
@@ -121,7 +121,7 @@ int FindMinusSym(const int depth, char* file, int line)
     return -1;
 }
 
-int FindPlusSym(const int depth, char* file, int line)
+int FindPlusSym(const int depth, char* file, const int line)
 {
     if (PlusSymTableSize <= 0) return -1;
     for (int index = 0; index < PlusSymTableIndex; ++index)
@@ -141,7 +141,7 @@ int FindPlusSym(const int depth, char* file, int line)
     return -1;
 }
 
-void AddMinusSym(char* file, int line)
+void AddMinusSym(char* file, const int line)
 {
     const char* module = "AddMinusSym";
 
@@ -174,7 +174,7 @@ void AddMinusSym(char* file, int line)
 
 }
 
-void AddPlusSym(char* file, int line)
+void AddPlusSym(char* file, const int line)
 {
     const char* module = "AddPlusSym";
 
@@ -358,7 +358,7 @@ void SanitizeSymbol(SymbolTablePtr symbol)
 /// <param name="sym">The sym.</param>
 /// <param name="value">The value.</param>
 /// <returns>SymbolTablePtr.</returns>
-SymbolTablePtr SetSymbolValue(SymbolTablePtr sym, int value)
+SymbolTablePtr SetSymbolValue(SymbolTablePtr sym, const int value)
 {
     const char* module = "SetSymbolValue";
 

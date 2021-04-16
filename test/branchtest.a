@@ -1,0 +1,28 @@
+    nop
+
+    beq +
+-    
+    lda ++,y
+    bne -
+    nop
+-
+    bpl -
+    jmp (--)
+    rts
+    
++
+    rts
++
+    nop
+    nop
+    rts
+
+    beq --
+    
+// ; test backwards
+// -
+// 
+// bne -
+// bpl +
+//    ; test fowards
+// +

@@ -1,8 +1,8 @@
 
 .var i,ii,jj
 
-.for i = 10 to 20 .STEP 2
-    dw * + i   
+.for i = 10 .to 20 .STEP 2
+    .dw * + i   
 .next i
 
 .repeat
@@ -16,7 +16,7 @@
     i = i + 2
 .while i < 10
 
-.for i = 1 to 10
+.for i = 1 .to 10
     ii = 0
     .repeat
         jsr * - ii
@@ -33,7 +33,7 @@
 
 .if i > 0 
     nop
-    .if .NOT 1 < 0
+    .if (0 > 1)
         .ds 1
     .endif
 .else
