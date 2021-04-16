@@ -1,17 +1,7 @@
 PASS 2
 Current File branchtest.a
-ExOprOrg  [line 1]
+ExOpCode  [line 1]
 NODE [line 1]
-    type typeOpr
-    opr ORG
-    CHILD NODE [line 1]
-        type typeCon
-        IsPC  0
-        value 0x00001000
-
-
-ExOpCode  [line 3]
-NODE [line 3]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -19,86 +9,86 @@ NODE [line 3]
     PC            0x00001000
 
 
-ExSymbol  [line 5]
-NODE [line 5]
+ExSymbol  [line 3]
+NODE [line 3]
     type typeId
     name +
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 5]
-NODE [line 5]
+ExOpCode  [line 3]
+NODE [line 3]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001001
-    CHILD NODE [line 5]
+    CHILD NODE [line 3]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOprEqu  [line 6]
-NODE [line 6]
+ExOprEqu  [line 4]
+NODE [line 4]
     type typeOpr
     opr '='
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeCon
         IsPC  1     PC = 00001003
         value 0x00001003
 
 
-ExSymbol  [line 6]
-NODE [line 6]
+ExSymbol  [line 4]
+NODE [line 4]
     type typeId
     name ++
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 7]
-NODE [line 7]
+ExOpCode  [line 5]
+NODE [line 5]
     type typeOpCode
     instruction   lda
     mode          absolute y
     opCode        B9
     PC            0x00001003
-    CHILD NODE [line 7]
+    CHILD NODE [line 5]
         type typeId
         name ++
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 8]
-NODE [line 8]
+ExSymbol  [line 6]
+NODE [line 6]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 8]
-NODE [line 8]
+ExOpCode  [line 6]
+NODE [line 6]
     type typeOpCode
     instruction   bne
     mode          relative
     opCode        D0
     PC            0x00001006
-    CHILD NODE [line 8]
+    CHILD NODE [line 6]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 9]
-NODE [line 9]
+ExOpCode  [line 7]
+NODE [line 7]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -106,70 +96,94 @@ NODE [line 9]
     PC            0x00001008
 
 
-ExOprEqu  [line 10]
-NODE [line 10]
+ExOprEqu  [line 8]
+NODE [line 8]
     type typeOpr
     opr '='
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeCon
         IsPC  1     PC = 00001009
         value 0x00001009
 
 
-ExSymbol  [line 11]
-NODE [line 11]
+ExSymbol  [line 9]
+NODE [line 9]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 11]
-NODE [line 11]
+ExOpCode  [line 9]
+NODE [line 9]
     type typeOpCode
     instruction   bpl
     mode          relative
     opCode        10
     PC            0x00001009
-    CHILD NODE [line 11]
+    CHILD NODE [line 9]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 12]
-NODE [line 12]
+ExSymbol  [line 10]
+NODE [line 10]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 12]
-NODE [line 12]
+ExOpCode  [line 10]
+NODE [line 10]
     type typeOpCode
     instruction   jmp
     mode          absolute i
     opCode        6C
     PC            0x0000100B
-    CHILD NODE [line 12]
+    CHILD NODE [line 10]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 13]
-NODE [line 13]
+ExOpCode  [line 11]
+NODE [line 11]
     type typeOpCode
     instruction   rts
     mode          implied
     opCode        60
     PC            0x0000100E
+
+
+ExOprEqu  [line 13]
+NODE [line 13]
+    type typeOpr
+    opr '='
+    CHILD NODE [line 13]
+        type typeId
+        name +
+        i    0000000000000000
+
+    CHILD NODE [line 13]
+        type typeCon
+        IsPC  1     PC = 0000100F
+        value 0x0000100F
+
+
+ExOpCode  [line 14]
+NODE [line 14]
+    type typeOpCode
+    instruction   rts
+    mode          implied
+    opCode        60
+    PC            0x0000100F
 
 
 ExOprEqu  [line 15]
@@ -179,40 +193,16 @@ NODE [line 15]
     CHILD NODE [line 15]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
     CHILD NODE [line 15]
-        type typeCon
-        IsPC  1     PC = 0000100F
-        value 0x0000100F
-
-
-ExOpCode  [line 16]
-NODE [line 16]
-    type typeOpCode
-    instruction   rts
-    mode          implied
-    opCode        60
-    PC            0x0000100F
-
-
-ExOprEqu  [line 17]
-NODE [line 17]
-    type typeOpr
-    opr '='
-    CHILD NODE [line 17]
-        type typeId
-        name +
-        i    00000000
-
-    CHILD NODE [line 17]
         type typeCon
         IsPC  1     PC = 00001010
         value 0x00001010
 
 
-ExOpCode  [line 18]
-NODE [line 18]
+ExOpCode  [line 16]
+NODE [line 16]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -220,8 +210,8 @@ NODE [line 18]
     PC            0x00001010
 
 
-ExOpCode  [line 19]
-NODE [line 19]
+ExOpCode  [line 17]
+NODE [line 17]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -229,8 +219,8 @@ NODE [line 19]
     PC            0x00001011
 
 
-ExOpCode  [line 20]
-NODE [line 20]
+ExOpCode  [line 18]
+NODE [line 18]
     type typeOpCode
     instruction   rts
     mode          implied
@@ -238,42 +228,32 @@ NODE [line 20]
     PC            0x00001012
 
 
-ExSymbol  [line 22]
-NODE [line 22]
+ExSymbol  [line 20]
+NODE [line 20]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 22]
-NODE [line 22]
+ExOpCode  [line 20]
+NODE [line 20]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001013
-    CHILD NODE [line 22]
+    CHILD NODE [line 20]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 
 
 PASS 3
 Current File branchtest.a
-ExOprOrg  [line 1]
+ExOpCode  [line 1]
 NODE [line 1]
-    type typeOpr
-    opr ORG
-    CHILD NODE [line 1]
-        type typeCon
-        IsPC  0
-        value 0x00001000
-
-
-ExOpCode  [line 3]
-NODE [line 3]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -281,86 +261,86 @@ NODE [line 3]
     PC            0x00001000
 
 
-ExSymbol  [line 5]
-NODE [line 5]
+ExSymbol  [line 3]
+NODE [line 3]
     type typeId
     name +
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 5]
-NODE [line 5]
+ExOpCode  [line 3]
+NODE [line 3]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001001
-    CHILD NODE [line 5]
+    CHILD NODE [line 3]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOprEqu  [line 6]
-NODE [line 6]
+ExOprEqu  [line 4]
+NODE [line 4]
     type typeOpr
     opr '='
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeCon
         IsPC  1     PC = 00001003
         value 0x00001003
 
 
-ExSymbol  [line 6]
-NODE [line 6]
+ExSymbol  [line 4]
+NODE [line 4]
     type typeId
     name ++
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 7]
-NODE [line 7]
+ExOpCode  [line 5]
+NODE [line 5]
     type typeOpCode
     instruction   lda
     mode          absolute y
     opCode        B9
     PC            0x00001003
-    CHILD NODE [line 7]
+    CHILD NODE [line 5]
         type typeId
         name ++
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 8]
-NODE [line 8]
+ExSymbol  [line 6]
+NODE [line 6]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 8]
-NODE [line 8]
+ExOpCode  [line 6]
+NODE [line 6]
     type typeOpCode
     instruction   bne
     mode          relative
     opCode        D0
     PC            0x00001006
-    CHILD NODE [line 8]
+    CHILD NODE [line 6]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 9]
-NODE [line 9]
+ExOpCode  [line 7]
+NODE [line 7]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -368,70 +348,94 @@ NODE [line 9]
     PC            0x00001008
 
 
-ExOprEqu  [line 10]
-NODE [line 10]
+ExOprEqu  [line 8]
+NODE [line 8]
     type typeOpr
     opr '='
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeCon
         IsPC  1     PC = 00001009
         value 0x00001009
 
 
-ExSymbol  [line 11]
-NODE [line 11]
+ExSymbol  [line 9]
+NODE [line 9]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 11]
-NODE [line 11]
+ExOpCode  [line 9]
+NODE [line 9]
     type typeOpCode
     instruction   bpl
     mode          relative
     opCode        10
     PC            0x00001009
-    CHILD NODE [line 11]
+    CHILD NODE [line 9]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 12]
-NODE [line 12]
+ExSymbol  [line 10]
+NODE [line 10]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 12]
-NODE [line 12]
+ExOpCode  [line 10]
+NODE [line 10]
     type typeOpCode
     instruction   jmp
     mode          absolute i
     opCode        6C
     PC            0x0000100B
-    CHILD NODE [line 12]
+    CHILD NODE [line 10]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 13]
-NODE [line 13]
+ExOpCode  [line 11]
+NODE [line 11]
     type typeOpCode
     instruction   rts
     mode          implied
     opCode        60
     PC            0x0000100E
+
+
+ExOprEqu  [line 13]
+NODE [line 13]
+    type typeOpr
+    opr '='
+    CHILD NODE [line 13]
+        type typeId
+        name +
+        i    0000000000000000
+
+    CHILD NODE [line 13]
+        type typeCon
+        IsPC  1     PC = 0000100F
+        value 0x0000100F
+
+
+ExOpCode  [line 14]
+NODE [line 14]
+    type typeOpCode
+    instruction   rts
+    mode          implied
+    opCode        60
+    PC            0x0000100F
 
 
 ExOprEqu  [line 15]
@@ -441,40 +445,16 @@ NODE [line 15]
     CHILD NODE [line 15]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
     CHILD NODE [line 15]
-        type typeCon
-        IsPC  1     PC = 0000100F
-        value 0x0000100F
-
-
-ExOpCode  [line 16]
-NODE [line 16]
-    type typeOpCode
-    instruction   rts
-    mode          implied
-    opCode        60
-    PC            0x0000100F
-
-
-ExOprEqu  [line 17]
-NODE [line 17]
-    type typeOpr
-    opr '='
-    CHILD NODE [line 17]
-        type typeId
-        name +
-        i    00000000
-
-    CHILD NODE [line 17]
         type typeCon
         IsPC  1     PC = 00001010
         value 0x00001010
 
 
-ExOpCode  [line 18]
-NODE [line 18]
+ExOpCode  [line 16]
+NODE [line 16]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -482,8 +462,8 @@ NODE [line 18]
     PC            0x00001010
 
 
-ExOpCode  [line 19]
-NODE [line 19]
+ExOpCode  [line 17]
+NODE [line 17]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -491,8 +471,8 @@ NODE [line 19]
     PC            0x00001011
 
 
-ExOpCode  [line 20]
-NODE [line 20]
+ExOpCode  [line 18]
+NODE [line 18]
     type typeOpCode
     instruction   rts
     mode          implied
@@ -500,42 +480,32 @@ NODE [line 20]
     PC            0x00001012
 
 
-ExSymbol  [line 22]
-NODE [line 22]
+ExSymbol  [line 20]
+NODE [line 20]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 22]
-NODE [line 22]
+ExOpCode  [line 20]
+NODE [line 20]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001013
-    CHILD NODE [line 22]
+    CHILD NODE [line 20]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 
 
 Final Pass
 Current File branchtest.a
-ExOprOrg  [line 1]
+ExOpCode  [line 1]
 NODE [line 1]
-    type typeOpr
-    opr ORG
-    CHILD NODE [line 1]
-        type typeCon
-        IsPC  0
-        value 0x00001000
-
-
-ExOpCode  [line 3]
-NODE [line 3]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -543,86 +513,86 @@ NODE [line 3]
     PC            0x00001000
 
 
-ExSymbol  [line 5]
-NODE [line 5]
+ExSymbol  [line 3]
+NODE [line 3]
     type typeId
     name +
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 5]
-NODE [line 5]
+ExOpCode  [line 3]
+NODE [line 3]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001001
-    CHILD NODE [line 5]
+    CHILD NODE [line 3]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOprEqu  [line 6]
-NODE [line 6]
+ExOprEqu  [line 4]
+NODE [line 4]
     type typeOpr
     opr '='
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 6]
+    CHILD NODE [line 4]
         type typeCon
         IsPC  1     PC = 00001003
         value 0x00001003
 
 
-ExSymbol  [line 6]
-NODE [line 6]
+ExSymbol  [line 4]
+NODE [line 4]
     type typeId
     name ++
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 7]
-NODE [line 7]
+ExOpCode  [line 5]
+NODE [line 5]
     type typeOpCode
     instruction   lda
     mode          absolute y
     opCode        B9
     PC            0x00001003
-    CHILD NODE [line 7]
+    CHILD NODE [line 5]
         type typeId
         name ++
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 8]
-NODE [line 8]
+ExSymbol  [line 6]
+NODE [line 6]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 8]
-NODE [line 8]
+ExOpCode  [line 6]
+NODE [line 6]
     type typeOpCode
     instruction   bne
     mode          relative
     opCode        D0
     PC            0x00001006
-    CHILD NODE [line 8]
+    CHILD NODE [line 6]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 9]
-NODE [line 9]
+ExOpCode  [line 7]
+NODE [line 7]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -630,70 +600,94 @@ NODE [line 9]
     PC            0x00001008
 
 
-ExOprEqu  [line 10]
-NODE [line 10]
+ExOprEqu  [line 8]
+NODE [line 8]
     type typeOpr
     opr '='
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
-    CHILD NODE [line 10]
+    CHILD NODE [line 8]
         type typeCon
         IsPC  1     PC = 00001009
         value 0x00001009
 
 
-ExSymbol  [line 11]
-NODE [line 11]
+ExSymbol  [line 9]
+NODE [line 9]
     type typeId
     name -
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 11]
-NODE [line 11]
+ExOpCode  [line 9]
+NODE [line 9]
     type typeOpCode
     instruction   bpl
     mode          relative
     opCode        10
     PC            0x00001009
-    CHILD NODE [line 11]
+    CHILD NODE [line 9]
         type typeId
         name -
-        i    00000000
+        i    0000000000000000
 
 
 
-ExSymbol  [line 12]
-NODE [line 12]
+ExSymbol  [line 10]
+NODE [line 10]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 12]
-NODE [line 12]
+ExOpCode  [line 10]
+NODE [line 10]
     type typeOpCode
     instruction   jmp
     mode          absolute i
     opCode        6C
     PC            0x0000100B
-    CHILD NODE [line 12]
+    CHILD NODE [line 10]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 
-ExOpCode  [line 13]
-NODE [line 13]
+ExOpCode  [line 11]
+NODE [line 11]
     type typeOpCode
     instruction   rts
     mode          implied
     opCode        60
     PC            0x0000100E
+
+
+ExOprEqu  [line 13]
+NODE [line 13]
+    type typeOpr
+    opr '='
+    CHILD NODE [line 13]
+        type typeId
+        name +
+        i    0000000000000000
+
+    CHILD NODE [line 13]
+        type typeCon
+        IsPC  1     PC = 0000100F
+        value 0x0000100F
+
+
+ExOpCode  [line 14]
+NODE [line 14]
+    type typeOpCode
+    instruction   rts
+    mode          implied
+    opCode        60
+    PC            0x0000100F
 
 
 ExOprEqu  [line 15]
@@ -703,40 +697,16 @@ NODE [line 15]
     CHILD NODE [line 15]
         type typeId
         name +
-        i    00000000
+        i    0000000000000000
 
     CHILD NODE [line 15]
-        type typeCon
-        IsPC  1     PC = 0000100F
-        value 0x0000100F
-
-
-ExOpCode  [line 16]
-NODE [line 16]
-    type typeOpCode
-    instruction   rts
-    mode          implied
-    opCode        60
-    PC            0x0000100F
-
-
-ExOprEqu  [line 17]
-NODE [line 17]
-    type typeOpr
-    opr '='
-    CHILD NODE [line 17]
-        type typeId
-        name +
-        i    00000000
-
-    CHILD NODE [line 17]
         type typeCon
         IsPC  1     PC = 00001010
         value 0x00001010
 
 
-ExOpCode  [line 18]
-NODE [line 18]
+ExOpCode  [line 16]
+NODE [line 16]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -744,8 +714,8 @@ NODE [line 18]
     PC            0x00001010
 
 
-ExOpCode  [line 19]
-NODE [line 19]
+ExOpCode  [line 17]
+NODE [line 17]
     type typeOpCode
     instruction   nop
     mode          implied
@@ -753,8 +723,8 @@ NODE [line 19]
     PC            0x00001011
 
 
-ExOpCode  [line 20]
-NODE [line 20]
+ExOpCode  [line 18]
+NODE [line 18]
     type typeOpCode
     instruction   rts
     mode          implied
@@ -762,24 +732,24 @@ NODE [line 20]
     PC            0x00001012
 
 
-ExSymbol  [line 22]
-NODE [line 22]
+ExSymbol  [line 20]
+NODE [line 20]
     type typeId
     name --
-    i    00000000
+    i    0000000000000000
 
 
-ExOpCode  [line 22]
-NODE [line 22]
+ExOpCode  [line 20]
+NODE [line 20]
     type typeOpCode
     instruction   beq
     mode          relative
     opCode        F0
     PC            0x00001013
-    CHILD NODE [line 22]
+    CHILD NODE [line 20]
         type typeId
         name --
-        i    00000000
+        i    0000000000000000
 
 
 

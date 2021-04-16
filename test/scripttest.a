@@ -1,42 +1,50 @@
 
-.var i,ii,jj
+    .var i,ii,jj
 
-.for i = 10 .to 20 .STEP 2
-    .dw * + i   
-.next i
+    .for i = 10 .to 20 .STEP 2
+        lda here + i  
+    .next i
 
-.repeat
-    jsr * - i
-    i = i - 2
-.until i <= 10
-
-.do
-    jsr * + i
-    nop
-    i = i + 2
-.while i < 10
-
-.for i = 1 .to 10
-    ii = 0
     .repeat
-        jsr * - ii
-        ii = ii - 2
+        jsr i + 1
+        i = i - 2
+    .until i <= 10
 
-        jj = 0
-        .do
-            jsr * + jj
-            nop
-            jj = jj + 2
-        .while jj < 10
-    .until ii <= 10
-.next i
+    .do
+        ldx here + i
+        nop
+        i = i + 2
+    .while i < 10
 
-.if i > 0 
+here
     nop
-    .if (0 > 1)
-        .ds 1
-    .endif
-.else
-    brk
-.endif
 
+
+    .for i = 1 .to 10
+        ii = 0
+        .repeat
+            jsr ii
+            ii = ii - 2
+
+            jj = 0
+            .do
+                jsr jj
+                nop
+                jj = jj + 2
+            .while jj < 10
+        .until ii <= 10
+    .next i
+    
+    .if i > 0 
+        nop
+        .while (i > 1)
+            .ds 1
+            i = i -3
+        .wend
+    .else
+        brk
+    .endif
+    .byte 100
+    
+    brk
+ 

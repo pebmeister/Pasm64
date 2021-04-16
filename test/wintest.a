@@ -6,6 +6,7 @@
     .inc "test.a"
     .inc "branchtest.a"
     .load "textfile.txt"
+    .inc "scripttest.a"
     
     .illegal OFF    ; no illegal opcodes
 

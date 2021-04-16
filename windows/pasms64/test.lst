@@ -1,8 +1,6 @@
 
 Processing branchtest.a
 
-                                                      .ORG    $1000
-                                                      
                                                       nop
 $1000: $EA               nop                      
                                                       beq +
