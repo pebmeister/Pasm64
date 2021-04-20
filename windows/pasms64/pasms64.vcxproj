@@ -163,6 +163,7 @@
     <ClCompile Include="..\..\genlist.c" />
     <ClCompile Include="..\..\genoutput.c" />
     <ClCompile Include="..\..\main.c" />
+    <ClCompile Include="..\..\mem.c" />
     <ClCompile Include="..\..\node.c" />
     <ClCompile Include="..\..\opcodes.c" />
     <ClCompile Include="..\..\pasm64.c" />
@@ -177,6 +178,7 @@
     <ClInclude Include="..\..\file.h" />
     <ClInclude Include="..\..\genlist.h" />
     <ClInclude Include="..\..\genoutput.h" />
+    <ClInclude Include="..\..\mem.h" />
     <ClInclude Include="..\..\node.h" />
     <ClInclude Include="..\..\opcodes.h" />
     <ClInclude Include="..\..\pasm64.h" />

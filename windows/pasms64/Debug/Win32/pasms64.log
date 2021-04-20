@@ -1,17 +1,10 @@
 ﻿  Process "pasm64.y" bison file
   Process "pasm64.l" flex file
-  dictionary.c
-  error.c
-  file.c
-  genlist.c
-  genoutput.c
-  main.c
+  mem.c
+C:\Users\jaret\source\repos\pebmeister\Pasm64\mem.c(75,18): warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _strdup. See online help for details.
   node.c
-  opcodes.c
   pasm64.c
   pasm64.flex.c
   pasm64.tab.c
-  str.c
-  symbol.c
   Generating Code...
   pasms64.vcxproj -> C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\pasm64.exe

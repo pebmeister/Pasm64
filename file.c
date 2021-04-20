@@ -6,6 +6,7 @@
 #include "genlist.h"
 #include "pasm64.h"
 #include "str.h"
+#include "mem.h"
 
 char Path[4096] = { 0 };
 
@@ -54,12 +55,12 @@ FileLine* ReadFileLines(const char* fileName)
         {
             if (fileNode == NULL)
             {
-                fileNode = (FileLine*)malloc(sizeof(FileLine));
+                fileNode = (FileLine*)ALLOCATE(sizeof(FileLine));
                 headFileNode = fileNode;
             }
             else
             {
-                fileNode->next = (FileLine*)malloc(sizeof(FileLine));
+                fileNode->next = (FileLine*)ALLOCATE(sizeof(FileLine));
                 fileNode = fileNode->next;
             }
             if (fileNode == NULL)

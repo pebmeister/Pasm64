@@ -20,6 +20,7 @@
 #include "str.h"
 #include "error.h"
 #include "file.h"
+#include "mem.h"
 
 #ifndef INT16_MAX
 #define INT16_MAX 32767
@@ -347,7 +348,6 @@ int ExOprInclude(parseNodePtr p)
     CHECK_OPS(1, 1);
 
     char* file = p->op[0]->str.value;
-
     OpenIncludeFile(file);
 
     return 1;
@@ -628,7 +628,7 @@ int ExOprSection(parseNodePtr p)
     if (CurrentSection != NULL)
     {
         const int len = (int)(strlen(CurrentSection) + strlen(name) + 2);
-        char* tempName = (char*)malloc(len);
+        char* tempName = (char*)ALLOCATE(len);
         if (tempName == NULL)
         {
             FatalError(method, error_outof_memory);
@@ -636,7 +636,7 @@ int ExOprSection(parseNodePtr p)
         }
 
         sprintf(tempName, "%s.%s", CurrentSection, name);
-        free(CurrentSection);
+        FREE(CurrentSection);
         CurrentSection = tempName;
     }
     else
@@ -676,7 +676,7 @@ int ExOprEndSection(parseNodePtr p)
         CurrentSection[index] = 0;
     else
     {
-        free(CurrentSection);
+        FREE(CurrentSection);
         CurrentSection = NULL;
     }
     return 0;
@@ -1526,7 +1526,7 @@ int ExOprEqu(parseNodePtr p)
         if (!sym->section && CurrentSection)
         {
             const int len = (int)(strlen(sym->name) + strlen(CurrentSection) + 2);
-            char* temp = (char*)malloc(len);
+            char* temp = (char*)ALLOCATE(len);
             if (temp == NULL)
             {
                 FatalError(method, error_outof_memory);
@@ -1535,7 +1535,7 @@ int ExOprEqu(parseNodePtr p)
 
             sprintf(temp, "%s.%s", CurrentSection, sym->name);
             sym = AddSymbol(temp);
-            free(temp);
+            FREE(temp);
         }
         SetSymbolValue(sym, op);
         sym->initialized = TRUE;
@@ -1741,7 +1741,14 @@ int ExOperator(parseNodePtr p)
 /// <returns>int.</returns>
 int Ex(parseNodePtr p)
 {
+
     const char* method = "Ex";
+
+    if (!IsTreeValid())
+    {
+        LogFile = stdout;
+        PrintNode(p);
+    }
 
     ExLevel++;
 
@@ -1756,6 +1763,9 @@ int Ex(parseNodePtr p)
     {
         const int result = entry->function(p);
         ExLevel--;
+
+        IsTreeValid();
+
         return result;
     }
 

@@ -6,6 +6,7 @@
   genlist.c
   genoutput.c
   main.c
+  mem.c
   node.c
   opcodes.c
   pasm64.c
@@ -15,6 +16,6 @@
   symbol.c
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 154 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 156 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   pasms64.vcxproj -> C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\x64\Release\pasm64.exe

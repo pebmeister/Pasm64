@@ -62,9 +62,11 @@ const char* Errors[] =
     "Branch out range. Creating branch island.",
     "Program counter out of range.",
     "Missing .EndSection",
-    "Circular symbol definition(s) detected",
-    "Include file stack overflow",
-    "Unable to open include file"
+    "Circular symbol definition(s) detected.",
+    "Include file stack overflow.",
+    "Unable to open include file.",
+    "Memory corruption detected.",
+    "Attempt to free unallocated memory."
 };
 #define NUM_ERRORS (sizeof(Errors)/sizeof(char*))
 

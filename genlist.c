@@ -16,6 +16,7 @@
 #include "error.h"
 #include "file.h"
 #include "genlist.h"
+#include "mem.h"
 
 #define SRC_LST_INDENT  25
 
@@ -31,7 +32,7 @@ FileLine* GetFileLine(char* file, const int line)
 
     if (!fileEntry)
     {
-        fileEntry = (FileEntry*)malloc(sizeof(FileEntry));
+        fileEntry = (FileEntry*)ALLOCATE(sizeof(FileEntry));
         if (fileEntry)
         {
             memset(fileEntry, 0, sizeof(FileEntry));
@@ -445,7 +446,7 @@ ListTablePtr AddList(char* file, const int line, char* output)
     const char* module = "AddList";
 
     // ReSharper disable once CppLocalVariableMayBeConst
-    ListTablePtr varPtr = (ListTablePtr)malloc(sizeof(ListTable));
+    ListTablePtr varPtr = (ListTablePtr)ALLOCATE(sizeof(ListTable));
     if (varPtr == NULL)
     {
         FatalError(module, error_outof_memory);
@@ -548,14 +549,14 @@ void FreeListTable(void)
     for (; tmpPtr != NULL;)
     {
         if (tmpPtr->filename)
-            free(tmpPtr->filename);
+            FREE(tmpPtr->filename);
 
         if (tmpPtr->output)
-            free(tmpPtr->output);
+            FREE(tmpPtr->output);
 
         // ReSharper disable once CppLocalVariableMayBeConst
         ListTablePtr nextNode = tmpPtr->next;
-        free(tmpPtr);
+        FREE(tmpPtr);
 
         tmpPtr = nextNode;
     }

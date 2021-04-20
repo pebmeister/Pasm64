@@ -4,9 +4,6 @@
 // Assembly         : 
 // Author           : Paul
 // Created          : 11-27-2015
-//
-// Last Modified By : Paul
-// Last Modified On : 11-27-2015
 // ***********************************************************************
 
 #include <ctype.h>
@@ -14,10 +11,14 @@
 #include <string.h>
 
 #include "dictionary.h"
+
+#include <stdio.h>
+
 #include "str.h"
 #include "error.h"
+#include "mem.h"
 
-#define INITIAL_SIZE    (10243)
+#define INITIAL_SIZE    (10240)
 #define GROWTH_FACTOR   (2)
 #define MAX_LOAD_FACTOR (.80)
 
@@ -29,8 +30,8 @@
 /// <returns>Dictionary.</returns>
 DictionaryPtr InternalDictCreate(int size, int elementSize)
 {
-    DictionaryPtr dictionary = (DictionaryPtr) malloc(sizeof(*dictionary));
-    const char* module = "internalDictCreate";
+    DictionaryPtr dictionary = (DictionaryPtr)ALLOCATE(sizeof(*dictionary));
+    const char* module = "InternalDictCreate";
 
     if (dictionary == NULL)
     {
@@ -42,7 +43,7 @@ DictionaryPtr InternalDictCreate(int size, int elementSize)
     dictionary->size = size;
     dictionary->element_size = elementSize;
 
-    dictionary->table = (ElementPtr*) malloc(sizeof(ElementPtr) * dictionary->size);
+    dictionary->table = (ElementPtr*)ALLOCATE(sizeof(ElementPtr) * dictionary->size);
     if (dictionary->table == NULL)
     {
         FatalError(module, error_outof_memory);
@@ -68,6 +69,7 @@ DictionaryPtr DictCreate(int elementSize)
 /// <param name="d">The d.</param>
 void DictDestroy(DictionaryPtr d)
 {
+ 
     if (d == NULL) return;
 
     ElementPtr next;
@@ -78,14 +80,14 @@ void DictDestroy(DictionaryPtr d)
         {
             next = element->next;
 
-            free(element->key);
-            free(element->value);
-            free(element);
+            FREE(element->key);
+            FREE(element->value);
+            FREE(element);
         }
     }
 
-    free(d->table);
-    free(d);
+    FREE(d->table);
+    FREE(d);
 }
 
 /// <summary>
@@ -136,6 +138,7 @@ static DictionaryPtr Grow(DictionaryPtr d)
     }
 
     DictDestroy(d);
+
     return d2;
 }
 
@@ -152,13 +155,13 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
     DictionaryPtr d = *dd;
     const char* module = "DictInsert";
 
-    ElementPtr e = (ElementPtr)malloc(sizeof(*e));
+    ElementPtr e = (ElementPtr)ALLOCATE(sizeof(Element));
     if (e == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
-    memset(e, 0, sizeof(*e));
+    memset(e, 0, sizeof(Element));
 
     e->key = StrLower(key);
     if (e->key == NULL)
@@ -166,7 +169,7 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
         FatalError(module, error_outof_memory);
         return NULL;
     }
-    e->value = malloc(d->element_size);
+    e->value = ALLOCATE(d->element_size);
     if (e->value == NULL)
     {
         FatalError(module, error_outof_memory);
@@ -188,6 +191,7 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
         *dd = Grow(d);        
         return DictSearch(*dd, key);
     }
+
     return e->value;
 }
 
@@ -213,12 +217,14 @@ void * DictSearch(DictionaryPtr d, const char *key)
     {
         if (!strcmp(e->key, lowerKey)) 
         {
-            free(lowerKey);
+            FREE(lowerKey);
+
             /* got it */
             return e->value;
         }
     }
-    free(lowerKey);
+    FREE(lowerKey);
+
     return NULL;
 }
 
@@ -231,6 +237,7 @@ void * DictSearch(DictionaryPtr d, const char *key)
 void DictDelete(DictionaryPtr d, const char *key)
 {
     const char* module = "DictDelete";
+
     char* lowerKey = StrLower(key);
 
     if (lowerKey == NULL)
@@ -250,12 +257,12 @@ void DictDelete(DictionaryPtr d, const char *key)
             ElementPtr e = *prev;
             *prev = e->next;
 
-            free(e->key);
-            free(e->value);
-            free(e);
-            free(lowerKey);
+            FREE(e->key);
+            FREE(e->value);
+            FREE(e);
+            FREE(lowerKey);
             return;
         }
     }
-    free(lowerKey);
+    FREE(lowerKey);
 }

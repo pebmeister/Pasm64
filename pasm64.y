@@ -24,6 +24,7 @@
 #include "pasm64.tab.h"
 #include "symbol.h" 
 #include "str.h" 
+#include "mem.h"
 
 %}
 
@@ -165,7 +166,7 @@ pc_assign
     ;
 
 symbol_value
-    : SYMBOL                            {                                                
+    : SYMBOL                            {   
                                             SymbolTablePtr sym = LookUpSymbol($1);
                                             if (sym && sym->ismacroname)
                                             {

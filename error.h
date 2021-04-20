@@ -61,7 +61,9 @@ enum
     error_missing_end_section,
     error_circular_symbol_definitions,
     error_include_file_stack_overflow,
-    error_cant_open_include_file
+    error_cant_open_include_file,
+    error_memory_corruption_detected,
+    error_free_unknown_pointer
 };
 
 extern void Error(const char* module, int error);

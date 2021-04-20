@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "error.h"
+#include "mem.h"
 
 /// <summary>
 /// duplicates the specified string.
@@ -23,7 +24,7 @@ char* StrDup(const char* string)
 {
     const int len = (int)strlen(string);
     const char* module = "StrDup";
-    char* buffer = (char*)malloc(len + 1);
+    char* buffer = (char*)ALLOCATE(len + 1);
 
     if (buffer == NULL)
     {
@@ -63,18 +64,17 @@ int StrICmp(const char* pStr1, const char* pStr2)
 char* StrLower(const char* string)
 {
     const char* module = "StrLower";
-    const int len = (int) strlen(string);
-    char* buffer = (char*)malloc(len + 1);
 
+    const int len = (int)strlen(string) + 1;
+    char* buffer = (char*)ALLOCATE(len);
+    
     if (buffer == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
-    char* strOut = buffer;
-    do
-    {
-        *strOut++ =  (char)tolower(*string);
-    } while (*string++);
+    for (int i = 0; i < len; ++i)
+        buffer[i] = (char) tolower(string[i] & 0xFF);
+
     return buffer;
 }

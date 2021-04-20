@@ -18,6 +18,7 @@
 #include "genlist.h"
 #include "file.h"
 #include "error.h"
+#include "mem.h"
 
 extern char* CurFileName;
 
@@ -38,10 +39,14 @@ int inMacroDef = 0;
 #define INT(off, base)      { yylval.iValue = (int) strtol (yytext + off, NULL, base); \
                                 return INTEGER; \
                             }
-#define INT_1BYTE           { int outlen; \
-                                char* tmpStr = SantizeString(yytext, &outlen); \
-                                yylval.iValue = (int)tmpStr[1]; \
-                                free(tmpStr); \
+#define INT_1BYTE           { \
+                                IsTreeValid(); \
+                                char* dup = StrDup(yytext); \
+                                char* tmpStr = SantizeString(dup); \
+                                yylval.iValue = (unsigned char)tmpStr[1] & 0xFF; \
+                                FREE(tmpStr); \
+                                FREE(dup); \
+                                IsTreeValid(); \
                                 return INTEGER; \
                             }
 %}

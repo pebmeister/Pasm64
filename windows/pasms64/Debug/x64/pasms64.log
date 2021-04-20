@@ -6,6 +6,7 @@
   genlist.c
   genoutput.c
   main.c
+  mem.c
   node.c
   opcodes.c
   pasm64.c

@@ -1,7 +1,11 @@
     ; Paul Baxter
-    .C64            ; C64 output
+    // .C64            ; C64 output
     
     .ORG $1000
+
+        lda #'\t'
+
+
 
     .inc "test.a"
     .inc "branchtest.a"
@@ -16,8 +20,8 @@
     start
         phx
         phy
-        bbr0 20,LoadSLASH
-    
+        //  bbr0 20,LoadSLASH
+        
     loadTAB
         lda #'\t'
     LoadSLASH
@@ -746,6 +750,7 @@ __las
 __maxOpcode
     .db "end",0
 
+
     ; loop test
     .var count, aaa, bbb
     .for count = 1 .To 3 .step 2
@@ -800,5 +805,6 @@ __maxOpcode
             jmp start
             rts
     .endsection       
-end
 
+
+end

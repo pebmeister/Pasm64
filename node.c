@@ -21,6 +21,8 @@
 #include "node.h"
 #include "str.h"
 #include "error.h"
+#include "mem.h"
+
 
 /// <summary>
 /// The head node
@@ -42,22 +44,23 @@ int PrintNestLevel = 0;
 /// </summary>
 /// <returns>parseNode *.</returns>
 parseNodePtr AllocateNode(void)
-{
+{ 
     const char* module = "AllocateNode";
 
     parseNodePtr p;
     const size_t size = sizeof(parseNode);
-    if ((p = (parseNode *) malloc(size)) == NULL)
+    if ((p = (parseNode *)ALLOCATE(size)) == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
 
     memset(p, 0, size);
-
+    p->allocated = 1;
     p->prev = CurrentNode;
     CurrentNode->next = p;
     CurrentNode = p;
+
     return p;
 }
 
@@ -94,6 +97,7 @@ parseNodePtr Con(const int value, const int isPc)
 parseNodePtr Str(char* value) 
 {
     const char* module = "str";
+
     parseNodePtr p = AllocateNode();
 	char* str = StrDup(value);	
 
@@ -105,17 +109,21 @@ parseNodePtr Str(char* value)
 
     p->type = type_str;
 	p->str.allocated = str;
-	
-    str[strlen(str)-1] = 0;
-	str++;
-		    
+    p->str.len = (int)strlen(str);
+    if (*str == '\'' || *str == '"')
+    {
+        str[p->str.len - 1] = 0;
+        str++;
+    }
+
     /* copy information */
-    p->str.value = SantizeString(str, &p->str.len);
+    p->str.value = SantizeString(str);
     if (p->str.value == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
+    p->str.len = (int)strlen(p->str.value);
 
     return p;
 }
@@ -147,6 +155,7 @@ parseNodePtr Id(char* name)
         FatalError(module, error_outof_memory);
         return NULL;
     }
+
     return p;
 }
 
@@ -204,7 +213,7 @@ parseNodePtr MacroEx(char* name, parseNodePtr macroParams)
     p->type = type_macro_ex;
     p->macro.macro = macro;
     p->macro.macroParams = macroParams;
-
+  
     return p;
 }
 
@@ -217,6 +226,7 @@ parseNodePtr MacroEx(char* name, parseNodePtr macroParams)
 parseNodePtr Data(const int dataSize, parseNodePtr data) 
 {
     const char* module = "data";
+
     /* allocate node */
     parseNodePtr p = AllocateNode();
 
@@ -254,20 +264,24 @@ parseNodePtr Opr(int op, int nops, ...)
         return NULL;
     }
 
-    const size_t size = nops * sizeof(parseNodePtr);
-    if ((p->op = (struct parseNode **) malloc(size)) == NULL)
-    {
-        FatalError(module, error_outof_memory);
-        return NULL;
-    }
     /* copy information */
     p->type = type_opr;
     p->opr.oper = op;
     p->nops = nops;
-    va_start(ap, nops);
-    for (int i = 0; i < nops; i++)
-        p->op[i] = va_arg(ap, parseNodePtr);
-    va_end(ap);
+
+    const size_t size = nops * sizeof(parseNodePtr);
+    if (size > 0)
+    {
+        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
+        {
+            FatalError(module, error_outof_memory);
+            return NULL;
+        }
+        va_start(ap, nops);
+        for (int i = 0; i < nops; i++)
+            p->op[i] = va_arg(ap, parseNodePtr);
+        va_end(ap);
+    }
 
     return p;
 }
@@ -293,11 +307,18 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
         FatalError(module, error_outof_memory);
         return NULL;
     }
-    const size_t size = nops * sizeof(parseNode*);
-    if ((p->op = (struct parseNode **) malloc(size)) == NULL)
+
+    p->type = type_op_code;
+
+    if (nops > 0)
     {
-        FatalError(module, error_outof_memory);
-        return NULL;
+        const size_t size = nops * sizeof(parseNodePtr);
+
+        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
+        {
+            FatalError(module, error_outof_memory);
+            return NULL;
+        }
     }
 
     switch (opr) 
@@ -318,16 +339,17 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
             break;
     }
 
-    /* copy information */    
-    p->type = type_op_code;
+    /* copy information */  
     p->opcode.mode = mode;
     p->opcode.instruction = opr;
     p->nops = nops;
-    va_start(ap, nops);
-    for (index = 0; index < nops; index++)
-        p->op[index] = va_arg(ap, parseNode*);
-    va_end(ap);
-
+    if (nops > 0)
+    {
+        va_start(ap, nops);
+        for (index = 0; index < nops; index++)
+            p->op[index] = va_arg(ap, parseNodePtr);
+        va_end(ap);
+    }
     int code = GetOpCode(opr, mode);
     if (code == -1)
     {
@@ -393,25 +415,29 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     {
         Error(module, error_invalid_opcode_or_mode);
     }
-    
+
     return p;
 }
 
 /// <summary>
 /// Frees the tree.
 /// </summary>
-void FreeTree(void)
+void FreeParseTree(void)
 {
-    CurrentNode = HeadNode;
-    while (CurrentNode != NULL) 
-    {
-        parseNodePtr p = CurrentNode->next;
-        FreeNode(CurrentNode);
-        CurrentNode = p;
-    }
-    HeadNode = NULL;
-}
+    VALIDATE_TREE
 
+    parseNodePtr p = HeadNode->next;
+    do
+    {
+        FreeParseNode(p);
+        p = HeadNode->next;
+    } while (p);
+
+    FreeParseNode(HeadNode);
+    HeadNode = CurrentNode = NULL;
+
+    VALIDATE_TREE
+}
 
 //
 // Print indent
@@ -422,22 +448,57 @@ void PrintIndent(void)
         fprintf(LogFile, "    ");
 }
 
+int IsValidParseTree(void)
+{
+    for (parseNodePtr p = HeadNode; p; p = p->next)
+    {
+        if (!IsValidParseNode(p))
+            return 0;
+    }
+    return 1;
+}
+
+int IsValidParseNode(parseNodePtr p)
+{
+    if (p == NULL) return 0;
+
+    if (p->type < type_head_node || p->type > type_str)
+        return 0;
+
+    for (int i = 0; i < p->nops; i++)
+    {
+        if (!IsValidParseNode(p->op[i]))
+            return 0;
+    }
+
+    return 1;
+}
+
 //
 // Print a node
 //
 void PrintNode(parseNodePtr p)
 {
-    int index;
-    if (LogFile == NULL)
+    if (LogFile == NULL || p == NULL)
         return;
+
+    int index;
 
     PrintIndent();
     if (PrintNestLevel > 0)
         fprintf(LogFile, "CHILD ");
     fprintf(LogFile, "NODE [line %d]\n", yylineno);
     PrintNestLevel++;
-    switch (p->type)
+    // ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
+    // ReSharper disable once CppIncompleteSwitchStatement
+    switch (p->type)  // NOLINT(clang-diagnostic-switch)
     {
+        case type_unknown:
+            PrintIndent();
+            fprintf(LogFile, "type %s\n", "type_unknown");
+            PrintIndent();
+            break;
+
         case type_id:
         case type_macro_id:
             PrintIndent();
@@ -844,45 +905,30 @@ void PrintNode(parseNodePtr p)
 // 
 // free a node
 //
-void FreeNode(parseNodePtr p)
+void FreeParseNode(parseNodePtr p)
 {
+    if (p == NULL) return;
+
     if (p->prev)
         p->prev->next = p->next;
     if (p->next)
         p->next->prev = p->prev;
 
-    switch (p->type)
+    if (p->allocated)
     {
-        case type_macro_id:
-        case type_id:
-            free(p->id.name);
-            break;
-
-        case type_macro_ex:
-        case type_opr:
-        case type_op_code:
-        case type_con:
-        case type_data:
-            break;
-
-        case type_str:
-            free(CurrentNode->str.allocated);
-            free(CurrentNode->str.value);
-            break;
-
+        p->allocated = 0;
+        FREE(p);
     }
-    memset(p, 0, sizeof(parseNode));
-    free(p);
 }
 
 //
 // return a string that expands escape sequences
 //
-char* SantizeString(char* str, int* outlen)
-{	
-    int outputLen = 0;
+char* SantizeString(char* str)
+{
     const int len = (int)strlen(str) + 1;
-    char* outStr = (char*) malloc(len);
+
+    char* outStr = (char*)ALLOCATE(len);
     char* tmpStr = outStr;
     unsigned char escChar = 0;
     const char* module = "SantizeString";
@@ -947,7 +993,6 @@ char* SantizeString(char* str, int* outlen)
                         temp[0] = *str;
                         temp[1] = *(str + 1);
                         *tmpStr++ = (char)(int) strtol (temp, NULL, 16);
-                        outputLen ++;
                         str += 2;
                     }
                     continue;
@@ -955,7 +1000,7 @@ char* SantizeString(char* str, int* outlen)
                 case '\'':
                 case '\"':
                 case '\\':
-                    escChar = *str;		
+                    escChar = *str & 0xFF;		
                     break;
 
                 default:
@@ -964,16 +1009,13 @@ char* SantizeString(char* str, int* outlen)
                     break;                                      
             }
             *tmpStr++ = (char)escChar;
-            outputLen++;
             str++;
         }
-        else
+        else if (*str)
         {
             *tmpStr++ = *str++;		
-            outputLen++;
         }
     }
-    *tmpStr = 0;
-    *outlen = outputLen;
+
     return outStr;
 }

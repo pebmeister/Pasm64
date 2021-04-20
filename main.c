@@ -24,6 +24,7 @@
 #include "str.h"
 #include "error.h"
 #include "file.h"
+#include "mem.h"
 
 // If we have this many passes there is an infinite loop
 const int MaxPasses =  20;
@@ -79,7 +80,7 @@ void ResetLex(void)
 
     if (InternalBuffer == NULL)
     {
-        InternalBuffer = (char*)malloc(MAX_LINE_LEN);
+        InternalBuffer = (char*)ALLOCATE(MAX_LINE_LEN);
         if (InternalBuffer == NULL)
         {
             FatalError(module, error_outof_memory);
@@ -88,13 +89,14 @@ void ResetLex(void)
     }
 
     // reset the the head node
-    CurrentNode = HeadNode = (parseNode *) malloc(sizeof(parseNode));
+    CurrentNode = HeadNode = (parseNode *)ALLOCATE(sizeof(parseNode));
     if (CurrentNode == NULL)
     {
         FatalError(module, error_outof_memory);
         return;
     }
     memset(HeadNode, 0, sizeof(parseNode));
+    HeadNode->type = type_head_node;    
 }
 
 //
@@ -130,7 +132,7 @@ int main(const int argc, char* argv[])
 
     const char* module = "main";
     
-    char** inputFiles = (char**) malloc(sizeof(char*) * argc);
+    char** inputFiles = (char**)ALLOCATE(sizeof(char*) * argc);
 
     if (inputFiles == NULL)
     {
@@ -401,14 +403,14 @@ int main(const int argc, char* argv[])
         }
 
         // free the parse tree
-        FreeTree();
+        FreeParseTree();
 
         // see if there are any more unresolved symbols
         const int unresolvedCount = UnResolvedSymbols();
 
         if (CurrentSection)
         {
-            free(CurrentSection);
+            FREE(CurrentSection);
             CurrentSection = NULL;
         }
 
@@ -430,6 +432,7 @@ int main(const int argc, char* argv[])
         {
             DumpSymbols(LogFile);
         }
+
     } while (Pass < MaxPasses && ErrorCount == 0 && cleanPassCount < 1);   
 
     if (Pass >= MaxPasses)
@@ -473,21 +476,23 @@ int main(const int argc, char* argv[])
             CurFileName = inputFiles[inFileIndex];
             yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
-            {                
+            {
                 FatalError(module, error_opening_input_file);
                 return -1;
             }
             if (LogFileSpecified)
             {
-                fprintf(LogFile, "Current File %s\n", CurFileName);           
+                fprintf(LogFile, "Current File %s\n", CurFileName);
             }
-            
+
             // make sure file gets included for a listing
             GenerateListNode(NULL);
 
-            fseek(yyin, 0, SEEK_SET);               
+            fseek(yyin, 0, SEEK_SET);
             yyrestart(yyin);
+
             yyparse();
+
             fclose(yyin);
             GenerateListNode(NULL);
         }
@@ -495,7 +500,7 @@ int main(const int argc, char* argv[])
         if (CurrentSection)
         {
             Warning(module, error_missing_end_section);
-            free(CurrentSection);
+            FREE(CurrentSection);
             CurrentSection = NULL;
         }
 
@@ -512,8 +517,10 @@ int main(const int argc, char* argv[])
                 FatalError(module, error_opening_symbol_file);
                 return -1;
             }
+
             // display the symbols
             DumpSymbols(SymFile);
+
             fclose(SymFile);
         }
 
@@ -542,34 +549,34 @@ int main(const int argc, char* argv[])
         }
         else if (OutputFile)
         {
-           fprintf(stdout, "Total bytes written: %d\n", TotalBytesWritten);
+            fprintf(stdout, "Total bytes written: %d\n", TotalBytesWritten);
         }
+
+        // free the parse tree
+        FreeParseTree();
+
+        // close log file
+        if (LogFileSpecified)
+            fclose(LogFile);
+
+        // free input file array
+        if (inputFiles)
+            FREE(inputFiles);
+
+        // free internal buffer
+        if (InternalBuffer)
+            FREE(InternalBuffer);
+
+        // delete symbol table
+        DeleteSymbolTable();
+
+        // free list table
+        FreeListTable();
+
+        // free lex buffers
+        yylex_destroy();
     }
 
-    // free lex buffers
-    yylex_destroy();
-
-    // free the parse tree
-    FreeTree();
-
-    // close log file
-    if (LogFileSpecified)
-        fclose(LogFile);
-
-    // free input file array
-    if (inputFiles)
-        free(inputFiles);
-  
-    // free internal buffer
-    if (InternalBuffer)
-        free(InternalBuffer);
-
-    // delete symbol table
-    DeleteSymbolTable();
-    
-    // free list table
-    FreeListTable();
-    
     return 0;
 }
 

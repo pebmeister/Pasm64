@@ -8,6 +8,7 @@
 // Last Modified On : 11-29-2015
 // ***********************************************************************
 #pragma once
+#include <stdio.h>
 
 #define MAX_LINE_LEN  102400
 
@@ -17,7 +18,7 @@ enum OutputFileType
     c64
 };
 
-typedef enum { type_con = 1, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
+typedef enum { type_unknown = 0, type_head_node = 1, type_con, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
 
 typedef struct symbol_table
 {
@@ -105,7 +106,7 @@ typedef struct parseNode
         DataParseNode data;      /* numeric data node */
 		StrParseNode str;		 /* string node */
     };
-
+    int allocated;
     int nops;                    /* number of operands */
     struct parseNode **op;       /* operands */
     struct parseNode* next;      /* next node in tree */

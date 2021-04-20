@@ -16,9 +16,12 @@ extern parseNodePtr Str(char* value);
 extern parseNodePtr MacroEx(char* name, parseNodePtr macroParams);
 extern parseNodePtr Data(int dataSize, parseNodePtr data);
 extern void PrintNode(parseNodePtr p);
-extern char* SantizeString(char* str, int* outlen);
-extern void FreeNode(parseNodePtr p);
-extern void FreeTree(void);
+extern char* SantizeString(char* str);
+extern void FreeParseNode(parseNodePtr p);
+extern void FreeParseTree(void);
 
 extern parseNodePtr HeadNode;
 extern parseNodePtr CurrentNode;
+
+extern int IsValidParseNode(parseNodePtr p);
+extern int IsValidParseTree(void);

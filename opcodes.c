@@ -141,13 +141,13 @@ struct InstructionLookUp InstrLookUp[_maxOpcode] =
     {_las, "las"}
 };
 
-struct ModeLookUp 
+struct mode_look_up 
 {
     int mode;
     char* name;
 };
 
-struct ModeLookUp MdLookUp[maxAddressingMode] =
+struct mode_look_up MdLookUp[maxAddressingMode] =
 {
     { i, "implied" },
     { I, "immediate" },
