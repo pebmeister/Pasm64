@@ -44,7 +44,7 @@
 %token WHILE ENDDO REPEAT UNTIL IF PRINT PRINTALL EQU ORG PCASSIGN 
 %token END DO MACRO ENDMACRO ENDIF WEND STATEMENT EXPRLIST STR
 %token FOR NEXT TO DOWNTO STEP NOT
-%token BYTE WORD LOBYTE HIBYTE DS INC LOAD
+%token EOL BYTE WORD LOBYTE HIBYTE DS INC LOAD
 %token REGX REGY VAR MSYM PSYM
 %token SECTION ENDSECTION
 
@@ -70,22 +70,22 @@ program
     ;
         
 stmt    
-    : opcode '\n'                       { $$ = $1;                                      }
-    | symbol_value '\n'                 { $$ = $1;                                      }
-    | symbol_value opcode '\n'          { Ex($1); $$ = $2;                              }
-    | symbol_assign '\n'                { $$ = $1;                                      }
-    | pc_assign '\n'                    { $$ = $1;                                      }
-    | ifexpr '\n'                       { $$ = $1;                                      }
-    | loopexpr '\n'                     { $$ = $1;                                      }
-    | regloopexpr '\n'                  { $$ = $1;                                      }
-    | macrodef '\n'                     { $$ = $1;                                      }
-    | macrocall '\n'                    { $$ = $1;                                      }
-    | section '\n'                      { $$ = $1;                                      }
-    | endsection '\n'                   { $$ = $1;                                      }
-    | var_def '\n'                      { $$ = $1;                                      }
-    | include_file '\n'                 { $$ = $1;                                      }
-    | load_file '\n'                    { $$ = $1;                                      }
-    | '\n'                              { $$ = Opr(STATEMENT, 0);                       }
+    : opcode EOL                        { $$ = $1;                                      }
+    | symbol_value EOL                  { $$ = $1;                                      }
+    | symbol_value opcode EOL           { Ex($1); $$ = $2;                              }
+    | symbol_assign EOL                 { $$ = $1;                                      }
+    | pc_assign EOL                     { $$ = $1;                                      }
+    | ifexpr EOL                        { $$ = $1;                                      }
+    | loopexpr EOL                      { $$ = $1;                                      }
+    | regloopexpr EOL                   { $$ = $1;                                      }
+    | macrodef EOL                      { $$ = $1;                                      }
+    | macrocall EOL                     { $$ = $1;                                      }
+    | section EOL                       { $$ = $1;                                      }
+    | endsection EOL                    { $$ = $1;                                      }
+    | var_def EOL                       { $$ = $1;                                      }
+    | include_file EOL                  { $$ = $1;                                      }
+    | load_file EOL                     { $$ = $1;                                      }
+    | EOL                               { $$ = Opr(STATEMENT, 0);                       }
     ;
 
 stmt_list
@@ -115,18 +115,18 @@ ifexpr
     ;
 
 loopexpr
-    : REPEAT '\n' stmt_list UNTIL subexpr                                       { $$ = Opr(REPEAT, 2, $3, $5);                  }
+    : REPEAT EOL  stmt_list UNTIL subexpr                                       { $$ = Opr(REPEAT, 2, $3, $5);                  }
     | DO stmt_list ENDDO subexpr                                                { $$ = Opr(DO, 2, $2, $4);                      }
-    | WHILE subexpr '\n' stmt_list WEND                                         { $$ = Opr(WHILE, 2, $2, $4);                   }   
-    | FOR symbol_assign TO subexpr '\n' stmt_list NEXT SYMBOL                   { $$ = Opr(FOR, 4, $2, $4, $6, Id($8));         }
-    | FOR symbol_assign TO subexpr STEP subexpr '\n' stmt_list NEXT SYMBOL      { $$ = Opr(FOR, 5, $2, $4, $8, Id($10), $6);    }
+    | WHILE subexpr EOL  stmt_list WEND                                         { $$ = Opr(WHILE, 2, $2, $4);                   }   
+    | FOR symbol_assign TO subexpr EOL  stmt_list NEXT SYMBOL                   { $$ = Opr(FOR, 4, $2, $4, $6, Id($8));         }
+    | FOR symbol_assign TO subexpr STEP subexpr EOL  stmt_list NEXT SYMBOL      { $$ = Opr(FOR, 5, $2, $4, $8, Id($10), $6);    }
     ;
 
 regloopexpr
-    : FOR REGX '=' subexpr TO subexpr '\n' stmt_list NEXT 'X'                   { $$ = Opr(REGX, 4, $4, $6, $8, Con(1, 0));     }
-    | FOR REGX '=' subexpr DOWNTO subexpr '\n' stmt_list NEXT 'X'               { $$ = Opr(REGX, 4, $4, $6, $8, Con(-1,0));     }
-    | FOR REGY '=' subexpr TO subexpr '\n' stmt_list NEXT 'Y'                   { $$ = Opr(REGY, 4, $4, $6, $8, Con(1,0));      }
-    | FOR REGY '=' subexpr DOWNTO subexpr '\n' stmt_list NEXT 'Y'               { $$ = Opr(REGY, 4, $4, $6, $8, Con(-1,0));     }
+    : FOR REGX '=' subexpr TO subexpr EOL  stmt_list NEXT 'X'                   { $$ = Opr(REGX, 4, $4, $6, $8, Con(1, 0));     }
+    | FOR REGX '=' subexpr DOWNTO subexpr EOL  stmt_list NEXT 'X'               { $$ = Opr(REGX, 4, $4, $6, $8, Con(-1,0));     }
+    | FOR REGY '=' subexpr TO subexpr EOL  stmt_list NEXT 'Y'                   { $$ = Opr(REGY, 4, $4, $6, $8, Con(1,0));      }
+    | FOR REGY '=' subexpr DOWNTO subexpr EOL  stmt_list NEXT 'Y'               { $$ = Opr(REGY, 4, $4, $6, $8, Con(-1,0));     }
     ;
 
 expr_list

@@ -1744,11 +1744,7 @@ int Ex(parseNodePtr p)
 
     const char* method = "Ex";
 
-    if (!IsTreeValid())
-    {
-        LogFile = stdout;
-        PrintNode(p);
-    }
+    VALIDATE_TREE
 
     ExLevel++;
 
@@ -1764,7 +1760,7 @@ int Ex(parseNodePtr p)
         const int result = entry->function(p);
         ExLevel--;
 
-        IsTreeValid();
+        VALIDATE_TREE
 
         return result;
     }

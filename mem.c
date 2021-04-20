@@ -2,13 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #include "mem.h"
-
 
 #include "error.h"
 
-#define PROTECTIONBUFFERSZ 4
+#define PROTECTION_BUFFER_SIZE 4
 
 typedef struct memory_node
 {
@@ -25,19 +23,11 @@ MemoryNode* FreeAllocationTable = NULL;
 int IsValidNode(MemoryNode* node)
 {
     const char* module = "IsValidNode";
-    int n = 0;
- /*   for (unsigned char* p = node->mem; n < PROTECTIONBUFFERSZ; ++n, ++p)
-        if (*p != 0x45)
-        {
-            FatalError(module, error_memory_corruption_detected);
-            return 0;
-        }*/
-
     unsigned char* p = (unsigned char*)node->ptr + node->size;
-    for (n = 0; n < PROTECTIONBUFFERSZ; ++n)
+    for (int n = 0; n < PROTECTION_BUFFER_SIZE; ++n)
         if (*(p + n) != 0x45)
         {
-           //  FatalError(module, error_memory_corruption_detected);
+            FatalError(module, error_memory_corruption_detected);
             return 0;
         }
 
@@ -68,14 +58,18 @@ void* AllocateMemory(const size_t size)
     memset(node, 0, sizeof(MemoryNode));
 
     node->size = size;
-    node->allocated_size = size + PROTECTIONBUFFERSZ * 2;
+    node->allocated_size = size + PROTECTION_BUFFER_SIZE * 2;
     node->mem = malloc(node->allocated_size);
     if (node->mem == NULL)
     {
         FatalError(function, error_outof_memory);
         return NULL;
     }
-    memset(node->mem, 0x45, node->allocated_size);
+
+    unsigned char* p = (unsigned char*)node->mem + node->size;
+    for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
+        *(p + n) = 0x45;
+
     node->ptr = node->mem;
     if (AllocationTable == NULL)
     {
@@ -132,7 +126,7 @@ void FreeMemory(void* ptr)
     FatalError(function, error_free_unknown_pointer);
 }
 
-void* ReallocateMemory(void* ptr, size_t size)
+void* ReallocateMemory(void* ptr, const size_t size)
 {
     const char* function = "ReallocateMemory";
 
@@ -141,7 +135,7 @@ void* ReallocateMemory(void* ptr, size_t size)
         if (node->ptr == ptr)
         {
             node->size = size;
-            node->allocated_size = size + PROTECTIONBUFFERSZ * 2;
+            node->allocated_size = size + PROTECTION_BUFFER_SIZE * 2;
             node->mem = realloc(node->mem, node->allocated_size);
             if (!node->mem)
             {
@@ -149,7 +143,7 @@ void* ReallocateMemory(void* ptr, size_t size)
                 return NULL;
             }
             node->ptr = (unsigned char*)node->mem;
-            for (int n = 0; n < PROTECTIONBUFFERSZ; ++n)
+            for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
                 *(((unsigned char*)node->ptr) + size + n) = 0x45;
 
             return node->ptr;
@@ -162,12 +156,12 @@ void* ReallocateMemory(void* ptr, size_t size)
 void PrintMemoryAllocation(void)
 {
     unsigned long long total = 0;
-    unsigned long long numnodes = 0;
+    unsigned long long numNodes = 0;
     for (MemoryNode* p = AllocationTable; p; p = p->next)
     {
         total += p->size;
-        ++numnodes;
+        ++numNodes;
         // printf("%-20s %-5d %u\n", p->file, p->line, p->size);
     }
-    printf("    Total %llu nodes    %llu K\n\n", numnodes, total / 1024);
+    printf("    Total %llu nodes    %llu K\n\n", numNodes, total / 1024);
 }

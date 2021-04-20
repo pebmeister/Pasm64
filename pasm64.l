@@ -59,7 +59,6 @@ BITOR                       [|]
 LOGAND                      [&][&]
 BITAND                      [&]
 STRVALUE					(\"([^"\\\n]|{ES})*\")+	
-
 %%
 
 "ORA"                       OP(ora)
@@ -159,6 +158,8 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 "BBS"[0-7]                  OP_65C02_REL(bbs)
 "RMB"[0-7]                  OP_65C02_REL(rmb)
 "SMB"[0-7]                  OP_65C02_REL(smb)
+
+[\xD\xA]|[\xA]|[\xD]        return EOL;
 
 ".BYTE"                     return BYTE;
 ".DB"                       return BYTE;
