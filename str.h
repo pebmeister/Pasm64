@@ -12,3 +12,4 @@
 extern char* StrDup(const char* string);
 extern int StrICmp(const char* str1, const char*str2);
 extern char* StrLower(const char* string);
+extern char* SantizeString(char* str);

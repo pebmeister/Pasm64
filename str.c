@@ -31,6 +31,8 @@ char* StrDup(const char* string)
         FatalError(module, error_outof_memory);
         return NULL;
     }
+
+
     return strcpy(buffer, string);
 }
 
@@ -65,8 +67,8 @@ char* StrLower(const char* string)
 {
     const char* module = "StrLower";
 
-    const int len = (int)strlen(string) + 1;
-    char* buffer = (char*)ALLOCATE(len);
+    const int len = (int)strlen(string);
+    char* buffer = StrDup(string);
     
     if (buffer == NULL)
     {
@@ -77,4 +79,103 @@ char* StrLower(const char* string)
         buffer[i] = (char) tolower(string[i] & 0xFF);
 
     return buffer;
+}
+
+//
+// return a string that expands escape sequences
+//
+char* SantizeString(char* str)
+{
+    const int len = (int)strlen(str) + 1;
+
+    char* outStr = (char*)ALLOCATE(len);
+    char* tmpStr = outStr;
+    unsigned char escChar = 0;
+    const char* module = "SantizeString";
+
+    if (outStr == NULL)
+    {
+        FatalError(module, error_outof_memory);
+        return NULL;
+    }
+    memset(outStr, 0, len);
+
+    if (str == NULL)
+    {
+        Error(module, error_source_string_null);
+        return NULL;
+    }
+
+    while (*str)
+    {
+        if (*str == '\\')
+        {
+            switch (tolower(*(++str)))
+            {
+            case 'a':
+                escChar = '\a';
+                break;
+
+            case 'b':
+                escChar = '\b';
+                break;
+
+            case 'f':
+                escChar = '\f';
+                break;
+
+            case 'v':
+                escChar = '\v';
+                break;
+
+            case 'r':
+                escChar = '\r';
+                break;
+
+            case 'n':
+                escChar = '\n';
+                break;
+
+            case 't':
+                escChar = '\t';
+                break;
+
+            case 'x':
+                str++;
+                if (*str == 0)
+                {
+                    Error(module, error_unrecognized_escape_sequence);
+                    break;
+                }
+                while (isxdigit((unsigned char)*str) && isxdigit((unsigned char)*(str + 1)))
+                {
+                    char temp[3] = { 0 };
+                    temp[0] = *str;
+                    temp[1] = *(str + 1);
+                    *tmpStr++ = (char)(int)strtol(temp, NULL, 16);
+                    str += 2;
+                }
+                continue;
+
+            case '\'':
+            case '\"':
+            case '\\':
+                escChar = *str & 0xFF;
+                break;
+
+            default:
+                escChar = '?';
+                Error(module, error_unrecognized_escape_sequence);
+                break;
+            }
+            *tmpStr++ = (char)escChar;
+            str++;
+        }
+        else if (*str)
+        {
+            *tmpStr++ = *str++;
+        }
+    }
+
+    return outStr;
 }

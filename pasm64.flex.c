@@ -1022,13 +1022,9 @@ int inMacroDef = 0;
                                 return INTEGER; \
                             }
 #define INT_1BYTE           { \
-                                IsTreeValid(); \
-                                char* dup = StrDup(yytext); \
-                                char* tmpStr = SantizeString(dup); \
+                                char* tmpStr = SantizeString(yytext); \
                                 yylval.iValue = (unsigned char)tmpStr[1] & 0xFF; \
                                 FREE(tmpStr); \
-                                FREE(dup); \
-                                IsTreeValid(); \
                                 return INTEGER; \
                             }
 

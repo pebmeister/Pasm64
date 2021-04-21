@@ -488,6 +488,7 @@ ListTablePtr AddList(char* file, const int line, char* output)
 //
 void GenerateListFile(FILE* lstFile)
 {
+
     // ReSharper disable once CppDeclaratorNeverUsed
     const char* module = "GenerateListFile";
 
@@ -548,16 +549,50 @@ void FreeListTable(void)
 
     for (; tmpPtr != NULL;)
     {
+        // ReSharper disable once CppLocalVariableMayBeConst
+        ListTablePtr nextNode = tmpPtr->next;
+
         if (tmpPtr->filename)
             FREE(tmpPtr->filename);
 
         if (tmpPtr->output)
             FREE(tmpPtr->output);
 
-        // ReSharper disable once CppLocalVariableMayBeConst
-        ListTablePtr nextNode = tmpPtr->next;
         FREE(tmpPtr);
 
         tmpPtr = nextNode;
+    }
+}
+
+void ResetFileLines(void)
+{
+    for (FileEntry* fileEntry = SourceFileList; fileEntry != NULL; fileEntry = fileEntry->next)
+    {
+        for (FileLine* fileLines = fileEntry->lines; fileLines != NULL; fileLines = fileLines->next)
+        {
+            fileLines->displayed = 0;
+        }
+    }
+}
+
+void FreeFileTable(void)
+{
+    FileEntry* fileEntry = SourceFileList;
+    for (; fileEntry != NULL;)
+    {
+        FileEntry* tmpPtr = fileEntry->next;
+
+        FileLine* fileLines = fileEntry->lines;
+        for (;fileLines != NULL;)
+        {
+            FileLine* tmpFileLines = fileLines->next;
+            FREE(fileLines->line);
+            FREE(fileLines);
+            fileLines = tmpFileLines;
+        }
+
+        FREE(fileEntry);
+
+        fileEntry = tmpPtr;
     }
 }

@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h> 
-#include <ctype.h>
 
 #include "opcodes.h"
 #include "pasm64.h"
@@ -22,7 +21,6 @@
 #include "str.h"
 #include "error.h"
 #include "mem.h"
-
 
 /// <summary>
 /// The head node
@@ -43,24 +41,37 @@ int PrintNestLevel = 0;
 /// Allocates the node.
 /// </summary>
 /// <returns>parseNode *.</returns>
-parseNodePtr AllocateNode(void)
+parseNodePtr AllocateNode(int nops)
 { 
     const char* module = "AllocateNode";
 
     parseNodePtr p;
-    const size_t size = sizeof(parseNode);
+    size_t size = sizeof(parseNode);
     if ((p = (parseNode *)ALLOCATE(size)) == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
-
     memset(p, 0, size);
     p->allocated = 1;
-    p->prev = CurrentNode;
-    CurrentNode->next = p;
+    if (CurrentNode != NULL)
+    {
+        p->prev = CurrentNode;
+        CurrentNode->next = p;
+    }
     CurrentNode = p;
+    p->nops = nops;
 
+    if (nops > 0)
+    {
+        size = nops * sizeof(parseNodePtr);
+        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
+        {
+            FatalError(module, error_outof_memory);
+            return NULL;
+        }
+        memset(p->op, 0, size);
+    }
     return p;
 }
 
@@ -74,7 +85,7 @@ parseNodePtr Con(const int value, const int isPc)
 {
     const char* module = "con";
 
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(0);
     if (p == NULL)
     {
         FatalError(module, error_outof_memory);
@@ -98,8 +109,10 @@ parseNodePtr Str(char* value)
 {
     const char* module = "str";
 
-    parseNodePtr p = AllocateNode();
-	char* str = StrDup(value);	
+    parseNodePtr p = AllocateNode(0);
+
+    // char* str = StrDup(value);
+    char* str = StrDup(value);
 
     if (str == NULL || p == NULL)
     {
@@ -139,7 +152,7 @@ parseNodePtr Id(char* name)
 
     /* allocate node */
     // ReSharper disable once CppLocalVariableMayBeConst
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
@@ -155,7 +168,6 @@ parseNodePtr Id(char* name)
         FatalError(module, error_outof_memory);
         return NULL;
     }
-
     return p;
 }
 
@@ -169,7 +181,7 @@ parseNodePtr MacroId(char* name)
     const char* module = "MacroId";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
@@ -185,7 +197,7 @@ parseNodePtr MacroId(char* name)
         FatalError(module, error_outof_memory);
         return NULL;
     }
-    
+    // FREE(name);
     return p;
 }
 
@@ -201,7 +213,7 @@ parseNodePtr MacroEx(char* name, parseNodePtr macroParams)
 
     parseNodePtr macro = MacroId(name);
     /* allocate node */
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(0);
 
     if (p == NULL || macro == NULL)
     {
@@ -228,7 +240,7 @@ parseNodePtr Data(const int dataSize, parseNodePtr data)
     const char* module = "data";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
@@ -257,7 +269,7 @@ parseNodePtr Opr(int op, int nops, ...)
     const char* module = "opr";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(nops);
     if (p == NULL)
     {
         FatalError(module, error_outof_memory);
@@ -267,16 +279,9 @@ parseNodePtr Opr(int op, int nops, ...)
     /* copy information */
     p->type = type_opr;
     p->opr.oper = op;
-    p->nops = nops;
 
-    const size_t size = nops * sizeof(parseNodePtr);
-    if (size > 0)
+    if (nops > 0)
     {
-        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
-        {
-            FatalError(module, error_outof_memory);
-            return NULL;
-        }
         va_start(ap, nops);
         for (int i = 0; i < nops; i++)
             p->op[i] = va_arg(ap, parseNodePtr);
@@ -300,7 +305,7 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     int index;
     const char* module = "opcode";
 
-    parseNodePtr p = AllocateNode();
+    parseNodePtr p = AllocateNode(nops);
 
     if (p == NULL)
     {
@@ -309,17 +314,6 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     }
 
     p->type = type_op_code;
-
-    if (nops > 0)
-    {
-        const size_t size = nops * sizeof(parseNodePtr);
-
-        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
-        {
-            FatalError(module, error_outof_memory);
-            return NULL;
-        }
-    }
 
     switch (opr) 
     {   
@@ -342,7 +336,7 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     /* copy information */  
     p->opcode.mode = mode;
     p->opcode.instruction = opr;
-    p->nops = nops;
+
     if (nops > 0)
     {
         va_start(ap, nops);
@@ -426,14 +420,13 @@ void FreeParseTree(void)
 {
     VALIDATE_TREE
 
-    parseNodePtr p = HeadNode->next;
-    do
+    parseNodePtr p = HeadNode;
+    for (; p != NULL;)
     {
+        parseNodePtr next = p->next;
         FreeParseNode(p);
-        p = HeadNode->next;
-    } while (p);
-
-    FreeParseNode(HeadNode);
+        p = next;
+    }
     HeadNode = CurrentNode = NULL;
 
     VALIDATE_TREE
@@ -909,113 +902,17 @@ void FreeParseNode(parseNodePtr p)
 {
     if (p == NULL) return;
 
-    if (p->prev)
-        p->prev->next = p->next;
-    if (p->next)
-        p->next->prev = p->prev;
-
     if (p->allocated)
     {
-        p->allocated = 0;
+        if (p->nops > 0)
+            FREE(p->op);
+
+        if (p->type == type_str)
+        {
+            FREE(p->str.value);
+        }
+        p->allocated = 0;        
         FREE(p);
     }
 }
 
-//
-// return a string that expands escape sequences
-//
-char* SantizeString(char* str)
-{
-    const int len = (int)strlen(str) + 1;
-
-    char* outStr = (char*)ALLOCATE(len);
-    char* tmpStr = outStr;
-    unsigned char escChar = 0;
-    const char* module = "SantizeString";
-
-    if (outStr == NULL)
-    {
-        FatalError(module, error_outof_memory);
-        return NULL;
-    }
-    memset(outStr, 0, len); 
-
-    if (str == NULL)
-    {
-        Error(module, error_source_string_null);
-        return NULL;
-    }
-
-    while (*str)
-    {
-        if (*str == '\\')
-        {
-            switch(tolower(*(++str)))
-            {
-                case 'a':
-                    escChar = '\a';
-                    break;
-
-                case 'b':
-                    escChar = '\b';
-                    break;
-
-                case 'f':
-                    escChar = '\f';
-                    break;
-
-                case 'v':
-                    escChar = '\v';
-                    break;
-
-                case 'r':
-                    escChar = '\r';
-                    break;
-
-                case 'n':
-                    escChar = '\n';
-                    break;
-
-                case 't':
-                    escChar = '\t';
-                    break;
-
-                case 'x':
-                    str++;
-                    if (*str == 0)
-                    {
-                        Error(module, error_unrecognized_escape_sequence);
-                        break;                                      
-                    }
-                    while (isxdigit((unsigned char)*str) && isxdigit((unsigned char)*(str+1)))
-                    {
-                        char temp[3] = { 0 };
-                        temp[0] = *str;
-                        temp[1] = *(str + 1);
-                        *tmpStr++ = (char)(int) strtol (temp, NULL, 16);
-                        str += 2;
-                    }
-                    continue;
-
-                case '\'':
-                case '\"':
-                case '\\':
-                    escChar = *str & 0xFF;		
-                    break;
-
-                default:
-                    escChar = '?';
-                    Error(module, error_unrecognized_escape_sequence);
-                    break;                                      
-            }
-            *tmpStr++ = (char)escChar;
-            str++;
-        }
-        else if (*str)
-        {
-            *tmpStr++ = *str++;		
-        }
-    }
-
-    return outStr;
-}

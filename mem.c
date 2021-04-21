@@ -6,6 +6,9 @@
 
 #include "error.h"
 
+#pragma warning(disable:4996)
+#pragma warning(disable:4477)
+
 #define PROTECTION_BUFFER_SIZE 4
 
 typedef struct memory_node
@@ -14,6 +17,8 @@ typedef struct memory_node
     size_t allocated_size;
     void* ptr;
     void* mem;
+    char* file;
+    int line;
     struct memory_node* next;
 } MemoryNode;
 
@@ -44,7 +49,7 @@ int IsTreeValid(void)
     return 1;
 }
 
-void* AllocateMemory(const size_t size)
+void* AllocateMemory(const size_t size, char* file, int line)
 {
     const char* function = "AllocateMemory";
 
@@ -65,6 +70,10 @@ void* AllocateMemory(const size_t size)
         FatalError(function, error_outof_memory);
         return NULL;
     }
+
+    // ReSharper disable once CppDeprecatedEntity
+    node->file = strdup(file);  // NOLINT(clang-diagnostic-deprecated-declarations)
+    node->line = line;
 
     unsigned char* p = (unsigned char*)node->mem + node->size;
     for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
@@ -91,6 +100,7 @@ void FreeMemoryNode(MemoryNode* node)
 {
     memset(node->mem, 0, node->allocated_size);
     free(node->mem);
+    free(node->file);
     memset(node, 0, sizeof(MemoryNode));
     free(node);
 }
@@ -116,17 +126,13 @@ void FreeMemory(void* ptr)
         {
             p->next = next->next;
             FreeMemoryNode(next);
-
-            IsTreeValid();
-
             return;
         }
     }
-
-    FatalError(function, error_free_unknown_pointer);
+    printf("Error\n");
 }
 
-void* ReallocateMemory(void* ptr, const size_t size)
+void* ReallocateMemory(void* ptr, const size_t size, char* file, int line)
 {
     const char* function = "ReallocateMemory";
 
@@ -146,11 +152,25 @@ void* ReallocateMemory(void* ptr, const size_t size)
             for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
                 *(((unsigned char*)node->ptr) + size + n) = 0x45;
 
+            free(node->file);
+            // ReSharper disable once CppDeprecatedEntity
+            node->file = strdup(file);  // NOLINT(clang-diagnostic-deprecated-declarations)
+            node->line = line;
             return node->ptr;
         }
     }
     FatalError(function, error_free_unknown_pointer);
     return NULL;
+}
+
+void FreeAllocatedMemory(void)
+{
+    MemoryNode* p = AllocationTable;
+    while (p != NULL)
+    {
+        FreeMemory(p->ptr);
+        p = AllocationTable;
+    }
 }
 
 void PrintMemoryAllocation(void)
@@ -161,7 +181,7 @@ void PrintMemoryAllocation(void)
     {
         total += p->size;
         ++numNodes;
-        // printf("%-20s %-5d %u\n", p->file, p->line, p->size);
+        printf("%-20s %-5d %lu\n", p->file, p->line, p->size);
     }
     printf("    Total %llu nodes    %llu K\n\n", numNodes, total / 1024);
 }

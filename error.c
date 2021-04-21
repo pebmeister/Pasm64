@@ -66,11 +66,12 @@ const char* Errors[] =
     "Include file stack overflow.",
     "Unable to open include file.",
     "Memory corruption detected.",
-    "Attempt to free unallocated memory."
+    "Attempt to free unallocated memory.",
+    "Verbose specified more than once"
 };
 #define NUM_ERRORS (sizeof(Errors)/sizeof(char*))
 
-static char errorBuffer[1024] = { 0 };
+static char ErrorBuffer[MAX_LINE_LEN] = { 0 };
 
 /// <summary>
 /// MessageBase.
@@ -86,36 +87,36 @@ char* MessageBase(const char* module, int error)
         {
             case error_writing_list_file:
             case error_opening_list_file:
-                sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], ListFileName);
+                sprintf(ErrorBuffer, "%s: %s %s.", module, Errors[error], ListFileName);
                 break;
 
             case error_opening_output_file:
-                sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], OutputFileName);
+                sprintf(ErrorBuffer, "%s: %s %s.", module, Errors[error], OutputFileName);
                 break;
 
             case error_opening_symbol_file:
-                sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], SymFileName);
+                sprintf(ErrorBuffer, "%s: %s %s.", module, Errors[error], SymFileName);
                 break;
 
             case error_opening_log_file:
-                sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], LogFileName);
+                sprintf(ErrorBuffer, "%s: %s %s.", module, Errors[error], LogFileName);
                 break;
 
             case error_reading_source_file:
             case error_opening_input_file:
-                sprintf(errorBuffer, "%s: %s %s.", module, Errors[error], CurFileName);
+                sprintf(ErrorBuffer, "%s: %s %s.", module, Errors[error], CurFileName);
                 break;
 
             default:
-                sprintf(errorBuffer, "%s: %s", module, Errors[error]);
+                sprintf(ErrorBuffer, "%s: %s", module, Errors[error]);
                 break;
         }
     }
     else
     {
-        sprintf(errorBuffer, "%s: Error %d", module, error);
+        sprintf(ErrorBuffer, "%s: Error %d", module, error);
     }
-    return errorBuffer;
+    return ErrorBuffer;
 }
 //
 // Warning routine

@@ -641,7 +641,7 @@ int ExOprSection(parseNodePtr p)
     }
     else
     {
-        CurrentSection = StrDup(name);
+        CurrentSection = name;
         if (CurrentSection == NULL)
         {
             FatalError(method, error_outof_memory);

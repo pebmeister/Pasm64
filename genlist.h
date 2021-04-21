@@ -8,8 +8,6 @@
 //
 // copyright (c) 2015 Paul Baxter
 //
-// Last Modified By : Paul
-// Last Modified On : 11-29-2015
 // ***********************************************************************
 
 typedef struct list_table
@@ -37,8 +35,10 @@ typedef struct file_entry
 
 extern void GenerateListFile(FILE* lstFile);
 extern int GenerateListNode(parseNodePtr p);
-extern FileLine* GetFileLine(char* file, const int line);
+extern FileLine* GetFileLine(char* file, int line);
 extern void FreeListTable(void);
+extern void FreeFileTable(void);
 extern ListTablePtr AddList(char* file, int line, char* output);
-
 extern FileEntry* SourceFileList;
+extern void ResetFileLines(void);
+

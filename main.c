@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
 #include <limits.h>
 
 #include "pasm64.h"
@@ -34,6 +33,8 @@ int WarningCount = 0;
 int ErrorCount = 0;
 int Pass = 0;
 int FinalPass = 0;
+int Verbose = 0;
+
 // ReSharper disable once CppInconsistentNaming
 int CPUSpecifed = 0;
 int IllegalSpecifed = 0;
@@ -89,14 +90,13 @@ void ResetLex(void)
     }
 
     // reset the the head node
-    CurrentNode = HeadNode = (parseNode *)ALLOCATE(sizeof(parseNode));
+    CurrentNode = HeadNode = (parseNode*)AllocateNode(0);
     if (CurrentNode == NULL)
     {
         FatalError(module, error_outof_memory);
         return;
     }
-    memset(HeadNode, 0, sizeof(parseNode));
-    HeadNode->type = type_head_node;    
+    HeadNode->type = type_head_node;
 }
 
 //
@@ -105,14 +105,15 @@ void ResetLex(void)
 void Usage(void)
 {
     printf("Usage:\n");
-    printf("  pasm64 [-o outputfile] [-dir directory] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
+    printf("  pasm64 [-o outputfile] [-dir directory] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-v] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
     printf("         -o outputfile   specifies output file\n");
     printf("         -dir directory  specifies directories to search for source files and include files separated by ';'\n");
     printf("         -s symbolfile   specifies symbol file\n");
     printf("         -l listfile     specifies listing file\n");
     printf("         -log logfile    specifies log file\n");
     printf("         -i              allow illegal instructions\n");
-    printf("         -c64            write load address in first 2 bytes of output file\n");
+    printf("         -v              verbose mode.\n");
+    printf("         -c64            Commodore program format. Write load address in first 2 bytes of output file\n");
     printf("         -6502           use 6502 instruction set (default)\n");
     printf("         -65C02          use 65C02 instruction set\n");
     printf("         -nowarn         turn off warnings\n");
@@ -271,6 +272,20 @@ int main(const int argc, char* argv[])
             continue;
         }
 
+        if ((StrICmp(argv[argIndex], "-v") == 0) || (StrICmp(argv[argIndex], "/v") == 0))
+        {
+            if (Verbose)
+            {
+                Error(module, error_verbose_specified_more_than_once);
+                Usage();
+                return -1;
+            }
+
+            Verbose = 1;
+            argIndex++;
+            continue;
+        }
+
         // 65c02 opcodes enabled
         if ((StrICmp(argv[argIndex], "-65c02") == 0) || (StrICmp(argv[argIndex], "/65c02") == 0))
         {
@@ -405,6 +420,7 @@ int main(const int argc, char* argv[])
         // free the parse tree
         FreeParseTree();
 
+
         // see if there are any more unresolved symbols
         const int unresolvedCount = UnResolvedSymbols();
 
@@ -432,8 +448,7 @@ int main(const int argc, char* argv[])
         {
             DumpSymbols(LogFile);
         }
-
-    } while (Pass < MaxPasses && ErrorCount == 0 && cleanPassCount < 1);   
+    } while (Pass < MaxPasses && ErrorCount == 0 && cleanPassCount < 1);
 
     if (Pass >= MaxPasses)
     {
@@ -539,6 +554,12 @@ int main(const int argc, char* argv[])
             }
         }
 
+        if (Verbose)
+        {
+            ResetFileLines();
+            GenerateListFile(stdout);
+        }
+
         if (WarningCount > 0)
         {
             fprintf(stderr, "%d warning(s)\n", WarningCount);
@@ -552,12 +573,12 @@ int main(const int argc, char* argv[])
             fprintf(stdout, "Total bytes written: %d\n", TotalBytesWritten);
         }
 
-        // free the parse tree
-        FreeParseTree();
-
         // close log file
         if (LogFileSpecified)
             fclose(LogFile);
+
+        // free the parse tree
+        FreeParseTree();
 
         // free input file array
         if (inputFiles)
@@ -572,6 +593,12 @@ int main(const int argc, char* argv[])
 
         // free list table
         FreeListTable();
+
+        // Free the file table
+        FreeFileTable();
+
+        // Free Misc Allocated memory
+        FreeAllocatedMemory();
 
         // free lex buffers
         yylex_destroy();

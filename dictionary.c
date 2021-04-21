@@ -12,8 +12,6 @@
 
 #include "dictionary.h"
 
-#include <stdio.h>
-
 #include "str.h"
 #include "error.h"
 #include "mem.h"
@@ -79,7 +77,6 @@ void DictDestroy(DictionaryPtr d)
         for (ElementPtr element = d->table[index]; element != 0; element = next) 
         {
             next = element->next;
-
             FREE(element->key);
             FREE(element->value);
             FREE(element);
@@ -161,6 +158,7 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
         FatalError(module, error_outof_memory);
         return NULL;
     }
+    // IMPORTANT: This sets the next to NULL
     memset(e, 0, sizeof(Element));
 
     e->key = StrLower(key);

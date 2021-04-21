@@ -63,7 +63,8 @@ enum
     error_include_file_stack_overflow,
     error_cant_open_include_file,
     error_memory_corruption_detected,
-    error_free_unknown_pointer
+    error_free_unknown_pointer,
+    error_verbose_specified_more_than_once
 };
 
 extern void Error(const char* module, int error);

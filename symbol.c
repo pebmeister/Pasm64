@@ -246,8 +246,6 @@ SymbolTablePtr AddSymbol(char* name)
         }
     }
 
-    IsTreeValid();
-
     if (strstr(name, "."))
         CurrentSection = NULL;
    
@@ -260,8 +258,6 @@ SymbolTablePtr AddSymbol(char* name)
     if (name[len-1] == ':')
         name[len-1] = 0;
 
-    IsTreeValid();
-
     SymbolTablePtr tmpPtr = LookUpSymbol(name);
     if (tmpPtr != NULL)
     {
@@ -269,16 +265,12 @@ SymbolTablePtr AddSymbol(char* name)
         return tmpPtr;
     }
 
-    IsTreeValid();
-
     sym.name = StrDup(name);
     if (sym.name == NULL)
     {
         FatalError(module, error_outof_memory);
         return NULL;
     }
-
-    IsTreeValid();
 
     sym.ismacroparam = name[0] == '@';
     if (CurrentSection)
@@ -303,8 +295,6 @@ SymbolTablePtr AddSymbol(char* name)
     }
     else
     {
-        IsTreeValid();
-
         sym.fullname = StrDup(sym.name);
         if (sym.fullname == NULL)
         {
@@ -313,11 +303,9 @@ SymbolTablePtr AddSymbol(char* name)
         }
     }
     CurrentSection = tempSection;
-    IsTreeValid();
 
     tmpPtr = (SymbolTablePtr) DictInsert(&SymbolDictionary, sym.fullname, &sym);
     SanitizeSymbol(tmpPtr);
-    IsTreeValid();
 
     return tmpPtr;
 }
@@ -348,13 +336,15 @@ void SanitizeSymbol(SymbolTablePtr symbol)
     while (symbol->name[len] != '.')
         len--;
     symbol->name[len] = 0;
-    char* tempSection = symbol->name;
+    char* tempSection = StrDup(symbol->name);
     char* tempName = StrDup(&symbol->name[len + 1]);
     if (tempName == NULL)
     {
         FatalError(module, error_outof_memory);
         return;
     }
+    if (symbol->name)
+        FREE(symbol->name);
     symbol->name = tempName;
     if (symbol->section)
     {
@@ -381,7 +371,7 @@ void SanitizeSymbol(SymbolTablePtr symbol)
         strcpy(combinedSection, tempSection);
         symbol->section = combinedSection;
     }
-    FREE(tempSection);
+    // FREE(tempSection);
 }
 
 /// <summary>
@@ -729,4 +719,17 @@ void DeleteSymbolTable(void)
     }
     MacroStackSize = 0;
     MacroIndex = 0;
+
+    for (int n = 0; n < MinusSymTableIndex; ++n)
+    {
+        FREE(MinusSymTable[n].file);
+    }
+    FREE(MinusSymTable);
+
+    for (int n = 0; n < PlusSymTableIndex; ++n)
+    {
+        FREE(PlusSymTable[n].file);
+    }
+    FREE(PlusSymTable);
+
 }
