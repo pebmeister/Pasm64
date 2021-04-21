@@ -64,7 +64,6 @@ FileLine* GetFileLine(char* file, const int line)
 /// </summary>
 ListTablePtr ListHead = NULL;
 
-
 // 
 // Generate a list node entry
 // based on node
@@ -441,9 +440,12 @@ int GenerateListNode(parseNodePtr p)
 /// <param name="line">The line number to add.</param>
 /// <param name="output">The line number to add.</param>
 /// <returns>int.</returns>
-ListTablePtr AddList(char* file, const int line, char* output)
+ListTablePtr AddList(char* file, int line, char* output)
 {
     const char* module = "AddList";
+
+    // yylineno seems to be 1 off.
+    --line;
 
     // ReSharper disable once CppLocalVariableMayBeConst
     ListTablePtr varPtr = (ListTablePtr)ALLOCATE(sizeof(ListTable));
