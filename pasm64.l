@@ -224,8 +224,8 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 ".VAR"                      { return VAR;  }
 ".6502"[ /t]*"ON"           { CPUMode = cpu_6502; }
 ".65C02"[ /t]*"ON"          { CPUMode = cpu_65C02; }
-".ILLEGAL"[ /t]*"ON"        { AllowIllegalOpCpodes = TRUE; }
-".ILLEGAL"[ /t]*"OFF"       { AllowIllegalOpCpodes = FALSE; }
+".ILLEGAL"[ /t]*"ON"        { AllowIllegalOpCodes = TRUE; }
+".ILLEGAL"[ /t]*"OFF"       { AllowIllegalOpCodes = FALSE; }
 ".WARN"[ /t]*"ON"           { NoWarnings = FALSE; }
 ".WARN"[ /t]*"OFF"          { NoWarnings = TRUE; }
 ".C64"                      { OutFileFormat = c64; }

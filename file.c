@@ -8,7 +8,10 @@
 #include "str.h"
 #include "mem.h"
 
-char Path[4096] = { 0 };
+
+#define PATH_MAX  4096
+
+char Path[PATH_MAX] = { 0 };
 
 FILE* OpenFile(const char* file, char* mode)
 {

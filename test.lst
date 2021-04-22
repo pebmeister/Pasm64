@@ -89,8 +89,8 @@ Processing wintest.a
 
 Processing branchtest.a
 
-                                                      nop
-$1031: $EA               nop                      
+                                                  
+$1031: $EA               nop                          nop
                                                   
 $1032: $F0 $0C           beq $1040                    beq +
                                                   -    
@@ -151,33 +151,33 @@ Processing scripttest.a
                                                       .var i,ii,jj
                                                   
                                                       .for i = 10 .to 20 .STEP 2
-                                                          lda here + i  
-$106F: $AD $A1 $10       lda $10A1                    .next i
+$106F: $AD $A1 $10       lda $10A1                        lda here + i  
 $1072: $AD $A3 $10       lda $10A3                
 $1075: $AD $A5 $10       lda $10A5                
 $1078: $AD $A7 $10       lda $10A7                
 $107B: $AD $A9 $10       lda $10A9                
 $107E: $AD $AB $10       lda $10AB                
+                                                      .next i
                                                   
                                                       .repeat
                                                           jsr i + 1
-                                                          i = i - 2
-$1081: $20 $17 $00       jsr $0017                    .until i <= 10
+$1081: $20 $17 $00       jsr $0017                        i = i - 2
 $1084: $20 $15 $00       jsr $0015                
 $1087: $20 $13 $00       jsr $0013                
 $108A: $20 $11 $00       jsr $0011                
 $108D: $20 $0F $00       jsr $000F                
 $1090: $20 $0D $00       jsr $000D                
+                                                      .until i <= 10
                                                   
                                                       .do
                                                           ldx here + i
                                                           nop
-                                                          i = i + 2
-$1093: $AE $A1 $10       ldx $10A1                    .while i < 10
+$1093: $AE $A1 $10       ldx $10A1                        i = i + 2
 $1096: $EA               nop                      
+                                                      .while i < 10
                                                   
-                                                  here
-$1097: $EA               nop                          nop
+$1097: $EA               nop                      here
+                                                      nop
                                                   
                                                   
                                                       .for i = 1 .to 10
@@ -192,8 +192,7 @@ $1097: $EA               nop                          nop
                                                                   nop
                                                                   jj = jj + 2
                                                               .while jj < 10
-                                                          .until ii <= 10
-$1098: $20 $00 $00       jsr $0000                    .next i
+$1098: $20 $00 $00       jsr $0000                        .until ii <= 10
 $109B: $20 $00 $00       jsr $0000                
 $109E: $EA               nop                      
 $109F: $20 $02 $00       jsr $0002                
@@ -303,6 +302,7 @@ $1176: $20 $06 $00       jsr $0006
 $1179: $EA               nop                      
 $117A: $20 $08 $00       jsr $0008                
 $117D: $EA               nop                      
+                                                      .next i
                                                       
                                                       .if i > 0 
                                                           nop
@@ -311,15 +311,15 @@ $117D: $EA               nop
                                                               i = i -3
                                                           .wend
                                                       .else
-                                                          brk
-$117E: $EA               nop                          .endif
+$117E: $EA               nop                              brk
 $117F: $00               .db $00                  
 $1180: $00               .db $00                  
 $1181: $00               .db $00                  
 $1182: $00               .db $00                  
-$1183: $64               .db $64                      .byte 100
-                                                      
-$1184: $00               brk                          brk
+$1183: $64               .db $64                      .endif
+                                                      .byte 100
+$1184: $00               brk                          
+                                                      brk
                                                    
 
 Processing wintest.a

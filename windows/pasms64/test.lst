@@ -89,8 +89,8 @@ Processing wintest.a
 
 Processing branchtest.a
 
-                                                      nop
-$1031: $EA               nop                      
+                                                  
+$1031: $EA               nop                          nop
                                                   
 $1032: $F0 $0C           beq $1040                    beq +
                                                   -    

@@ -167,9 +167,9 @@ typedef enum
     maxAddressingMode
 } AddressingModes;
 
-extern int AllowIllegalOpCpodes;
+extern int AllowIllegalOpCodes;
 extern CPU CPUMode;
-extern int GetOpCode(int instruction, int addressingmode);
+extern int GetOpCode(int instruction, int addressingMode);
 extern char * InstructionToString(int instruction);
 extern char* ModeToString(int mode);
 

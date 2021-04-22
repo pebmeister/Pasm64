@@ -49,7 +49,7 @@ int IsTreeValid(void)
     return 1;
 }
 
-void* AllocateMemory(const size_t size, char* file, int line)
+void* AllocateMemory(const size_t size, char* file, const int line)
 {
     const char* function = "AllocateMemory";
 
@@ -107,8 +107,7 @@ void FreeMemoryNode(MemoryNode* node)
 
 void FreeMemory(void* ptr)
 {
-    const char* function = "FreeMemory";
-
+    
     if (!IsTreeValid()) return;
 
     if (ptr == AllocationTable->ptr)

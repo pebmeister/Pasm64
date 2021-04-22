@@ -490,7 +490,6 @@ ListTablePtr AddList(char* file, int line, char* output)
 //
 void GenerateListFile(FILE* lstFile)
 {
-
     // ReSharper disable once CppDeclaratorNeverUsed
     const char* module = "GenerateListFile";
 

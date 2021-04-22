@@ -2,10 +2,6 @@
 // Author           : Paul Baxter
 // Created          : 02-23-2015
 //
-// copyright (c) 2015 Paul Baxter
-//
-// Last Modified By : Paul
-// Last Modified On : 03-15-2015
 // ***********************************************************************
 
 #include <stdio.h>

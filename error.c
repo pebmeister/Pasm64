@@ -121,7 +121,7 @@ char* MessageBase(const char* module, int error)
 //
 // Warning routine
 //
-void Warning(const char* module, int error)
+void Warning(const char* module, const int error)
 {
     yywarn(MessageBase(module, error));
 }
@@ -129,7 +129,7 @@ void Warning(const char* module, int error)
 //
 // Error routine
 //
-void Error(const char* module, int error)
+void Error(const char* module, const int error)
 {
     yyerror(MessageBase(module, error));
 }
@@ -137,7 +137,7 @@ void Error(const char* module, int error)
 //
 // Error routine
 //
-void FatalError(const char* module, int error)
+void FatalError(const char* module, const int error)
 {  // NOLINT(clang-diagnostic-missing-noreturn)
     yyerror(MessageBase(module, error));
     exit(error);

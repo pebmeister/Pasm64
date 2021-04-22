@@ -2,15 +2,11 @@
 // Author           : Paul Baxter
 // Created          : 02-23-2015
 //
-// copyright (c) 2015 Paul Baxter
-//
-// Last Modified By : Paul
-// Last Modified On : 03-15-2015
 // ***********************************************************************
 #include "opcodes.h"
 
 CPU CPUMode = cpu_6502;
-int AllowIllegalOpCpodes = 0;
+int AllowIllegalOpCodes = 0;
 
 struct InstructionLookUp
 {
@@ -455,22 +451,22 @@ if not found return -1
 
 */
 
-int GetOpCode(int instruction, int addressingmode)
+int GetOpCode(const int instruction, const int addressingMode)
 {
 
     if ((instruction >= 0 && instruction < _maxOpcode) &&
-        (addressingmode >= 0 && addressingmode < (maxAddressingMode + 1)))
+        (addressingMode >= 0 && addressingMode < (maxAddressingMode + 1)))
     {
-        if (!AllowIllegalOpCpodes && instruction >= _illegalStart)
+        if (!AllowIllegalOpCodes && instruction >= _illegalStart)
             return -1;
 
-        switch (CPUMode)
+        switch (CPUMode)  // NOLINT(hicpp-multiway-paths-covered)
         {
             case cpu_6502:
-                return OPS_6502[instruction][addressingmode + 1];
+                return OPS_6502[instruction][addressingMode + 1];
  
             case cpu_65C02:
-                return OPS_65C02[instruction][addressingmode + 1];
+                return OPS_65C02[instruction][addressingMode + 1];
         }
     }
     return -1;

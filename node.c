@@ -418,8 +418,6 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
 /// </summary>
 void FreeParseTree(void)
 {
-    VALIDATE_TREE
-
     parseNodePtr p = HeadNode;
     for (; p != NULL;)
     {
@@ -428,8 +426,6 @@ void FreeParseTree(void)
         p = next;
     }
     HeadNode = CurrentNode = NULL;
-
-    VALIDATE_TREE
 }
 
 //
@@ -888,7 +884,6 @@ void PrintNode(parseNodePtr p)
             for (index = 0; index < p->nops; index++)
                 PrintNode(p->op[index]);
             break;
-
     }
     
     fprintf(LogFile, "\n");
@@ -915,4 +910,3 @@ void FreeParseNode(parseNodePtr p)
         FREE(p);
     }
 }
-

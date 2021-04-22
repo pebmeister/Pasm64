@@ -1952,11 +1952,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 155:
 YY_RULE_SETUP
-{ AllowIllegalOpCpodes = TRUE; }
+{ AllowIllegalOpCodes = TRUE; }
 	YY_BREAK
 case 156:
 YY_RULE_SETUP
-{ AllowIllegalOpCpodes = FALSE; }
+{ AllowIllegalOpCodes = FALSE; }
 	YY_BREAK
 case 157:
 YY_RULE_SETUP

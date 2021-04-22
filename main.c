@@ -2,10 +2,6 @@
 // Author           : Paul Baxter
 // Created          : 02-23-2015
 //
-// copyright (c) 2015 Paul Baxter
-//
-// Last Modified By : Paul
-// Last Modified On : 11-07-2015
 // ***********************************************************************
 #pragma warning(disable:4065)
 #pragma warning(disable:4996)
@@ -52,6 +48,8 @@ char* OutputFileName = NULL;
 char* InternalBuffer = NULL;
 char* ListFileName = NULL;
 char* Directories = NULL;
+char** InputFiles = NULL;
+int InputFileCount = 0;
 
 // ReSharper disable once CppInconsistentNaming
 // ReSharper disable once IdentifierTypo
@@ -120,25 +118,16 @@ void Usage(void)
     printf("         -?              print this help\n");
 }
 
-//
-// Main Entry point
-//
-int main(const int argc, char* argv[]) 
+void ParseArguments(const int argc, char* argv[])
 {
-    int cleanPassCount = 0;
+    const char* module = "ParseArguments";
+    InputFiles = (char**)ALLOCATE(sizeof(char*) * argc);
     int argIndex = 1;
-    int inputFileCount = 0;
-    int inFileIndex;
-    int lastUnresolvedCount = INT_MAX;
 
-    const char* module = "main";
-    
-    char** inputFiles = (char**)ALLOCATE(sizeof(char*) * argc);
-
-    if (inputFiles == NULL)
+    if (InputFiles == NULL)
     {
         FatalError(module, error_outof_memory);
-        return -1;
+        exit(-1);
     }
 
     CPUMode = cpu_6502;
@@ -148,26 +137,27 @@ int main(const int argc, char* argv[])
 
     while (argIndex < argc)
     {
-        if ((StrICmp(argv[argIndex], "-?") == 0) || (StrICmp(argv[argIndex], "/?") == 0))
+        if ((StrICmp(argv[argIndex], "-?") == 0) || (StrICmp(argv[argIndex], "/?") == 0)
+            || ((StrICmp(argv[argIndex], "-h") == 0) || (StrICmp(argv[argIndex], "/k") == 0)))
         {
             Usage();
-            continue;
+            exit(0);
         }
         // get output file
         if ((StrICmp(argv[argIndex], "-o") == 0) || (StrICmp(argv[argIndex], "/o") == 0))
         {
-            argIndex ++;
+            argIndex++;
             if (argIndex >= argc)
             {
                 Error(module, error_missing_output_file);
                 Usage();
-                return -1;
+                exit(-1);
             }
             if (OutputFileName != NULL)
             {
                 Error(module, error_output_file_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             OutputFileName = argv[argIndex];
             argIndex++;
@@ -177,18 +167,18 @@ int main(const int argc, char* argv[])
         // get symbol file
         if ((StrICmp(argv[argIndex], "-s") == 0) || (StrICmp(argv[argIndex], "/s") == 0))
         {
-            argIndex ++;
+            argIndex++;
             if (argIndex >= argc)
             {
                 Error(module, error_missing_symbol_file);
                 Usage();
-                return -1;
+                exit(-1);
             }
             if (SymFileName != NULL)
             {
                 Error(module, error_symbol_file_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             SymFileName = argv[argIndex];
             argIndex++;
@@ -202,13 +192,13 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_missing_parameter);
                 Usage();
-                return -1;
+                exit(-1);
             }
             if (Directories != NULL)
             {
                 Error(module, error_symbol_file_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             Directories = argv[argIndex];
             argIndex++;
@@ -218,18 +208,18 @@ int main(const int argc, char* argv[])
         // get log file
         if ((StrICmp(argv[argIndex], "-log") == 0) || (StrICmp(argv[argIndex], "/log") == 0))
         {
-            argIndex ++;
+            argIndex++;
             if (argIndex >= argc)
             {
                 Error(module, error_missing_log_file);
                 Usage();
-                return -1;
+                exit(-1);
             }
             if (LogFileName != NULL)
             {
                 Error(module, error_log_file_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             LogFileName = argv[argIndex];
             argIndex++;
@@ -240,18 +230,18 @@ int main(const int argc, char* argv[])
         // get list file
         if ((StrICmp(argv[argIndex], "-l") == 0) || (StrICmp(argv[argIndex], "/l") == 0))
         {
-            argIndex ++;
+            argIndex++;
             if (argIndex >= argc)
             {
                 Error(module, error_missing_list_file);
                 Usage();
-                return -1;
+                exit(-1);
             }
             if (ListFileName != NULL)
             {
                 Error(module, error_list_file_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             ListFileName = argv[argIndex];
             argIndex++;
@@ -265,7 +255,7 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_c64_output_format_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             OutFileFormat = c64;
             argIndex++;
@@ -278,7 +268,7 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_verbose_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
 
             Verbose = 1;
@@ -293,7 +283,7 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_instruction_set_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             CPUSpecifed = TRUE;
             CPUMode = cpu_65C02;
@@ -308,7 +298,7 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_instruction_set_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             CPUSpecifed = TRUE;
             CPUMode = cpu_6502;
@@ -323,10 +313,10 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_illegal_opcodes_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             IllegalSpecifed = TRUE;
-            AllowIllegalOpCpodes = TRUE;
+            AllowIllegalOpCodes = TRUE;
             argIndex++;
             continue;
         }
@@ -338,7 +328,7 @@ int main(const int argc, char* argv[])
             {
                 Error(module, error_illegal_opcodes_specified_more_than_once);
                 Usage();
-                return -1;
+                exit(-1);
             }
             NoWarnings = TRUE;
             argIndex++;
@@ -346,12 +336,26 @@ int main(const int argc, char* argv[])
         }
 
         // add to the input file list
-        inputFiles[inputFileCount++] = argv[argIndex];
-        argIndex ++;
+        InputFiles[InputFileCount++] = argv[argIndex];
+        argIndex++;
     }
+}
+
+//
+// Main Entry point
+//
+int main(const int argc, char* argv[]) 
+{
+    int cleanPassCount = 0;
+    int inFileIndex;
+    int lastUnresolvedCount = INT_MAX;
+
+    const char* module = "main";
+
+    ParseArguments(argc, argv);
 
     // make sure we have at least 1 input file
-    if (inputFileCount == 0)
+    if (InputFileCount == 0)
     {
         Error(module, error_no_input_file_specified);
         Usage();
@@ -374,8 +378,8 @@ int main(const int argc, char* argv[])
 
     do
     {
-        fprintf(stdout, "Pass %d\n", Pass);
-        Pass++;
+        if (Verbose)
+            fprintf(stdout, "Pass %d\n", Pass);
 
         if (LogFileSpecified)
         {
@@ -386,12 +390,12 @@ int main(const int argc, char* argv[])
         ResetLex();
 
         // loop through each input file
-        for (inFileIndex = 0; inFileIndex < inputFileCount; inFileIndex++)
+        for (inFileIndex = 0; inFileIndex < InputFileCount; inFileIndex++)
         {
             // initialize line number and set file name
             yylineno = 0;
 
-            CurFileName = inputFiles[inFileIndex];
+            CurFileName = InputFiles[inFileIndex];
             yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {
@@ -420,7 +424,6 @@ int main(const int argc, char* argv[])
         // free the parse tree
         FreeParseTree();
 
-
         // see if there are any more unresolved symbols
         const int unresolvedCount = UnResolvedSymbols();
 
@@ -448,6 +451,7 @@ int main(const int argc, char* argv[])
         {
             DumpSymbols(LogFile);
         }
+        Pass++;
     } while (Pass < MaxPasses && ErrorCount == 0 && cleanPassCount < 1);
 
     if (Pass >= MaxPasses)
@@ -461,7 +465,8 @@ int main(const int argc, char* argv[])
     }
     else
     {
-        printf("Final Pass\n");
+        if (Verbose)
+            printf("Final Pass\n");
 
         // Make a FinalPass
         ResetLex();
@@ -485,10 +490,10 @@ int main(const int argc, char* argv[])
         }
 
         // loop through the input files
-        for (inFileIndex = 0; inFileIndex < inputFileCount; inFileIndex++)
+        for (inFileIndex = 0; inFileIndex < InputFileCount; inFileIndex++)
         {
             yylineno = 0;
-            CurFileName = inputFiles[inFileIndex];
+            CurFileName = InputFiles[inFileIndex];
             yyin = OpenFile(CurFileName, "r");
             if (yyin == NULL)
             {
@@ -554,6 +559,7 @@ int main(const int argc, char* argv[])
             }
         }
 
+        // generate verbose output
         if (Verbose)
         {
             ResetFileLines();
@@ -581,8 +587,8 @@ int main(const int argc, char* argv[])
         FreeParseTree();
 
         // free input file array
-        if (inputFiles)
-            FREE(inputFiles);
+        if (InputFiles)
+            FREE(InputFiles);
 
         // free internal buffer
         if (InternalBuffer)
