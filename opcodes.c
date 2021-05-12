@@ -8,13 +8,13 @@
 CPU CPUMode = cpu_6502;
 int AllowIllegalOpCodes = 0;
 
-struct InstructionLookUp
+struct instruction_look_up
 {
     int instruction;
     char* name;
 } InstructionLookUp;
 
-struct InstructionLookUp InstrLookUp[_maxOpcode] =
+struct instruction_look_up InstrLookUp[_maxOpcode] =
 {
     {_ora, "ora"},
     {_and, "and"},
@@ -166,7 +166,7 @@ struct mode_look_up MdLookUp[maxAddressingMode] =
 // The table below was made using information from
 // http://www.oxyron.de/html/opcodes02.html
 //
-static int OPS_6502[_maxOpcode][maxAddressingMode + 1] =
+static int Ops6502[_maxOpcode][maxAddressingMode + 1] =
 {
     //         i     I    zp   zpi   zpx   zpy  zpix  zpiy     a   aix    ax    ay   ind     r    zr     A
     { _ora,   -1, 0x09, 0x05,   -1, 0x15,   -1, 0x01, 0x11, 0x0D,   -1, 0x1D, 0x19,   -1,   -1,   -1,   -1},
@@ -306,7 +306,7 @@ static int OPS_6502[_maxOpcode][maxAddressingMode + 1] =
 //
 // 65C02 cpu
 //
-static int OPS_65C02[_maxOpcode][maxAddressingMode + 1] =
+static int Ops65C02[_maxOpcode][maxAddressingMode + 1] =
 {
     // Logical and arithmetic commands
     //         i     I    zp   zpi   zpx   zpy  zpix  zpiy     a   aix    ax    ay   ind     r    zr     A
@@ -463,10 +463,10 @@ int GetOpCode(const int instruction, const int addressingMode)
         switch (CPUMode)  // NOLINT(hicpp-multiway-paths-covered)
         {
             case cpu_6502:
-                return OPS_6502[instruction][addressingMode + 1];
+                return Ops6502[instruction][addressingMode + 1];
  
             case cpu_65C02:
-                return OPS_65C02[instruction][addressingMode + 1];
+                return Ops65C02[instruction][addressingMode + 1];
         }
     }
     return -1;
@@ -477,7 +477,7 @@ int GetOpCode(const int instruction, const int addressingMode)
 /// </summary>
 /// <param name="instruction">The instruction.</param>
 /// <returns>char *.</returns>
-char * InstructionToString(int instruction)
+char * InstructionToString(const int instruction)
 {
     if (instruction < _maxOpcode)
         return InstrLookUp[instruction].name;
@@ -489,7 +489,7 @@ char * InstructionToString(int instruction)
 /// </summary>
 /// <param name="mode">The mode.</param>
 /// <returns>char *.</returns>
-char * ModeToString(int mode)
+char * ModeToString(const int mode)
 {
     if (mode < maxAddressingMode)
         return MdLookUp[mode].name;

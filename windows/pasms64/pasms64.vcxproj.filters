@@ -77,9 +77,6 @@
     <ClInclude Include="..\..\pasm64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\symbol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\genlist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -104,6 +101,9 @@
     <ClInclude Include="..\..\mem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\symbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Flex Include="..\..\pasm64.l">
@@ -114,5 +114,10 @@
     <Bison Include="..\..\pasm64.y">
       <Filter>FlexBison</Filter>
     </Bison>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\InstallerCustomActions\cpp.hint">
+      <Filter>FlexBison</Filter>
+    </None>
   </ItemGroup>
 </Project>

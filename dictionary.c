@@ -33,7 +33,7 @@ DictionaryPtr InternalDictCreate(const int size, const int elementSize)
 
     if (dictionary == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
@@ -44,7 +44,7 @@ DictionaryPtr InternalDictCreate(const int size, const int elementSize)
     dictionary->table = (ElementPtr*)ALLOCATE(sizeof(ElementPtr) * dictionary->size);
     if (dictionary->table == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     memset(dictionary->table, 0, sizeof(ElementPtr) * dictionary->size);
@@ -92,9 +92,9 @@ void DictDestroy(DictionaryPtr d)
 /// <returns>unsigned long.</returns>
 static unsigned long HashFunction(const char *key)
 {
-    unsigned long hash = 0, index = 0;
+    unsigned long hash = 0;
 
-    for (; key[index]; ++index)
+    for (unsigned long index = 0; key[index]; ++index)
     {
         hash += ((index % 2) ? tolower(key[index]) : toupper(key[index]));
         hash += (hash << 10);
@@ -112,12 +112,13 @@ static unsigned long HashFunction(const char *key)
 /// <param name="d">The d.</param>
 static DictionaryPtr Grow(DictionaryPtr d)
 {
-    const char* module = "grow";
+    // ReSharper disable once CppTooWideScope
+    const char* module = "Grow";
 
     DictionaryPtr d2 = InternalDictCreate(d->size * GROWTH_FACTOR, d->element_size);
     if (d2 == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     d2->collisions = d->collisions;
@@ -144,7 +145,7 @@ static DictionaryPtr Grow(DictionaryPtr d)
 /// <param name="dd">The address of dictionary pointer.</param>
 /// <param name="key">The key.</param>
 /// <param name="value">The value.</param>
-void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
+void* DictInsert(DictionaryPtr *dd, char *key, void *value)
 {
     // ReSharper disable once CppLocalVariableMayBeConst
     DictionaryPtr d = *dd;
@@ -154,22 +155,22 @@ void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
     ElementPtr e = (ElementPtr)ALLOCATE(sizeof(Element));
     if (e == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     // IMPORTANT: This sets the next to NULL
     memset(e, 0, sizeof(Element));
 
-    e->key = StrLower(key);
+    e->key = key;
     if (e->key == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     e->value = ALLOCATE(d->element_size);
     if (e->value == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     memcpy(e->value, value, d->element_size);

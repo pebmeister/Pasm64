@@ -8,5 +8,5 @@
 // Last Modified By : Paul
 // Last Modified On : 11-29-2015
 // ***********************************************************************
-extern int GenerateOut(parseNodePtr p);
-extern int GetOpByteCount(parseNodePtr p);
+extern int GenerateOut(ParseNodePtr p);
+extern int GetOpByteCount(ParseNodePtr p);

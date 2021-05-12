@@ -7,22 +7,22 @@
 #pragma once
 
 /* prototypes */
-extern parseNodePtr Opr(int op, int nops, ...);
-extern parseNodePtr Opcode(int opr, int mode, int nops, ...);
-extern parseNodePtr Id(char* name);
-extern parseNodePtr MacroId(char* name);
-extern parseNodePtr Con(int value, int isPc);
-extern parseNodePtr Str(char* value);
-extern parseNodePtr MacroEx(char* name, parseNodePtr macroParams);
-extern parseNodePtr Data(int dataSize, parseNodePtr data);
-extern void PrintNode(parseNodePtr p);
-extern void FreeParseNode(parseNodePtr p);
+extern ParseNodePtr Opr(int op, int nops, ...);
+extern ParseNodePtr Opcode(int opr, int mode, int nops, ...);
+extern ParseNodePtr Id(char* name);
+extern ParseNodePtr MacroId(char* name);
+extern ParseNodePtr Con(int value, int isPc);
+extern ParseNodePtr Str(char* value);
+extern ParseNodePtr MacroEx(char* name, ParseNodePtr macroParams);
+extern ParseNodePtr Data(int dataSize, ParseNodePtr data);
+extern void PrintNode(ParseNodePtr p);
+extern void FreeParseNode(ParseNodePtr p);
 extern void FreeParseTree(void);
 
-extern parseNodePtr HeadNode;
-extern parseNodePtr CurrentNode;
+extern ParseNodePtr HeadNode;
+extern ParseNodePtr CurrentNode;
 
-extern parseNodePtr AllocateNode(int nops);
+extern ParseNodePtr AllocateNode(int nops);
 
-extern int IsValidParseNode(parseNodePtr p);
+extern int IsValidParseNode(ParseNodePtr p);
 extern int IsValidParseTree(void);

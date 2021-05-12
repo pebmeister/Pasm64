@@ -82,16 +82,16 @@ void ResetLex(void)
         InternalBuffer = (char*)ALLOCATE(MAX_LINE_LEN);
         if (InternalBuffer == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return;
         }
     }
 
     // reset the the head node
-    CurrentNode = HeadNode = (parseNode*)AllocateNode(0);
+    CurrentNode = HeadNode = (ParseNode*)AllocateNode(0);
     if (CurrentNode == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return;
     }
     HeadNode->type = type_head_node;
@@ -103,8 +103,9 @@ void ResetLex(void)
 void Usage(void)
 {
     printf("Usage:\n");
-    printf("  pasm64 [-o outputfile] [-dir directory] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-v] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
+    printf("  pasm64 [-o outputfile] [-d sym val] [-dir directory] [-s symbolfile] [-l listfile] [-log logfile] [-i] [-v] [-c64] [-65c02 | -6502] [-?] [-nowarn] inputfile1 inputfile2 ...\n\n");
     printf("         -o outputfile   specifies output file\n");
+    printf("         -d sym value    defines a symbol with a value. This may be specified more than one for multiple symbols\n");
     printf("         -dir directory  specifies directories to search for source files and include files separated by ';'\n");
     printf("         -s symbolfile   specifies symbol file\n");
     printf("         -l listfile     specifies listing file\n");
@@ -126,7 +127,7 @@ void ParseArguments(const int argc, char* argv[])
 
     if (InputFiles == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         exit(-1);
     }
 
@@ -138,7 +139,7 @@ void ParseArguments(const int argc, char* argv[])
     while (argIndex < argc)
     {
         if ((StrICmp(argv[argIndex], "-?") == 0) || (StrICmp(argv[argIndex], "/?") == 0)
-            || ((StrICmp(argv[argIndex], "-h") == 0) || (StrICmp(argv[argIndex], "/k") == 0)))
+            || ((StrICmp(argv[argIndex], "-h") == 0) || (StrICmp(argv[argIndex], "/h") == 0)))
         {
             Usage();
             exit(0);
@@ -335,6 +336,59 @@ void ParseArguments(const int argc, char* argv[])
             continue;
         }
 
+        if ((StrICmp(argv[argIndex], "-d") == 0) || (StrICmp(argv[argIndex], "/d") == 0))
+        {
+            argIndex++;
+            if (argIndex >= argc)
+            {
+                Error(module, error_invalid_parameters);
+                Usage();
+                exit(-1);
+            }
+            char* symName = argv[argIndex];
+
+            argIndex++;
+            if (argIndex >= argc)
+            {
+                Error(module, error_invalid_parameters);
+                Usage();
+                exit(-1);
+            }
+            char* val = argv[argIndex];
+
+            int symVal;
+
+            if (val[0] == '$')
+            {
+                symVal = (int)strtol(val + 1, NULL, 16);
+            }
+            else if (val[0] == '0' && val[1] == 'x')
+            {
+                symVal = (int)strtol(val + 2, NULL, 16);
+            }
+            else if (val[0] == '%')
+            {
+                symVal = (int)strtol(val + 1, NULL, 2);
+            }
+            else if (val[0] == '0' && val[1] == 'b')
+            {
+                symVal = (int)strtol(val + 2, NULL, 2);
+            }
+            else
+            {
+                symVal = (int)strtol(val, NULL, 10);
+            }
+
+            // ReSharper disable once CppLocalVariableMayBeConst
+            SymbolTablePtr sym = AddSymbol(symName);
+            if (sym != NULL)
+            {
+                SetSymbolValue(sym, symVal);
+                sym->initialized = TRUE;
+            }
+            argIndex++;
+            continue;
+        }
         // add to the input file list
         InputFiles[InputFileCount++] = argv[argIndex];
         argIndex++;
@@ -427,10 +481,10 @@ int main(const int argc, char* argv[])
         // see if there are any more unresolved symbols
         const int unresolvedCount = UnResolvedSymbols();
 
-        if (CurrentSection)
+        if (CurrentScope)
         {
-            FREE(CurrentSection);
-            CurrentSection = NULL;
+            FREE(CurrentScope);
+            CurrentScope = NULL;
         }
 
         // if there are no more symbols resolved then
@@ -517,11 +571,11 @@ int main(const int argc, char* argv[])
             GenerateListNode(NULL);
         }
 
-        if (CurrentSection)
+        if (CurrentScope)
         {
             Warning(module, error_missing_end_section);
-            FREE(CurrentSection);
-            CurrentSection = NULL;
+            FREE(CurrentScope);
+            CurrentScope = NULL;
         }
 
         // close output file
@@ -602,6 +656,14 @@ int main(const int argc, char* argv[])
 
         // Free the file table
         FreeFileTable();
+
+#ifdef _DEBUG
+#ifdef DEBUG_MEMORY
+        PrintMemoryAllocationSummary();
+        PrintMemoryAllocation();
+        DumpStrings();
+#endif
+#endif
 
         // Free Misc Allocated memory
         FreeAllocatedMemory();

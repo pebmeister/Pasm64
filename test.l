@@ -1,0 +1,1178 @@
+
+Processing wintest.a
+
+                                                      ; Paul Baxter
+                                                      // .C64            ; C64 output
+                                                      
+                                                      .ORG $1000
+$1000: $A9 $09           lda #$09                 
+                                                          lda #'\t'
+                                                  
+                                                  
+                                                  
+
+Processing test.a
+
+                                                  
+                                                  
+$1002: $15 $1A           ora $1A,x                    ora $1A,x
+$1004: $01 $E5           ora ($E5,x)                  ora (229,x)
+                                                  
+$1006: $EA               nop                          nop
+                                                  
+$1007: $EA               nop                          nop
+$1008: $0A               asl                          asl
+                                                      .var aaa,bbb
+                                                  
+                                                  
+                                                      aaa = 1
+                                                      aaa = aaa + 1
+$1009: $A9 $02           lda #$02                     lda #aaa
+$100B: $00               brk                          brk
+                                                  
+                                                      loops
+                                                  
+                                                      ; while loop
+                                                  
+                                                      .while (aaa<10)
+                                                  
+                                                          aaa = aaa + 1
+                                                          ldx #aaa
+                                                  
+                                                          .if (aaa>6)
+                                                              brk
+                                                              brk
+                                                              brk
+                                                          .else
+                                                              bbb = 0
+                                                              .repeat
+                                                                  nop
+                                                                  bbb = bbb + 2
+                                                              .until (bbb < 6)
+                                                          .endif
+$100C: $A2 $03           ldx #$03                     .wend
+$100E: $EA               nop                      
+$100F: $A2 $04           ldx #$04                 
+$1011: $EA               nop                      
+$1012: $A2 $05           ldx #$05                 
+$1014: $EA               nop                      
+$1015: $A2 $06           ldx #$06                 
+$1017: $EA               nop                      
+$1018: $A2 $07           ldx #$07                 
+$101A: $00               brk                      
+$101B: $00               brk                      
+$101C: $00               brk                      
+$101D: $A2 $08           ldx #$08                 
+$101F: $00               brk                      
+$1020: $00               brk                      
+$1021: $00               brk                      
+$1022: $A2 $09           ldx #$09                 
+$1024: $00               brk                      
+$1025: $00               brk                      
+$1026: $00               brk                      
+$1027: $A2 $0A           ldx #$0A                 
+$1029: $00               brk                      
+$102A: $00               brk                      
+$102B: $00               brk                      
+                                                  
+$102C: $A2 $01           ldx #$01                     ldx #1
+$102E: $A0 $35           ldy #$35                     ldy #%110101
+                                                  
+$1030: $60               rts                          rts
+                                                  
+
+Processing wintest.a
+
+                                                  
+                                                      .inc "test.a"
+
+Processing branchtest.a
+
+                                                  
+$1031: $EA               nop                          nop
+                                                  
+$1032: $F0 $0C           beq $1040                    beq +
+                                                  -    
+$1034: $B9 $41 $10       lda $1041,y                  lda ++,y
+$1037: $D0 $FB           bne $1034                    bne -
+$1039: $EA               nop                          nop
+                                                  -
+$103A: $10 $FE           bpl $103A                    bpl -
+$103C: $6C $34 $10       jmp ($1034)                  jmp (--)
+$103F: $60               rts                          rts
+                                                      
+                                                  +
+$1040: $60               rts                          rts
+                                                  +
+$1041: $EA               nop                          nop
+$1042: $EA               nop                          nop
+$1043: $60               rts                          rts
+                                                  
+$1044: $F0 $EE           beq $1034                    beq --
+                                                      
+                                                  // ; test backwards
+                                                  // -
+                                                  // 
+                                                  // bne -
+                                                  // bpl +
+                                                  //    ; test fowards
+                                                  // +
+
+Processing wintest.a
+
+                                                  
+$1046: $41 $42           .db $41, $42                 .inc "branchtest.a"
+$1048: $43 $44           .db $43, $44             
+$104A: $45 $46           .db $45, $46             
+$104C: $47 $48           .db $47, $48             
+$104E: $49 $4A           .db $49, $4A             
+$1050: $4B $4C           .db $4B, $4C             
+$1052: $4D $4E           .db $4D, $4E             
+$1054: $4F $50           .db $4F, $50             
+$1056: $51 $52           .db $51, $52             
+$1058: $53 $54           .db $53, $54             
+$105A: $55 $56           .db $55, $56             
+$105C: $57 $58           .db $57, $58             
+$105E: $59 $5A           .db $59, $5A             
+$1060: $21 $0A           .db $21, $0A             
+$1062: $30 $31           .db $30, $31             
+$1064: $32 $33           .db $32, $33             
+$1066: $34 $35           .db $34, $35             
+$1068: $36 $37           .db $36, $37             
+$106A: $38 $39           .db $38, $39             
+$106C: $31 $30           .db $31, $30             
+$106E: $0A               .db $0A                  
+                                                      .load "textfile.txt"
+
+Processing scripttest.a
+
+                                                  
+                                                      .var i,ii,jj
+                                                  
+                                                      .for i = 10 .to 20 .STEP 2
+$106F: $AD $A1 $10       lda $10A1                        lda here + i  
+$1072: $AD $A3 $10       lda $10A3                
+$1075: $AD $A5 $10       lda $10A5                
+$1078: $AD $A7 $10       lda $10A7                
+$107B: $AD $A9 $10       lda $10A9                
+$107E: $AD $AB $10       lda $10AB                
+                                                      .next i
+                                                  
+                                                      .repeat
+                                                          jsr i + 1
+$1081: $20 $17 $00       jsr $0017                        i = i - 2
+$1084: $20 $15 $00       jsr $0015                
+$1087: $20 $13 $00       jsr $0013                
+$108A: $20 $11 $00       jsr $0011                
+$108D: $20 $0F $00       jsr $000F                
+$1090: $20 $0D $00       jsr $000D                
+                                                      .until i <= 10
+                                                  
+                                                      .do
+                                                          ldx here + i
+                                                          nop
+$1093: $AE $A1 $10       ldx $10A1                        i = i + 2
+$1096: $EA               nop                      
+                                                      .while i < 10
+                                                  
+$1097: $EA               nop                      here
+                                                      nop
+                                                  
+                                                  
+                                                      .for i = 1 .to 10
+                                                          ii = 0
+                                                          .repeat
+                                                              jsr ii
+                                                              ii = ii - 2
+                                                  
+                                                              jj = 0
+                                                              .do
+                                                                  jsr jj
+                                                                  nop
+                                                                  jj = jj + 2
+                                                              .while jj < 10
+$1098: $20 $00 $00       jsr $0000                        .until ii <= 10
+$109B: $20 $00 $00       jsr $0000                
+$109E: $EA               nop                      
+$109F: $20 $02 $00       jsr $0002                
+$10A2: $EA               nop                      
+$10A3: $20 $04 $00       jsr $0004                
+$10A6: $EA               nop                      
+$10A7: $20 $06 $00       jsr $0006                
+$10AA: $EA               nop                      
+$10AB: $20 $08 $00       jsr $0008                
+$10AE: $EA               nop                      
+$10AF: $20 $00 $00       jsr $0000                
+$10B2: $20 $00 $00       jsr $0000                
+$10B5: $EA               nop                      
+$10B6: $20 $02 $00       jsr $0002                
+$10B9: $EA               nop                      
+$10BA: $20 $04 $00       jsr $0004                
+$10BD: $EA               nop                      
+$10BE: $20 $06 $00       jsr $0006                
+$10C1: $EA               nop                      
+$10C2: $20 $08 $00       jsr $0008                
+$10C5: $EA               nop                      
+$10C6: $20 $00 $00       jsr $0000                
+$10C9: $20 $00 $00       jsr $0000                
+$10CC: $EA               nop                      
+$10CD: $20 $02 $00       jsr $0002                
+$10D0: $EA               nop                      
+$10D1: $20 $04 $00       jsr $0004                
+$10D4: $EA               nop                      
+$10D5: $20 $06 $00       jsr $0006                
+$10D8: $EA               nop                      
+$10D9: $20 $08 $00       jsr $0008                
+$10DC: $EA               nop                      
+$10DD: $20 $00 $00       jsr $0000                
+$10E0: $20 $00 $00       jsr $0000                
+$10E3: $EA               nop                      
+$10E4: $20 $02 $00       jsr $0002                
+$10E7: $EA               nop                      
+$10E8: $20 $04 $00       jsr $0004                
+$10EB: $EA               nop                      
+$10EC: $20 $06 $00       jsr $0006                
+$10EF: $EA               nop                      
+$10F0: $20 $08 $00       jsr $0008                
+$10F3: $EA               nop                      
+$10F4: $20 $00 $00       jsr $0000                
+$10F7: $20 $00 $00       jsr $0000                
+$10FA: $EA               nop                      
+$10FB: $20 $02 $00       jsr $0002                
+$10FE: $EA               nop                      
+$10FF: $20 $04 $00       jsr $0004                
+$1102: $EA               nop                      
+$1103: $20 $06 $00       jsr $0006                
+$1106: $EA               nop                      
+$1107: $20 $08 $00       jsr $0008                
+$110A: $EA               nop                      
+$110B: $20 $00 $00       jsr $0000                
+$110E: $20 $00 $00       jsr $0000                
+$1111: $EA               nop                      
+$1112: $20 $02 $00       jsr $0002                
+$1115: $EA               nop                      
+$1116: $20 $04 $00       jsr $0004                
+$1119: $EA               nop                      
+$111A: $20 $06 $00       jsr $0006                
+$111D: $EA               nop                      
+$111E: $20 $08 $00       jsr $0008                
+$1121: $EA               nop                      
+$1122: $20 $00 $00       jsr $0000                
+$1125: $20 $00 $00       jsr $0000                
+$1128: $EA               nop                      
+$1129: $20 $02 $00       jsr $0002                
+$112C: $EA               nop                      
+$112D: $20 $04 $00       jsr $0004                
+$1130: $EA               nop                      
+$1131: $20 $06 $00       jsr $0006                
+$1134: $EA               nop                      
+$1135: $20 $08 $00       jsr $0008                
+$1138: $EA               nop                      
+$1139: $20 $00 $00       jsr $0000                
+$113C: $20 $00 $00       jsr $0000                
+$113F: $EA               nop                      
+$1140: $20 $02 $00       jsr $0002                
+$1143: $EA               nop                      
+$1144: $20 $04 $00       jsr $0004                
+$1147: $EA               nop                      
+$1148: $20 $06 $00       jsr $0006                
+$114B: $EA               nop                      
+$114C: $20 $08 $00       jsr $0008                
+$114F: $EA               nop                      
+$1150: $20 $00 $00       jsr $0000                
+$1153: $20 $00 $00       jsr $0000                
+$1156: $EA               nop                      
+$1157: $20 $02 $00       jsr $0002                
+$115A: $EA               nop                      
+$115B: $20 $04 $00       jsr $0004                
+$115E: $EA               nop                      
+$115F: $20 $06 $00       jsr $0006                
+$1162: $EA               nop                      
+$1163: $20 $08 $00       jsr $0008                
+$1166: $EA               nop                      
+$1167: $20 $00 $00       jsr $0000                
+$116A: $20 $00 $00       jsr $0000                
+$116D: $EA               nop                      
+$116E: $20 $02 $00       jsr $0002                
+$1171: $EA               nop                      
+$1172: $20 $04 $00       jsr $0004                
+$1175: $EA               nop                      
+$1176: $20 $06 $00       jsr $0006                
+$1179: $EA               nop                      
+$117A: $20 $08 $00       jsr $0008                
+$117D: $EA               nop                      
+                                                      .next i
+                                                      
+                                                      .if i > 0 
+                                                          nop
+                                                          .while (i > 1)
+                                                              .ds 1
+                                                              i = i -3
+                                                          .wend
+                                                      .else
+$117E: $EA               nop                              brk
+$117F: $00               .db $00                  
+$1180: $00               .db $00                  
+$1181: $00               .db $00                  
+$1182: $00               .db $00                  
+$1183: $64               .db $64                      .endif
+                                                      .byte 100
+$1184: $00               brk                          
+                                                      brk
+                                                   
+
+Processing wintest.a
+
+                                                  
+                                                      .inc "scripttest.a"
+                                                      
+                                                      .illegal OFF    ; no illegal opcodes
+                                                  
+                                                      ; Turn on 65C02 
+                                                      .65C02 on
+                                                          
+$1185: $DA               phx                          start
+$1186: $5A               phy                              phx
+                                                          phy
+                                                          //  bbr0 20,LoadSLASH
+                                                          
+$1187: $A9 $09           lda #$09                     loadTAB
+                                                          lda #'\t'
+$1189: $A9 $5C           lda #$5C                     LoadSLASH
+                                                          lda #'\\'
+                                                  
+$118B: $F0 $03           beq $1190                    .warn off
+$118D: $4C $A3 $15       jmp $15A3                
+                                                      bne end
+                                                      .warn on
+                                                      
+$1190: $09 $16           ora #$16                 __ora    
+$1192: $09 $16           ora #$16                     ora #22
+$1194: $05 $B2           ora $B2                      ora #$16
+$1196: $05 $B2           ora $B2                      ora 178
+$1198: $15 $1A           ora $1A,x                    ora $B2
+$119A: $15 $1A           ora $1A,x                    ora 26,x
+$119C: $01 $E5           ora ($E5,x)                  ora $1A,x
+$119E: $01 $E5           ora ($E5,x)                  ora (229,x)
+$11A0: $11 $39           ora ($39),y                  ora ($E5,x)
+$11A2: $11 $39           ora ($39),y                  ora (57),y
+$11A4: $0D $23 $76       ora $7623                    ora ($39),y
+$11A7: $0D $23 $76       ora $7623                    ora 30243
+$11AA: $1D $B2 $65       ora $65B2,x                  ora $7623
+$11AD: $1D $B2 $65       ora $65B2,x                  ora 26034,x
+$11B0: $19 $2C $BE       ora $BE2C,y                  ora $65B2,x
+$11B3: $19 $2C $BE       ora $BE2C,y                  ora 48684,y 
+                                                      ora $BE2C,y
+                                                  
+                                                      ; and
+                                                  
+$11B6: $29 $88           and #$88                 __and
+$11B8: $29 $88           and #$88                     and #136
+$11BA: $25 $B7           and $B7                      and #$88
+$11BC: $25 $B7           and $B7                      and 183
+$11BE: $35 $97           and $97,x                    and $B7
+$11C0: $35 $97           and $97,x                    and 151,x
+$11C2: $21 $14           and ($14,x)                  and $97,x
+$11C4: $21 $14           and ($14,x)                  and (20,x)
+$11C6: $31 $DB           and ($DB),y                  and ($14,x)
+$11C8: $31 $DB           and ($DB),y                  and (219),y
+$11CA: $2D $CC $18       and $18CC                    and ($DB),y
+$11CD: $2D $CC $18       and $18CC                    and 6348
+$11D0: $3D $FF $D2       and $D2FF,x                  and $18CC
+$11D3: $3D $FF $D2       and $D2FF,x                  and 54015,x
+$11D6: $39 $1B $F4       and $F41B,y                  and $D2FF,x
+$11D9: $39 $1B $F4       and $F41B,y                  and 62491,y
+                                                      and $F41B,y
+                                                  
+                                                      ; eor
+                                                  
+$11DC: $49 $33           eor #$33                 __eor
+$11DE: $49 $33           eor #$33                     eor #51
+$11E0: $45 $17           eor $17                      eor #$33
+$11E2: $45 $17           eor $17                      eor 23
+$11E4: $55 $F5           eor $F5,x                    eor $17
+$11E6: $55 $F5           eor $F5,x                    eor 245,x
+$11E8: $41 $D2           eor ($D2,x)                  eor $F5,x
+$11EA: $41 $D2           eor ($D2,x)                  eor (210,x)
+$11EC: $51 $72           eor ($72),y                  eor ($D2,x)
+$11EE: $51 $72           eor ($72),y                  eor (114),y
+$11F0: $4D $05 $85       eor $8505                    eor ($72),y
+$11F3: $4D $05 $85       eor $8505                    eor 34053
+$11F6: $5D $59 $6E       eor $6E59,x                  eor $8505
+$11F9: $5D $59 $6E       eor $6E59,x                  eor 28249,x
+$11FC: $59 $77 $FB       eor $FB77,y                  eor $6E59,x
+$11FF: $59 $77 $FB       eor $FB77,y                  eor 64375,y
+                                                      eor $FB77,y
+                                                  
+                                                      ; adc
+                                                  
+$1202: $69 $63           adc #$63                 __adc
+$1204: $69 $63           adc #$63                     adc #99
+$1206: $65 $6F           adc $6F                      adc #$63
+$1208: $65 $6F           adc $6F                      adc 111
+$120A: $75 $9D           adc $9D,x                    adc $6F
+$120C: $75 $9D           adc $9D,x                    adc 157,x
+$120E: $61 $4A           adc ($4A,x)                  adc $9D,x
+$1210: $61 $4A           adc ($4A,x)                  adc (74,x)
+$1212: $71 $E4           adc ($E4),y                  adc ($4A,x)
+$1214: $71 $E4           adc ($E4),y                  adc (228),y
+$1216: $6D $62 $31       adc $3162                    adc ($E4),y
+$1219: $6D $62 $31       adc $3162                    adc 12642
+$121C: $7D $D8 $D8       adc $D8D8,x                  adc $3162
+$121F: $7D $D8 $D8       adc $D8D8,x                  adc 55512,x
+$1222: $79 $9F $70       adc $709F,y                  adc $D8D8,x
+$1225: $79 $9F $70       adc $709F,y                  adc 28831,y
+                                                      adc $709F,y
+                                                  
+                                                      ; sbc
+                                                  
+$1228: $E9 $11           sbc #$11                 __sbc
+$122A: $E9 $11           sbc #$11                     sbc #17
+$122C: $E5 $0E           sbc $0E                      sbc #$11
+$122E: $E5 $0E           sbc $0E                      sbc 14
+$1230: $F5 $C5           sbc $C5,x                    sbc $E
+$1232: $F5 $C5           sbc $C5,x                    sbc 197,x
+$1234: $E1 $00           sbc ($00,x)                  sbc $C5,x
+$1236: $E1 $00           sbc ($00,x)                  sbc (0,x)
+$1238: $F1 $8B           sbc ($8B),y                  sbc ($0,x)
+$123A: $F1 $8B           sbc ($8B),y                  sbc (139),y
+$123C: $ED $C6 $79       sbc $79C6                    sbc ($8B),y
+$123F: $ED $C6 $79       sbc $79C6                    sbc 31174
+$1242: $FD $03 $4D       sbc $4D03,x                  sbc $79C6
+$1245: $FD $03 $4D       sbc $4D03,x                  sbc 19715,x
+$1248: $F9 $BC $81       sbc $81BC,y                  sbc $4D03,x
+$124B: $F9 $BC $81       sbc $81BC,y                  sbc 33212,y
+                                                      sbc $81BC,y
+                                                  
+                                                      ; cmp
+                                                  
+$124E: $C9 $A0           cmp #$A0                 __cmp
+$1250: $C9 $A0           cmp #$A0                     cmp #160
+$1252: $C5 $4D           cmp $4D                      cmp #$A0
+$1254: $C5 $4D           cmp $4D                      cmp 77
+$1256: $D5 $F7           cmp $F7,x                    cmp $4D
+$1258: $D5 $F7           cmp $F7,x                    cmp 247,x
+$125A: $C1 $86           cmp ($86,x)                  cmp $F7,x
+$125C: $C1 $86           cmp ($86,x)                  cmp (134,x)
+$125E: $D1 $7C           cmp ($7C),y                  cmp ($86,x)
+$1260: $D1 $7C           cmp ($7C),y                  cmp (124),y
+$1262: $CD $57 $E8       cmp $E857                    cmp ($7C),y
+$1265: $CD $57 $E8       cmp $E857                    cmp 59479
+$1268: $DD $11 $20       cmp $2011,x                  cmp $E857
+$126B: $DD $11 $20       cmp $2011,x                  cmp 8209,x
+$126E: $D9 $1A $EF       cmp $EF1A,y                  cmp $2011,x
+$1271: $D9 $1A $EF       cmp $EF1A,y                  cmp 61210,y
+                                                      cmp $EF1A,y
+                                                  
+                                                      ; cpx
+                                                  
+$1274: $E0 $8C           cpx #$8C                 __cpx
+$1276: $E0 $8C           cpx #$8C                     cpx #140
+$1278: $E4 $A1           cpx $A1                      cpx #$8C
+$127A: $E4 $A1           cpx $A1                      cpx 161
+$127C: $EC $A2 $EA       cpx $EAA2                    cpx $A1
+$127F: $EC $A2 $EA       cpx $EAA2                    cpx 60066
+                                                      cpx $EAA2
+                                                  
+                                                      ; cpy
+                                                  
+$1282: $C0 $C9           cpy #$C9                 __cpy
+$1284: $C0 $C9           cpy #$C9                     cpy #201
+$1286: $C4 $5A           cpy $5A                      cpy #$C9
+$1288: $C4 $5A           cpy $5A                      cpy 90
+$128A: $CC $D6 $E9       cpy $E9D6                    cpy $5A
+$128D: $CC $D6 $E9       cpy $E9D6                    cpy 59862
+                                                      cpy $E9D6
+                                                  
+                                                      ; dec
+                                                  
+$1290: $C6 $64           dec $64                  __dec
+$1292: $C6 $64           dec $64                      dec 100
+$1294: $D6 $04           dec $04,x                    dec $64
+$1296: $D6 $04           dec $04,x                    dec 4,x
+$1298: $CE $4F $84       dec $844F                    dec $4,x
+$129B: $CE $4F $84       dec $844F                    dec 33871
+$129E: $DE $A1 $9D       dec $9DA1,x                  dec $844F
+$12A1: $DE $A1 $9D       dec $9DA1,x                  dec 40353,x
+                                                      dec $9DA1,x
+                                                  
+                                                      ; dex
+                                                  
+$12A4: $CA               dex                      __dex
+                                                      dex
+                                                  
+                                                      ; dey
+                                                  
+$12A5: $88               dey                      __dey
+                                                      dey
+                                                  
+                                                      ; inc
+                                                  
+$12A6: $E6 $39           inc $39                  __inc
+$12A8: $E6 $39           inc $39                      inc 57
+$12AA: $F6 $B4           inc $B4,x                    inc $39
+$12AC: $F6 $B4           inc $B4,x                    inc 180,x
+$12AE: $EE $EC $4D       inc $4DEC                    inc $B4,x
+$12B1: $EE $EC $4D       inc $4DEC                    inc 19948
+$12B4: $FE $10 $B3       inc $B310,x                  inc $4DEC
+$12B7: $FE $10 $B3       inc $B310,x                  inc 45840,x
+                                                      inc $B310,x
+                                                  
+                                                      ; inx
+                                                  
+$12BA: $E8               inx                      __inx
+                                                      inx
+                                                  
+                                                      ; iny
+                                                  
+$12BB: $C8               iny                      __iny
+                                                      iny
+                                                  
+                                                      ; asl
+                                                  
+$12BC: $0A               asl                      __asl
+$12BD: $06 $31           asl $31                      asl
+$12BF: $06 $31           asl $31                      asl 49
+$12C1: $16 $DF           asl $DF,x                    asl $31
+$12C3: $16 $DF           asl $DF,x                    asl 223,x
+$12C5: $0E $64 $88       asl $8864                    asl $DF,x
+$12C8: $0E $64 $88       asl $8864                    asl 34916
+$12CB: $1E $BF $06       asl $06BF,x                  asl $8864
+$12CE: $1E $BF $06       asl $06BF,x                  asl 1727,x
+$12D1: $0A               asl                          asl $6BF,x
+                                                      asl A
+                                                  
+                                                      ; rol
+                                                  
+$12D2: $2A               rol                      __rol
+$12D3: $26 $59           rol $59                      rol
+$12D5: $26 $59           rol $59                      rol 89
+$12D7: $36 $91           rol $91,x                    rol $59
+$12D9: $36 $91           rol $91,x                    rol 145,x
+$12DB: $2E $DA $4A       rol $4ADA                    rol $91,x
+$12DE: $2E $DA $4A       rol $4ADA                    rol 19162
+$12E1: $3E $F2 $47       rol $47F2,x                  rol $4ADA
+$12E4: $3E $F2 $47       rol $47F2,x                  rol 18418,x
+                                                      rol $47F2,x
+                                                  
+                                                      ; lsr
+                                                  
+$12E7: $4A               lsr                      __lsr
+$12E8: $46 $35           lsr $35                      lsr
+$12EA: $46 $35           lsr $35                      lsr 53
+$12EC: $56 $2B           lsr $2B,x                    lsr $35
+$12EE: $56 $2B           lsr $2B,x                    lsr 43,x
+$12F0: $4E $3A $E8       lsr $E83A                    lsr $2B,x
+$12F3: $4E $3A $E8       lsr $E83A                    lsr 59450
+$12F6: $5E $7E $F0       lsr $F07E,x                  lsr $E83A
+$12F9: $5E $7E $F0       lsr $F07E,x                  lsr 61566,x
+                                                      lsr $F07E,x
+                                                  
+                                                      ; ror
+                                                  
+$12FC: $6A               ror                      __ror
+$12FD: $66 $B9           ror $B9                      ror
+$12FF: $66 $B9           ror $B9                      ror 185
+$1301: $76 $D1           ror $D1,x                    ror $B9
+$1303: $76 $D1           ror $D1,x                    ror 209,x
+$1305: $6E $2C $25       ror $252C                    ror $D1,x
+$1308: $6E $2C $25       ror $252C                    ror 9516
+$130B: $7E $A0 $91       ror $91A0,x                  ror $252C
+$130E: $7E $A0 $91       ror $91A0,x                  ror 37280,x
+                                                      ror $91A0,x
+                                                  
+                                                      ; lda
+                                                  
+$1311: $A9 $50           lda #$50                 __lda
+$1313: $A9 $50           lda #$50                     lda #80
+$1315: $A5 $31           lda $31                      lda #$50
+$1317: $A5 $31           lda $31                      lda 49
+$1319: $B5 $54           lda $54,x                    lda $31
+$131B: $B5 $54           lda $54,x                    lda 84,x
+$131D: $A1 $1A           lda ($1A,x)                  lda $54,x
+$131F: $A1 $1A           lda ($1A,x)                  lda (26,x)
+$1321: $B1 $EC           lda ($EC),y                  lda ($1A,x)
+$1323: $B1 $EC           lda ($EC),y                  lda (236),y
+$1325: $AD $41 $31       lda $3141                    lda ($EC),y
+$1328: $AD $41 $31       lda $3141                    lda 12609
+$132B: $BD $03 $20       lda $2003,x                  lda $3141
+$132E: $BD $03 $20       lda $2003,x                  lda 8195,x
+$1331: $B9 $97 $84       lda $8497,y                  lda $2003,x
+$1334: $B9 $97 $84       lda $8497,y                  lda 33943,y
+                                                      lda $8497,y
+                                                  
+                                                      ; sta
+                                                  
+$1337: $85 $F7           sta $F7                  __sta
+$1339: $85 $F7           sta $F7                      sta 247
+$133B: $95 $97           sta $97,x                    sta $F7
+$133D: $95 $97           sta $97,x                    sta 151,x
+$133F: $81 $A0           sta ($A0,x)                  sta $97,x
+$1341: $81 $A0           sta ($A0,x)                  sta (160,x)
+$1343: $91 $1A           sta ($1A),y                  sta ($A0,x)
+$1345: $91 $1A           sta ($1A),y                  sta (26),y
+$1347: $8D $8B $B2       sta $B28B                    sta ($1A),y
+$134A: $8D $8B $B2       sta $B28B                    sta 45707
+$134D: $9D $8F $0F       sta $0F8F,x                  sta $B28B
+$1350: $9D $8F $0F       sta $0F8F,x                  sta 3983,x
+$1353: $99 $36 $65       sta $6536,y                  sta $F8F,x
+$1356: $99 $36 $65       sta $6536,y                  sta 25910,y
+                                                      sta $6536,y
+                                                  
+                                                      ; ldx
+                                                  
+$1359: $A2 $8C           ldx #$8C                 __ldx
+$135B: $A2 $8C           ldx #$8C                     ldx #140
+$135D: $A6 $92           ldx $92                      ldx #$8C
+$135F: $A6 $92           ldx $92                      ldx 146
+$1361: $B6 $07           ldx $07,y                    ldx $92
+$1363: $B6 $07           ldx $07,y                    ldx 7,y
+$1365: $AE $03 $55       ldx $5503                    ldx $7,y
+$1368: $AE $03 $55       ldx $5503                    ldx 21763
+$136B: $BE $09 $0F       ldx $0F09,y                  ldx $5503
+$136E: $BE $09 $0F       ldx $0F09,y                  ldx 3849,y
+                                                      ldx $F09,y
+                                                  
+                                                      ; stx
+                                                  
+$1371: $86 $D0           stx $D0                  __stx
+$1373: $86 $D0           stx $D0                      stx 208
+$1375: $96 $08           stx $08,y                    stx $D0
+$1377: $96 $08           stx $08,y                    stx 8,y
+$1379: $8E $7B $28       stx $287B                    stx $8,y
+$137C: $8E $7B $28       stx $287B                    stx 10363
+                                                      stx $287B
+                                                  
+                                                      ; ldy
+                                                  
+$137F: $A0 $46           ldy #$46                 __ldy
+$1381: $A0 $46           ldy #$46                     ldy #70
+$1383: $A4 $B6           ldy $B6                      ldy #$46
+$1385: $A4 $B6           ldy $B6                      ldy 182
+$1387: $B4 $91           ldy $91,x                    ldy $B6
+$1389: $B4 $91           ldy $91,x                    ldy 145,x
+$138B: $AC $3C $73       ldy $733C                    ldy $91,x
+$138E: $AC $3C $73       ldy $733C                    ldy 29500
+$1391: $BC $5E $B7       ldy $B75E,x                  ldy $733C
+$1394: $BC $5E $B7       ldy $B75E,x                  ldy 46942,x
+                                                      ldy $B75E,x
+                                                  
+                                                      ; sty
+                                                  
+$1397: $84 $46           sty $46                  __sty
+$1399: $84 $46           sty $46                      sty 70
+$139B: $94 $3E           sty $3E,x                    sty $46
+$139D: $94 $3E           sty $3E,x                    sty 62,x
+$139F: $8C $E4 $8B       sty $8BE4                    sty $3E,x
+$13A2: $8C $E4 $8B       sty $8BE4                    sty 35812
+                                                      sty $8BE4
+                                                  
+                                                      ; tax
+                                                  
+$13A5: $AA               tax                      __tax
+                                                      tax
+                                                  
+                                                      ; txa
+                                                  
+$13A6: $8A               txa                      __txa
+                                                      txa
+                                                  
+                                                      ; tay
+                                                  
+$13A7: $A8               tay                      __tay
+                                                      tay
+                                                  
+                                                      ; tya
+                                                      
+$13A8: $98               tya                      __tya
+                                                      tya
+                                                  
+                                                      ; tsx
+                                                      
+$13A9: $BA               tsx                      __tsx
+                                                      tsx
+                                                  
+                                                      ; txs
+                                                      
+$13AA: $9A               txs                      __txs
+                                                      txs
+                                                  
+                                                      ; pla
+                                                      
+$13AB: $68               pla                      __pla
+                                                      pla
+                                                  
+                                                      ; pha
+                                                      
+$13AC: $48               pha                      __pha
+                                                      pha
+                                                  
+                                                      ; plp
+                                                      
+$13AD: $28               plp                      __plp
+                                                      plp
+                                                  
+                                                      ; php
+                                                      
+$13AE: $08               php                      __php
+                                                      php
+                                                  
+                                                      ; bpl
+                                                      
+$13AF: $10 $02           bpl $13B3                __bpl
+$13B1: $10 $FB           bpl $13AE                    bpl __bmi
+                                                      bpl __php
+                                                  
+                                                      ; bmi
+                                                      
+$13B3: $30 $FA           bmi $13AF                __bmi
+$13B5: $30 $F7           bmi $13AE                    bmi __bpl
+                                                      bmi __php
+                                                  
+                                                      ; bvc
+$13B7: $50 $FA           bvc $13B3                __bvc
+$13B9: $50 $F3           bvc $13AE                    bvc __bmi
+                                                      bvc __php
+                                                  
+                                                      ; bvs
+                                                  
+$13BB: $70 $02           bvs $13BF                __bvs
+$13BD: $70 $EF           bvs $13AE                    bvs __bcc
+                                                      bvs __php
+                                                  
+                                                      ; bcc
+                                                  
+$13BF: $90 $ED           bcc $13AE                __bcc
+$13C1: $90 $04           bcc $13C7                    bcc __php
+                                                      bcc __bne
+                                                  
+                                                      ; bcs
+                                                  
+$13C3: $B0 $30           bcs $13F5                __bcs
+$13C5: $B0 $2E           bcs $13F5                    bcs __nop
+                                                      bcs __nop
+                                                  
+                                                      ; bne
+                                                  
+$13C7: $D0 $06           bne $13CF                __bne
+$13C9: $D0 $05           bne $13D0                    bne __brk
+                                                      bne __rti
+                                                  
+                                                      ; beq
+                                                  
+$13CB: $F0 $FA           beq $13C7                __beq
+$13CD: $F0 $02           beq $13D1                    beq __bne
+                                                      beq __jsr
+                                                  
+                                                      ; brk
+                                                  
+$13CF: $00               brk                      __brk
+                                                      brk
+                                                  
+                                                      ; rti
+                                                  
+$13D0: $40               rti                      __rti
+                                                      rti
+                                                  
+                                                      ; jsr
+                                                  
+$13D1: $20 $3C $5C       jsr $5C3C                __jsr
+$13D4: $20 $3C $5C       jsr $5C3C                    jsr 23612
+                                                      jsr $5C3C
+                                                  
+                                                      ; rts
+                                                  
+$13D7: $60               rts                      __rts
+                                                      rts
+                                                  
+                                                      ; jmp
+                                                  
+$13D8: $4C $24 $93       jmp $9324                __jmp
+$13DB: $4C $24 $93       jmp $9324                    jmp 37668
+$13DE: $6C $DC $5A       jmp ($5ADC)                  jmp $9324
+$13E1: $6C $DC $5A       jmp ($5ADC)                  jmp (23260)
+                                                      jmp ($5ADC)
+                                                  
+                                                      ; bit
+                                                  
+$13E4: $24 $27           bit $27                  __bit
+$13E6: $24 $27           bit $27                      bit 39
+$13E8: $2C $F5 $A1       bit $A1F5                    bit $27
+$13EB: $2C $F5 $A1       bit $A1F5                    bit 41461
+                                                      bit $A1F5
+                                                  
+                                                      ; clc
+                                                  
+$13EE: $18               clc                      __clc
+                                                      clc
+                                                  
+                                                      ; sec
+                                                  
+$13EF: $38               sec                      __sec
+                                                      sec
+                                                  
+                                                      ; cld
+                                                  
+$13F0: $D8               cld                      __cld
+                                                      cld
+                                                  
+                                                      ; sed
+                                                  
+$13F1: $F8               sed                      __sed
+                                                      sed
+                                                  
+                                                      ; cli
+                                                  
+$13F2: $58               cli                      __cli
+                                                      cli
+                                                  
+                                                      ; sei
+                                                  
+$13F3: $78               sei                      __sei
+                                                      sei
+                                                  
+                                                      ; clv
+                                                  
+$13F4: $B8               clv                      __clv
+                                                      clv
+                                                  
+                                                      ; nop
+                                                  
+$13F5: $EA               nop                      __nop
+                                                      nop
+                                                  
+                                                  ; illegal opcodes
+                                                      .illegal ON
+                                                      ; slo
+                                                  
+$13F6: $07 $AC           slo $AC                  __slo
+$13F8: $07 $AC           slo $AC                      slo 172
+$13FA: $17 $EC           slo $EC,x                    slo $AC
+$13FC: $17 $EC           slo $EC,x                    slo 236,x
+$13FE: $03 $D8           slo ($D8,x)                  slo $EC,x
+$1400: $03 $D8           slo ($D8,x)                  slo (216,x)
+$1402: $13 $2B           slo ($2B),y                  slo ($D8,x)
+$1404: $13 $2B           slo ($2B),y                  slo (43),y
+$1406: $0F $29 $10       slo $1029                    slo ($2B),y
+$1409: $0F $29 $10       slo $1029                    slo 4137
+$140C: $1F $59 $19       slo $1959,x                  slo $1029
+$140F: $1F $59 $19       slo $1959,x                  slo 6489,x
+$1412: $1B $9F $0C       slo $0C9F,y                  slo $1959,x
+$1415: $1B $9F $0C       slo $0C9F,y                  slo 3231,y
+                                                      slo $C9F,y
+                                                  
+                                                      ; rla
+                                                  
+$1418: $27 $C2           rla $C2                  __rla
+$141A: $27 $C2           rla $C2                      rla 194
+$141C: $37 $A8           rla $A8,x                    rla $C2
+$141E: $37 $A8           rla $A8,x                    rla 168,x
+$1420: $23 $ED           rla ($ED,x)                  rla $A8,x
+$1422: $23 $ED           rla ($ED,x)                  rla (237,x)
+$1424: $33 $0E           rla ($0E),y                  rla ($ED,x)
+$1426: $33 $0E           rla ($0E),y                  rla (14),y
+$1428: $2F $B7 $D4       rla $D4B7                    rla ($E),y
+$142B: $2F $B7 $D4       rla $D4B7                    rla 54455
+$142E: $3F $87 $47       rla $4787,x                  rla $D4B7
+$1431: $3F $87 $47       rla $4787,x                  rla 18311,x
+$1434: $3B $6C $87       rla $876C,y                  rla $4787,x
+$1437: $3B $6C $87       rla $876C,y                  rla 34668,y
+                                                      rla $876C,y
+                                                  
+                                                      ; sre
+                                                  
+$143A: $47 $D2           sre $D2                  __sre
+$143C: $47 $D2           sre $D2                      sre 210
+$143E: $57 $73           sre $73,x                    sre $D2
+$1440: $57 $73           sre $73,x                    sre 115,x
+$1442: $43 $90           sre ($90,x)                  sre $73,x
+$1444: $43 $90           sre ($90,x)                  sre (144,x)
+$1446: $53 $EF           sre ($EF),y                  sre ($90,x)
+$1448: $53 $EF           sre ($EF),y                  sre (239),y
+$144A: $4F $14 $34       sre $3414                    sre ($EF),y
+$144D: $4F $14 $34       sre $3414                    sre 13332
+$1450: $5F $34 $6D       sre $6D34,x                  sre $3414
+$1453: $5F $34 $6D       sre $6D34,x                  sre 27956,x
+$1456: $5B $1D $75       sre $751D,y                  sre $6D34,x
+$1459: $5B $1D $75       sre $751D,y                  sre 29981,y
+                                                      sre $751D,y
+                                                  
+                                                      ; rra
+                                                  
+$145C: $67 $D1           rra $D1                  __rra
+$145E: $67 $D1           rra $D1                      rra 209
+$1460: $77 $41           rra $41,x                    rra $D1
+$1462: $77 $41           rra $41,x                    rra 65,x
+$1464: $63 $06           rra ($06,x)                  rra $41,x
+$1466: $63 $06           rra ($06,x)                  rra (6,x)
+$1468: $73 $97           rra ($97),y                  rra ($6,x)
+$146A: $73 $97           rra ($97),y                  rra (151),y
+$146C: $6F $4C $F3       rra $F34C                    rra ($97),y
+$146F: $6F $4C $F3       rra $F34C                    rra 62284
+$1472: $7F $01 $FD       rra $FD01,x                  rra $F34C
+$1475: $7F $01 $FD       rra $FD01,x                  rra 64769,x
+$1478: $7B $25 $06       rra $0625,y                  rra $FD01,x
+$147B: $7B $25 $06       rra $0625,y                  rra 1573,y
+                                                      rra $625,y
+                                                  
+                                                      ; sax
+                                                  
+$147E: $87 $FC           sax $FC                  __sax
+$1480: $87 $FC           sax $FC                      sax 252
+$1482: $97 $C5           sax $C5,y                    sax $FC
+$1484: $97 $C5           sax $C5,y                    sax 197,y
+$1486: $83 $C8           sax ($C8,x)                  sax $C5,y
+$1488: $83 $C8           sax ($C8,x)                  sax (200,x)
+$148A: $8F $A4 $0C       sax $0CA4                    sax ($C8,x)
+$148D: $8F $A4 $0C       sax $0CA4                    sax 3236
+                                                      sax $CA4
+                                                  
+                                                      ; lax
+                                                  
+$1490: $A7 $41           lax $41                  __lax
+$1492: $A7 $41           lax $41                      lax 65
+$1494: $B7 $94           lax $94,y                    lax $41
+$1496: $B7 $94           lax $94,y                    lax 148,y
+$1498: $A3 $A5           lax ($A5,x)                  lax $94,y
+$149A: $A3 $A5           lax ($A5,x)                  lax (165,x)
+$149C: $B3 $96           lax ($96),y                  lax ($A5,x)
+$149E: $B3 $96           lax ($96),y                  lax (150),y
+$14A0: $AF $65 $DA       lax $DA65                    lax ($96),y
+$14A3: $AF $65 $DA       lax $DA65                    lax 55909
+$14A6: $BF $4D $EE       lax $EE4D,y                  lax $DA65
+$14A9: $BF $4D $EE       lax $EE4D,y                  lax 61005,y
+                                                      lax $EE4D,y
+                                                  
+                                                      ; dcp
+                                                  
+$14AC: $C7 $AF           dcp $AF                  __dcp
+$14AE: $C7 $AF           dcp $AF                      dcp 175
+$14B0: $D7 $9E           dcp $9E,x                    dcp $AF
+$14B2: $D7 $9E           dcp $9E,x                    dcp 158,x
+$14B4: $C3 $AF           dcp ($AF,x)                  dcp $9E,x
+$14B6: $C3 $AF           dcp ($AF,x)                  dcp (175,x)
+$14B8: $D3 $45           dcp ($45),y                  dcp ($AF,x)
+$14BA: $D3 $45           dcp ($45),y                  dcp (69),y
+$14BC: $CF $D3 $CB       dcp $CBD3                    dcp ($45),y
+$14BF: $CF $D3 $CB       dcp $CBD3                    dcp 52179
+$14C2: $DF $9D $D9       dcp $D99D,x                  dcp $CBD3
+$14C5: $DF $9D $D9       dcp $D99D,x                  dcp 55709,x
+$14C8: $DB $43 $FB       dcp $FB43,y                  dcp $D99D,x
+$14CB: $DB $43 $FB       dcp $FB43,y                  dcp 64323,y
+                                                      dcp $FB43,y
+                                                  
+                                                      ; isc
+                                                  
+$14CE: $E7 $FC           isc $FC                  __isc
+$14D0: $E7 $FC           isc $FC                      isc 252
+$14D2: $F7 $74           isc $74,x                    isc $FC
+$14D4: $F7 $74           isc $74,x                    isc 116,x
+$14D6: $E3 $53           isc ($53,x)                  isc $74,x
+$14D8: $E3 $53           isc ($53,x)                  isc (83,x)
+$14DA: $F3 $2E           isc ($2E),y                  isc ($53,x)
+$14DC: $F3 $2E           isc ($2E),y                  isc (46),y
+$14DE: $EF $69 $F2       isc $F269                    isc ($2E),y
+$14E1: $EF $69 $F2       isc $F269                    isc 62057
+$14E4: $FF $D0 $21       isc $21D0,x                  isc $F269
+$14E7: $FF $D0 $21       isc $21D0,x                  isc 8656,x
+$14EA: $FB $D9 $9A       isc $9AD9,y                  isc $21D0,x
+$14ED: $FB $D9 $9A       isc $9AD9,y                  isc 39641,y
+                                                      isc $9AD9,y
+                                                  
+                                                      ; anc
+                                                  
+$14F0: $0B $63           anc #$63                 __anc
+$14F2: $0B $63           anc #$63                     anc #99
+                                                      anc #$63
+                                                  
+                                                      ; anc2
+                                                  
+$14F4: $2B $2E           anc2 #$2E                __anc2
+$14F6: $2B $2E           anc2 #$2E                    anc2 #46
+                                                      anc2 #$2E
+                                                  
+                                                      ; alr
+                                                  
+$14F8: $4B $6B           alr #$6B                 __alr
+$14FA: $4B $6B           alr #$6B                     alr #107
+                                                      alr #$6B
+                                                  
+                                                      ; arr
+                                                  
+$14FC: $6B $45           arr #$45                 __arr
+$14FE: $6B $45           arr #$45                     arr #69
+                                                      arr #$45
+                                                  
+                                                      ; xaa
+                                                  
+$1500: $8B $7B           xaa #$7B                 __xaa
+$1502: $8B $7B           xaa #$7B                     xaa #123
+                                                      xaa #$7B
+                                                  
+                                                      ; lax2
+                                                  
+$1504: $AB $C4           lax2 #$C4                __lax2
+$1506: $AB $C4           lax2 #$C4                    lax2 #196
+                                                      lax2 #$C4
+                                                  
+                                                      ; axs
+                                                  
+$1508: $CB $22           axs #$22                 __axs
+$150A: $CB $22           axs #$22                     axs #34
+                                                      axs #$22
+                                                  
+                                                      ; sbc2
+                                                  
+$150C: $EB $F2           sbc2 #$F2                __sbc2
+$150E: $EB $F2           sbc2 #$F2                    sbc2 #242
+                                                      sbc2 #$F2
+                                                  
+                                                      ; ahx
+                                                  
+$1510: $93 $84           ahx ($84),y              __ahx
+$1512: $93 $84           ahx ($84),y                  ahx (132),y
+$1514: $9F $7F $08       ahx $087F,y                  ahx ($84),y
+$1517: $9F $7F $08       ahx $087F,y                  ahx 2175,y
+                                                      ahx $87F,y
+                                                  
+                                                      ; shy
+                                                  
+$151A: $9C $19 $46       shy $4619,x              __shy
+$151D: $9C $19 $46       shy $4619,x                  shy 17945,x
+                                                      shy $4619,x
+                                                  
+                                                      ; shx
+                                                  
+$1520: $9E $78 $53       shx $5378,y              __shx
+$1523: $9E $78 $53       shx $5378,y                  shx 21368,y
+                                                      shx $5378,y
+                                                  
+                                                      ; tas
+                                                  
+$1526: $9B $F9 $D0       tas $D0F9,y              __tas
+$1529: $9B $F9 $D0       tas $D0F9,y                  tas 53497,y
+                                                      tas $D0F9,y
+                                                  
+                                                      ; las
+                                                  
+$152C: $BB $B8 $89       las $89B8,y              __las
+$152F: $BB $B8 $89       las $89B8,y                  las 35256,y
+                                                      las $89B8,y
+                                                  
+                                                      .illegal OFF
+                                                  
+                                                      ; maxOpcode
+$1532: $65 $6E $64       .db 'e', 'n', 'd'        __maxOpcode
+$1535: $00               .db $00                  
+                                                      .db "end",0
+                                                  
+                                                  
+                                                      ; loop test
+                                                      .var count, aaa, bbb
+                                                      .for count = 1 .To 3 .step 2
+                                                          aaa = count
+                                                          .while (aaa<6)
+                                                              aaa = aaa + 1
+                                                              ldx #aaa
+                                                              .if (aaa>4)
+                                                                  brk
+                                                                  brk
+                                                              .else
+                                                                  bbb = 0
+                                                                  .repeat
+                                                                      nop
+                                                                      bbb = bbb + 2
+                                                                  .until (bbb > 6)
+                                                                  .do
+                                                                      lda #bbb
+                                                                      bbb = bbb + 5
+                                                                  .while bbb < 15
+                                                              .endif
+$1536: $A2 $02           ldx #$02                         .wend
+$1538: $EA               nop                      
+$1539: $EA               nop                      
+$153A: $EA               nop                      
+$153B: $EA               nop                      
+$153C: $A9 $08           lda #$08                 
+$153E: $A9 $0D           lda #$0D                 
+$1540: $A2 $03           ldx #$03                 
+$1542: $EA               nop                      
+$1543: $EA               nop                      
+$1544: $EA               nop                      
+$1545: $EA               nop                      
+$1546: $A9 $08           lda #$08                 
+$1548: $A9 $0D           lda #$0D                 
+$154A: $A2 $04           ldx #$04                 
+$154C: $EA               nop                      
+$154D: $EA               nop                      
+$154E: $EA               nop                      
+$154F: $EA               nop                      
+$1550: $A9 $08           lda #$08                 
+$1552: $A9 $0D           lda #$0D                 
+$1554: $A2 $05           ldx #$05                 
+$1556: $00               brk                      
+$1557: $00               brk                      
+$1558: $A2 $06           ldx #$06                 
+$155A: $00               brk                      
+$155B: $00               brk                      
+$155C: $A2 $04           ldx #$04                 
+$155E: $EA               nop                      
+$155F: $EA               nop                      
+$1560: $EA               nop                      
+$1561: $EA               nop                      
+$1562: $A9 $08           lda #$08                 
+$1564: $A9 $0D           lda #$0D                 
+$1566: $A2 $05           ldx #$05                 
+$1568: $00               brk                      
+$1569: $00               brk                      
+$156A: $A2 $06           ldx #$06                 
+$156C: $00               brk                      
+$156D: $00               brk                      
+                                                      .next count
+                                                  
+                                                      .macro macroNoParam
+                                                          nop
+                                                      .endm
+                                                       
+                                                      .macro macroTest
+                                                          lda @0
+                                                          sta @1
+                                                          .if @0 <= @2
+                                                              macroTest @0 + 1, @1 + 1
+                                                          .endif
+                                                      .endm
+$156E: $48 $65 $6C       .db 'H', 'e', 'l'            
+$1571: $6C $6F $20       .db 'l', 'o', ' '        
+$1574: $57 $6F $72       .db 'W', 'o', 'r'        
+$1577: $6C $64 $00       .db 'l', 'd', $00        
+                                                      .dw  "Hello World"
+$157A: $A5 $FE           lda $FE                      
+$157C: $8D $00 $C0       sta $C000                
+$157F: $A5 $FF           lda $FF                  
+$1581: $8D $01 $C0       sta $C001                
+$1584: $AD $00 $01       lda $0100                
+$1587: $8D $02 $C0       sta $C002                
+$158A: $AD $01 $01       lda $0101                
+$158D: $8D $03 $C0       sta $C003                
+$1590: $AD $02 $01       lda $0102                
+$1593: $8D $04 $C0       sta $C004                
+$1596: $60               rts                          macroTest $FE, $C000, $101
+                                                      rts
+$1597: $F3 $FF           .db $F3, $FF             
+                                                      .dw $FFF3
+                                                      
+$1599: $F0 $03           beq $159E                    .warn OFF
+$159B: $4C $90 $11       jmp $1190                
+                                                      bne __ora
+                                                      .warn on
+$159E: $EA               nop                          
+                                                      macroNoParam
+                                                      
+                                                      .section  end
+$159F: $4C $85 $11       jmp $1185                        end
+$15A2: $60               rts                                  jmp start
+                                                              rts
+                                                      .endsection       
+                                                  
+                                                  
+                                                  end

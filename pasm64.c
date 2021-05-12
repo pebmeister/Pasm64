@@ -52,12 +52,12 @@ enum ExprExpansionType
 //
 // function pointer to expand node
 //
-typedef int (*Expr)(parseNodePtr p);
+typedef int (*Expr)(ParseNodePtr p);
 
 //
 // table lookup for operators
 //
-struct OpTable
+struct op_table
 {
     int tag;
     Expr function;
@@ -90,64 +90,64 @@ const int Dec[] =
     if ((p->nops < (mn)) || (p->nops >(mx))) FatalError(method, error_invalid_number_of_ops); \
     if (PC > MaxAddress) FatalError(method, error_program_counter_out_of_range)
 
-char* CurrentSection = NULL;
+char* CurrentScope = NULL;
 
 // functions to determine if a symbol is defined
-int IsUnInitializedSymbol(parseNodePtr p);
+int IsUnInitializedSymbol(ParseNodePtr p);
 
 // 
 // function prototypes
 //
-int ExConstant(parseNodePtr p);
-int ExSymbol(parseNodePtr p);
-int ExMacroExpansion(parseNodePtr p);
-int ExMacroSymbol(parseNodePtr p);
-int ExData(parseNodePtr p);
-int ExOpCode(parseNodePtr p);
-int ExOperator(parseNodePtr p);
-int ExOprLoByte(parseNodePtr p);
-int ExOprHiByte(parseNodePtr p);
-int ExOprPcAssign(parseNodePtr p);
-int ExOprOrg(parseNodePtr p);
-int ExOprExpressionList(parseNodePtr p);
-int ExOprMacroDefinition(parseNodePtr p);
-int ExOprWhile(parseNodePtr p);
-int ExOprRepeat(parseNodePtr p);
-int ExOprDo(parseNodePtr p);
-int ExOprFor(parseNodePtr p);
-int ExOprIf(parseNodePtr p);
-int ExOprPrint(parseNodePtr p);
-int ExOprPrintAll(parseNodePtr p);
-int ExOprDs(parseNodePtr p);
-int ExOprStatement(parseNodePtr p);
-int ExOprEnd(parseNodePtr p);
-int ExOprEqu(parseNodePtr p);
-int ExOprUMinus(parseNodePtr p);
-int ExOprOnesComp(parseNodePtr p);
-int ExOprPlus(parseNodePtr p);
-int ExOprMinus(parseNodePtr p);
-int ExOprMultiply(parseNodePtr p);
-int ExOprDivide(parseNodePtr p);
-int ExOprBitOr(parseNodePtr p);
-int ExOprBitAnd(parseNodePtr p);
-int ExOprXor(parseNodePtr p);
-int ExOprLessThan(parseNodePtr p);
-int ExOprGreaterThan(parseNodePtr p);
-int ExOprOr(parseNodePtr p);
-int ExOprAnd(parseNodePtr p);
-int ExOprEqual(parseNodePtr p);
-int ExOprNotEqual(parseNodePtr p);
-int ExOprGreaterThanOrEqual(parseNodePtr p);
-int ExOprLessThanOrEqual(parseNodePtr p);
-int ExOprShiftLeft(parseNodePtr p);
-int ExOprShiftRight(parseNodePtr p);
-int ExOprNot(parseNodePtr p);
-int ExOprForReg(parseNodePtr p);
-int ExOprSection(parseNodePtr p);
-int ExOprEndSection(parseNodePtr p);
-int ExOprVar(parseNodePtr p);
-int ExOprInclude(parseNodePtr p);
-int ExOprLoad(parseNodePtr p);
+int ExConstant(ParseNodePtr p);
+int ExSymbol(ParseNodePtr p);
+int ExMacroExpansion(ParseNodePtr p);
+int ExMacroSymbol(ParseNodePtr p);
+int ExData(ParseNodePtr p);
+int ExOpCode(ParseNodePtr p);
+int ExOperator(ParseNodePtr p);
+int ExOprLoByte(ParseNodePtr p);
+int ExOprHiByte(ParseNodePtr p);
+int ExOprPcAssign(ParseNodePtr p);
+int ExOprOrg(ParseNodePtr p);
+int ExOprExpressionList(ParseNodePtr p);
+int ExOprMacroDefinition(ParseNodePtr p);
+int ExOprWhile(ParseNodePtr p);
+int ExOprRepeat(ParseNodePtr p);
+int ExOprDo(ParseNodePtr p);
+int ExOprFor(ParseNodePtr p);
+int ExOprIf(ParseNodePtr p);
+int ExOprPrint(ParseNodePtr p);
+int ExOprPrintAll(ParseNodePtr p);
+int ExOprDs(ParseNodePtr p);
+int ExOprStatement(ParseNodePtr p);
+int ExOprEnd(ParseNodePtr p);
+int ExOprEqu(ParseNodePtr p);
+int ExOprUMinus(ParseNodePtr p);
+int ExOprOnesComp(ParseNodePtr p);
+int ExOprPlus(ParseNodePtr p);
+int ExOprMinus(ParseNodePtr p);
+int ExOprMultiply(ParseNodePtr p);
+int ExOprDivide(ParseNodePtr p);
+int ExOprBitOr(ParseNodePtr p);
+int ExOprBitAnd(ParseNodePtr p);
+int ExOprXor(ParseNodePtr p);
+int ExOprLessThan(ParseNodePtr p);
+int ExOprGreaterThan(ParseNodePtr p);
+int ExOprOr(ParseNodePtr p);
+int ExOprAnd(ParseNodePtr p);
+int ExOprEqual(ParseNodePtr p);
+int ExOprNotEqual(ParseNodePtr p);
+int ExOprGreaterThanOrEqual(ParseNodePtr p);
+int ExOprLessThanOrEqual(ParseNodePtr p);
+int ExOprShiftLeft(ParseNodePtr p);
+int ExOprShiftRight(ParseNodePtr p);
+int ExOprNot(ParseNodePtr p);
+int ExOprForReg(ParseNodePtr p);
+int ExOprSection(ParseNodePtr p);
+int ExOprEndSection(ParseNodePtr p);
+int ExOprVar(ParseNodePtr p);
+int ExOprInclude(ParseNodePtr p);
+int ExOprLoad(ParseNodePtr p);
 
 //
 // Program Counter
@@ -192,7 +192,7 @@ int ForYCount = 0;
 //
 // node to inject a byte
 //
-parseNodePtr GenByteNode = NULL;
+ParseNodePtr GenByteNode = NULL;
 
 //
 // expansion type for expressions
@@ -203,7 +203,7 @@ enum ExprExpansionType ExpansionType = macro_parameter;
 // function table for 
 // operator expansion
 //
-struct OpTable ExOprTable [] =
+struct op_table ExOprTable [] =
 {
     { LOBYTE,       ExOprLoByte             },
     { HIBYTE,       ExOprHiByte             },
@@ -251,29 +251,29 @@ struct OpTable ExOprTable [] =
     { INC,          ExOprInclude            },
     { LOAD,         ExOprLoad               },
 };
-#define NUM_OPR_EXP (sizeof(ExOprTable) / sizeof(struct OpTable))
+#define NUM_OPR_EXP (sizeof(ExOprTable) / sizeof(struct op_table))
 
 //
 // function table for node expansion
 //
-struct OpTable ExTable[] =
+struct op_table ExTable[] =
 {
     { type_con,      ExConstant              },
     { type_id,       ExSymbol                },
-    { type_macro_id,  ExMacroSymbol           },
-    { type_macro_ex,  ExMacroExpansion        },
+    { type_macro_id,  ExMacroSymbol          },
+    { type_macro_ex,  ExMacroExpansion       },
     { type_data,     ExData                  },
-    { type_op_code,   ExOpCode                },
+    { type_op_code,   ExOpCode               },
     { type_opr,      ExOperator              }
 };
-#define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct OpTable))
+#define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct op_table))
 
 //
 // Compare function for qsort
 //
 int OpCmpfunc (const void * a, const void * b)
 {
-    return ((const struct OpTable*)a)->tag - ((const struct OpTable*)b)->tag;
+    return ((const struct op_table*)a)->tag - ((const struct op_table*)b)->tag;
 }
 
 // 
@@ -282,8 +282,8 @@ int OpCmpfunc (const void * a, const void * b)
 //
 void InitEx(void)
 {
-    qsort(&ExOprTable, NUM_OPR_EXP, sizeof(struct OpTable), OpCmpfunc);
-    qsort(&ExTable, NUM_EX_EXP, sizeof(struct OpTable), OpCmpfunc);
+    qsort(&ExOprTable, NUM_OPR_EXP, sizeof(struct op_table), OpCmpfunc);
+    qsort(&ExTable, NUM_EX_EXP, sizeof(struct op_table), OpCmpfunc);
 }
 
 int PlusMinusSymNameIsValid(char* name)
@@ -300,7 +300,7 @@ int PlusMinusSymNameIsValid(char* name)
 //
 // search a an entry in a table
 //
-struct OpTable* BSearch(const int search, struct OpTable* table, const int size)
+struct op_table* BSearch(const int search, struct op_table* table, const int size)
 {
     int first = 0;
     int last = size - 1;
@@ -326,7 +326,7 @@ struct OpTable* BSearch(const int search, struct OpTable* table, const int size)
 //
 // constant node
 //
-int ExConstant(parseNodePtr p)
+int ExConstant(ParseNodePtr p)
 {
     const char* method = "ExConstant";
     CHECK_OPS(0, 0);
@@ -335,14 +335,13 @@ int ExConstant(parseNodePtr p)
     {
         if (p->con.value != PC)
         {
-            SymbolValueChanged++;
             p->con.value = PC;
         }
     }
     return p->con.value;
 }
 
-int ExOprInclude(parseNodePtr p)
+int ExOprInclude(ParseNodePtr p)
 {
     const char* method = "ExOprInclude";
     CHECK_OPS(1, 1);
@@ -353,7 +352,7 @@ int ExOprInclude(parseNodePtr p)
     return 1;
 }
 
-int ExOprLoad(parseNodePtr p)
+int ExOprLoad(ParseNodePtr p)
 {
     const char* method = "ExOprLoad";
     CHECK_OPS(1, 1);
@@ -397,13 +396,13 @@ int ExOprLoad(parseNodePtr p)
 //
 // Variable
 //
-int ExOprVar(parseNodePtr p)
+int ExOprVar(ParseNodePtr p)
 {
     const char* method = "ExOprVar";
 
     CHECK_OPS(1, 2);
 
-    const parseNodePtr pp = p->op[0];
+    const ParseNodePtr pp = p->op[0];
     if (pp)
     {
         ExpansionType = symbol;
@@ -416,7 +415,7 @@ int ExOprVar(parseNodePtr p)
 //
 // symbol
 //
-int ExSymbol(parseNodePtr p)
+int ExSymbol(ParseNodePtr p)
 {
     const char* method = "ExSymbol";
 
@@ -459,7 +458,7 @@ int ExSymbol(parseNodePtr p)
         sym = p->id.i;
         if (sym == NULL)
         {
-            FatalError(method, error_outof_memory);
+            FatalError(method, error_out_of_memory);
             return 0;
         }
     }
@@ -469,15 +468,14 @@ int ExSymbol(parseNodePtr p)
 //
 // Reg loop
 //
-int ExOprForReg(parseNodePtr p)
+int ExOprForReg(ParseNodePtr p)
 {
     const char* method = "ExOprForReg";
 
     // must convert to 1 or 0
     const int isRegX = p->opr.oper == REGX ? 1 : 0;
 
-    parseNodePtr cmpNode;
-    parseNodePtr loopBranch = NULL;
+    ParseNodePtr loopBranch = NULL;
 
     const int cmpOp = Cmp[isRegX];
     const int ldOp = Ld[isRegX];
@@ -531,7 +529,7 @@ int ExOprForReg(parseNodePtr p)
     }
 
     // inject (ldx | ldy) #start opcode node
-    const parseNodePtr loopInitialize = Opcode(ldOp, I, 1, Con(start, 0));
+    const ParseNodePtr loopInitialize = Opcode(ldOp, I, 1, Con(start, 0));
     Ex(loopInitialize);
 
     // save program counter
@@ -551,12 +549,13 @@ int ExOprForReg(parseNodePtr p)
     }
 
     // inject inx or dex | iny or dey
-    const parseNodePtr loopNext = Opcode(incflag > 0 ? incOp : decOp, i, 0);
+    const ParseNodePtr loopNext = Opcode(incflag > 0 ? incOp : decOp, i, 0);
     Ex(loopNext);
 
     // check to see if we need a compare
     if (end != 0)
     {
+        ParseNodePtr cmpNode;
         if (incflag > 0 && end < 255)
         {
             cmpNode = Opcode(cmpOp, I, 1, Con(end + 1, 0));
@@ -596,7 +595,7 @@ int ExOprForReg(parseNodePtr p)
 //
 // Data node
 //
-int ExData(parseNodePtr p)
+int ExData(ParseNodePtr p)
 {
     const char* method = "ExData";
 
@@ -612,39 +611,39 @@ int ExData(parseNodePtr p)
         ExpansionType = data_byte;
         DataSize = p->data.size;
     }
-    Ex((parseNodePtr)p->data.data);
+    Ex((ParseNodePtr)p->data.data);
     return 0;
 }
 
 //
 // Section
-int ExOprSection(parseNodePtr p)
+int ExOprSection(ParseNodePtr p)
 {
     const char* method = "ExOprSection";
 
     CHECK_OPS(1, 1);
 
     char* name = p->op[0]->id.name;
-    if (CurrentSection != NULL)
+    if (CurrentScope != NULL)
     {
-        const int len = (int)(strlen(CurrentSection) + strlen(name) + 2);
+        const int len = (int)(strlen(CurrentScope) + strlen(name) + 2);
         char* tempName = (char*)ALLOCATE(len);
         if (tempName == NULL)
         {
-            FatalError(method, error_outof_memory);
+            FatalError(method, error_out_of_memory);
             return 0;
         }
 
-        sprintf(tempName, "%s.%s", CurrentSection, name);
-        FREE(CurrentSection);
-        CurrentSection = tempName;
+        sprintf(tempName, "%s.%s", CurrentScope, name);
+        FREE(CurrentScope);
+        CurrentScope = tempName;
     }
     else
     {
-        CurrentSection = name;
-        if (CurrentSection == NULL)
+        CurrentScope = STR_DUP(name);
+        if (CurrentScope == NULL)
         {
-            FatalError(method, error_outof_memory);
+            FatalError(method, error_out_of_memory);
             return 0;
         }
     }
@@ -653,31 +652,31 @@ int ExOprSection(parseNodePtr p)
 }
 
 /// <summary>
-/// end section.
+/// end scope.
 /// </summary>
 /// <param name="p">The parseNode.</param>
 /// <returns>int.</returns>
-int ExOprEndSection(parseNodePtr p)
+int ExOprEndSection(ParseNodePtr p)
 {
     const char* method = "ExOprSection";
 
     CHECK_OPS(0, 0);
 
-    if (CurrentSection == NULL)
+    if (CurrentScope == NULL)
     {
         Error(method, error_end_section_without_section);
         return 0;
     }
 
-    int index = (int) strlen(CurrentSection);
-    while (index >= 0 && CurrentSection[index] != '.')
+    int index = (int) strlen(CurrentScope);
+    while (index >= 0 && CurrentScope[index] != '.')
         index--;
     if (index >= 0)
-        CurrentSection[index] = 0;
+        CurrentScope[index] = 0;
     else
     {
-        FREE(CurrentSection);
-        CurrentSection = NULL;
+        FREE(CurrentScope);
+        CurrentScope = NULL;
     }
     return 0;
 }
@@ -685,15 +684,12 @@ int ExOprEndSection(parseNodePtr p)
 //
 // Opcode
 //
-int ExOpCode(parseNodePtr p)
+int ExOpCode(ParseNodePtr p)
 {
     int modeCheck = p->opcode.mode;
     const int saveMode = p->opcode.mode;
-    int code2;
     const int saveOpCode = p->opcode.opcode;
     int opBytes;
-    int largeOp = 0;
-    int outOfRange = 0;
     const char* method = "ExOpCode";
 
     p->opcode.pc = PC;
@@ -746,10 +742,16 @@ int ExOpCode(parseNodePtr p)
 
     if (!HasUnInitializedSymbol(p))
     {
+        int outOfRange = 0;
+        int largeOp = 0;
+        int code2;
         for (int index = 0; index < p->nops; index++)
         {
             const int opValue = Ex(p->op[index]);
+            
             largeOp = largeOp | ((opValue & ~0xFF) != 0);
+
+            
             outOfRange =  outOfRange | ((((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp)));
             if (outOfRange)
             {
@@ -797,12 +799,12 @@ int ExOpCode(parseNodePtr p)
                     code2 = GetOpCode(p->opcode.instruction, r);
                     if (code2 != -1)
                     {
-                        const parseNodePtr target = p->op[index];
-                        const parseNodePtr jmp = Opcode(_jmp, a, 1, target);
+                        const ParseNodePtr target = p->op[index];
+                        const ParseNodePtr jmp = Opcode(_jmp, a, 1, target);
 
                         if (target == NULL || jmp == NULL)
                         {
-                            FatalError(method, error_outof_memory);
+                            FatalError(method, error_out_of_memory);
                             return 0;
                         }
 
@@ -864,7 +866,7 @@ int ExOpCode(parseNodePtr p)
 //
 // Operator Not
 //
-int ExOprNot(parseNodePtr p)
+int ExOprNot(ParseNodePtr p)
 {
     const char* method = "ExOprNot"; 
     CHECK_OPS(1, 1);
@@ -874,7 +876,7 @@ int ExOprNot(parseNodePtr p)
 //
 // Operator Shift left
 //
-int ExOprShiftLeft(parseNodePtr p)
+int ExOprShiftLeft(ParseNodePtr p)
 {
     const char* method = "ExOprShiftLeft";
     CHECK_OPS(2, 2);
@@ -884,7 +886,7 @@ int ExOprShiftLeft(parseNodePtr p)
 //
 // Operator Shift right
 //
-int ExOprShiftRight(parseNodePtr p)
+int ExOprShiftRight(ParseNodePtr p)
 {
     const char* method = "ExOprShiftRight";
     CHECK_OPS(2, 2);
@@ -894,7 +896,7 @@ int ExOprShiftRight(parseNodePtr p)
 //
 // Operator LoByte
 //
-int ExOprLoByte(parseNodePtr p)
+int ExOprLoByte(ParseNodePtr p)
 {
     const char* method = "ExOprLoByte";
 
@@ -908,7 +910,7 @@ int ExOprLoByte(parseNodePtr p)
 //
 // Operator HiByte
 //
-int ExOprHiByte(parseNodePtr p)
+int ExOprHiByte(ParseNodePtr p)
 {
     const char* method = "ExOprHiByte";
 
@@ -922,7 +924,7 @@ int ExOprHiByte(parseNodePtr p)
 //
 // Operator PC assign
 //
-int ExOprPcAssign(parseNodePtr p)
+int ExOprPcAssign(ParseNodePtr p)
 {
     const char* method = "ExOprPcAssign";
 
@@ -962,7 +964,7 @@ int ExOprPcAssign(parseNodePtr p)
 //
 // Operator Org
 //
-int ExOprOrg(parseNodePtr p)
+int ExOprOrg(ParseNodePtr p)
 {
     const char* method = "ExOprOrg";
 
@@ -982,7 +984,7 @@ int ExOprOrg(parseNodePtr p)
 //
 // Operator Expression List
 //
-int ExOprExpressionList(parseNodePtr p)
+int ExOprExpressionList(ParseNodePtr p)
 {
     SymbolTablePtr sym = NULL;
     const char* method = "ExOprExpressionList";
@@ -992,7 +994,7 @@ int ExOprExpressionList(parseNodePtr p)
 
     for (int index = 0; index < p->nops; index++)
     {
-        const parseNodePtr pp = p->op[index];
+        const ParseNodePtr pp = p->op[index];
         if (pp->type == type_opr && pp->opr.oper == EXPRLIST)
         {
             Ex(pp);
@@ -1051,10 +1053,10 @@ int ExOprExpressionList(parseNodePtr p)
                         Error(method, error_value_outof_range);
                         return 0;
                 }
-                if (MacroParameterIndex > MaxMacroParam)
+                if (++MacroParameterIndex > MaxMacroParam)
                     MaxMacroParam = MacroParameterIndex;
 
-                sprintf(symName, "@%d", MacroParameterIndex++);
+                sprintf(symName, "@%d", MacroParameterIndex);
                 sym = AddSymbol(symName);
                 if (sym != NULL)
                 {
@@ -1063,7 +1065,7 @@ int ExOprExpressionList(parseNodePtr p)
                 }
                 else
                 {
-                    FatalError(method, error_outof_memory);
+                    FatalError(method, error_out_of_memory);
                 }
                 break;
 
@@ -1153,7 +1155,7 @@ int ExOprExpressionList(parseNodePtr p)
 //
 // Expand macro symbol
 //
-int ExMacroSymbol(parseNodePtr p)
+int ExMacroSymbol(ParseNodePtr p)
 {
     
     const char* method = "ExMacroSymbol";
@@ -1165,14 +1167,14 @@ int ExMacroSymbol(parseNodePtr p)
     const SymbolTablePtr sym = p->id.i;
     if (! sym  || !sym->macro_node)
         return 0;
-    Ex((parseNodePtr)(sym->macro_node));
+    Ex((ParseNodePtr)(sym->macro_node));
     return sym->value;
 }
 
 //
 // macro expansion
 //
-int ExMacroExpansion(parseNodePtr p)
+int ExMacroExpansion(ParseNodePtr p)
 {
     const char* method = "ExMacroExpansion";
     CHECK_OPS(0, 0);
@@ -1182,11 +1184,11 @@ int ExMacroExpansion(parseNodePtr p)
     ExpansionType = macro_parameter;
     MacroParameterIndex = 0;
 
-    if (p->macro.macroParams != NULL)
-        Ex(((parseNodePtr)p->macro.macroParams));
+    if (p->macro.macro_params != NULL)
+        Ex(((ParseNodePtr)p->macro.macro_params));
 
     if (p->macro.macro != NULL)
-        Ex(((parseNodePtr)p->macro.macro));
+        Ex(((ParseNodePtr)p->macro.macro));
 
     PopMacroParams();
 
@@ -1196,7 +1198,7 @@ int ExMacroExpansion(parseNodePtr p)
 //
 // Expand a Macro definition
 //
-int ExOprMacroDefinition(parseNodePtr p)
+int ExOprMacroDefinition(ParseNodePtr p)
 {
     const char* method = "ExOprMacroDefinition";
 
@@ -1205,7 +1207,7 @@ int ExOprMacroDefinition(parseNodePtr p)
     const SymbolTablePtr sym = AddSymbol(p->op[0]->id.name);
     if (sym == NULL)
     {
-        FatalError(method, error_outof_memory);
+        FatalError(method, error_out_of_memory);
         return 0;
     }
     p->id.i = sym;
@@ -1219,7 +1221,7 @@ int ExOprMacroDefinition(parseNodePtr p)
 //
 // Operator While
 //
-int ExOprWhile(parseNodePtr p)
+int ExOprWhile(ParseNodePtr p)
 {
     const char* method = "ExOprWhile";
 
@@ -1241,7 +1243,7 @@ int ExOprWhile(parseNodePtr p)
 //
 // Operator Repeat
 //
-int ExOprRepeat(parseNodePtr p)
+int ExOprRepeat(ParseNodePtr p)
 {
     const char* method = "ExOprRepeat";
 
@@ -1263,7 +1265,7 @@ int ExOprRepeat(parseNodePtr p)
 //
 // Operator Do
 //
-int ExOprDo(parseNodePtr p)
+int ExOprDo(ParseNodePtr p)
 {
     const char* method = "ExOprDo";
 
@@ -1284,7 +1286,7 @@ int ExOprDo(parseNodePtr p)
 //
 // Operator For
 //
-int ExOprFor(parseNodePtr p)
+int ExOprFor(ParseNodePtr p)
 {
     SymbolTablePtr startSym = NULL;
     int val = 1;
@@ -1295,7 +1297,7 @@ int ExOprFor(parseNodePtr p)
     if (p->nops == 5)
         val = Ex(p->op[4]);
 
-    const parseNodePtr pp = p->op[0];
+    const ParseNodePtr pp = p->op[0];
     if (pp->op[0]->type == type_id)
     {
         if (pp->op[0]->id.i == NULL)
@@ -1303,7 +1305,7 @@ int ExOprFor(parseNodePtr p)
         startSym = pp->op[0]->id.i;
         if (startSym == NULL)
         {
-            FatalError(method, error_outof_memory);
+            FatalError(method, error_out_of_memory);
             return 0;
         }
     }
@@ -1314,7 +1316,7 @@ int ExOprFor(parseNodePtr p)
     const SymbolTablePtr sym = p->op[3]->id.i;
     if (sym == NULL)
     {
-        FatalError(method, error_outof_memory);
+        FatalError(method, error_out_of_memory);
         return 0;
     }
     const int endval = Ex(p->op[1]);
@@ -1358,7 +1360,7 @@ int ExOprFor(parseNodePtr p)
 //
 // ExOperator If
 //
-int ExOprIf(parseNodePtr p)
+int ExOprIf(ParseNodePtr p)
 {
     const char* method = "ExOprIf";
     CHECK_OPS(2, 3);
@@ -1377,7 +1379,7 @@ int ExOprIf(parseNodePtr p)
 //
 // Operator PrintAll
 //
-int ExOprPrintAll(parseNodePtr p)
+int ExOprPrintAll(ParseNodePtr p)
 {
     const char* method = "ExOprPrintAll";
 
@@ -1395,7 +1397,7 @@ int ExOprPrintAll(parseNodePtr p)
 //
 // Operator Print
 //
-int ExOprPrint(parseNodePtr p)
+int ExOprPrint(ParseNodePtr p)
 {
     const char* method = "ExOprPrint";
 
@@ -1414,7 +1416,7 @@ int ExOprPrint(parseNodePtr p)
 //
 // Operator Ds
 //
-int ExOprDs(parseNodePtr p)
+int ExOprDs(ParseNodePtr p)
 {
     const char* method = "ExOprDs";
 
@@ -1443,7 +1445,7 @@ int ExOprDs(parseNodePtr p)
 //
 // Operator Statement
 //
-int ExOprStatement(parseNodePtr p)
+int ExOprStatement(ParseNodePtr p)
 {
     const char* method = "ExOprStatement";
 
@@ -1462,7 +1464,7 @@ int ExOprStatement(parseNodePtr p)
 //
 // Operator End
 //
-int ExOprEnd(parseNodePtr p)
+int ExOprEnd(ParseNodePtr p)
 {
     const char* method = "ExOprEnd";
  
@@ -1474,24 +1476,29 @@ int ExOprEnd(parseNodePtr p)
 //
 // Operator Equate
 //
-int ExOprEqu(parseNodePtr p)
+int ExOprEqu(ParseNodePtr p)
 {
     const char* method = "ExOprEqu";
 
     CHECK_OPS(2, 2);
 
+    const int op = Ex(p->op[1]);
+
     if (StrICmp(p->op[0]->id.name, "-" ) == 0)
     {
+
         int index = FindMinusSymDef(CurFileName, yylineno);
-        if (index < 0) AddMinusSym(CurFileName, yylineno);
+        if (index < 0) AddMinusSym(CurFileName, yylineno, op);
 
         index = FindMinusSym((int)strlen(p->op[0]->id.name), CurFileName, yylineno);
-
-        const int op = Ex(p->op[1]);
-        if (MinusSymTable[index].value != op)
+        
+        if (index >= 0)
         {
-            MinusSymTable[index].value = op;
-            SymbolValueChanged++;
+            if (MinusSymTable[index].value != op)
+            {
+                MinusSymTable[index].value = op;
+                SymbolValueChanged++;
+            }
         }
         return op;
     }
@@ -1499,15 +1506,17 @@ int ExOprEqu(parseNodePtr p)
     if (StrICmp(p->op[0]->id.name, "+") == 0)
     {
         int index = FindPlusSymDef(CurFileName, yylineno);
-        if (index < 0) AddPlusSym(CurFileName, yylineno);
+        if (index < 0) AddPlusSym(CurFileName, yylineno, op);
 
         index = FindPlusSym((int)strlen(p->op[0]->id.name), CurFileName, yylineno - 1);
 
-        const int op = Ex(p->op[1]);
-        if (PlusSymTable[index].value != op)
+        if (index >= 0)
         {
-            PlusSymTable[index].value = op;
-            SymbolValueChanged++;
+            if (PlusSymTable[index].value != op)
+            {
+                PlusSymTable[index].value = op;
+                SymbolValueChanged++;
+            }
         }
         return op;
     }
@@ -1517,23 +1526,23 @@ int ExOprEqu(parseNodePtr p)
     SymbolTablePtr sym = (p->op[0])->id.i;
     if (sym == NULL)
     {
-        FatalError(method, error_outof_memory);
+        FatalError(method, error_out_of_memory);
         return 0;
     }
-    const int op = Ex(p->op[1]);
+
     if (!sym->initialized || sym->value != op)
     {
-        if (!sym->section && CurrentSection)
+        if (!sym->scope && CurrentScope)
         {
-            const int len = (int)(strlen(sym->name) + strlen(CurrentSection) + 2);
+            const int len = (int)(strlen(sym->name) + strlen(CurrentScope) + 2);
             char* temp = (char*)ALLOCATE(len);
             if (temp == NULL)
             {
-                FatalError(method, error_outof_memory);
+                FatalError(method, error_out_of_memory);
                 return 0;
             }
 
-            sprintf(temp, "%s.%s", CurrentSection, sym->name);
+            sprintf(temp, "%s.%s", CurrentScope, sym->name);
             sym = AddSymbol(temp);
             FREE(temp);
         }
@@ -1546,7 +1555,7 @@ int ExOprEqu(parseNodePtr p)
 //
 // Operator UMinus
 //
-int ExOprUMinus(parseNodePtr p)
+int ExOprUMinus(ParseNodePtr p)
 {
     const char* method = "ExOprUMinus";
     CHECK_OPS(1, 1);
@@ -1556,17 +1565,21 @@ int ExOprUMinus(parseNodePtr p)
 //
 // Operator Ones Complement
 //
-int ExOprOnesComp(parseNodePtr p)
+int ExOprOnesComp(ParseNodePtr p)
 {
+    int mask = 0xFF;
     const char* method = "ExOprOnesComp";
     CHECK_OPS(1, 1);
-    return (~ Ex(p->op[0])) & 0xFFFF;
+    const int v = Ex(p->op[0]);
+    if (v & ~0xFF)
+        mask = 0xFFFF;
+    return (~ v) & mask;
 }
 
 //
 // Operator Plus
 //
-int ExOprPlus(parseNodePtr p)
+int ExOprPlus(ParseNodePtr p)
 {
     const char* method = "ExOprPlus";
     CHECK_OPS(2, 2);
@@ -1576,7 +1589,7 @@ int ExOprPlus(parseNodePtr p)
 //
 // Operator Minus
 //
-int ExOprMinus(parseNodePtr p)
+int ExOprMinus(ParseNodePtr p)
 {
     const char* method = "ExOprMinus";
     CHECK_OPS(2, 2);
@@ -1586,7 +1599,7 @@ int ExOprMinus(parseNodePtr p)
 //
 // Operator Multiply
 //
-int ExOprMultiply(parseNodePtr p)
+int ExOprMultiply(ParseNodePtr p)
 {
     const char* method = "ExOprMultiply";
     CHECK_OPS(2, 2);
@@ -1596,7 +1609,7 @@ int ExOprMultiply(parseNodePtr p)
 //
 // Operator Divide
 //
-int ExOprDivide(parseNodePtr p)
+int ExOprDivide(ParseNodePtr p)
 {
     const char* method = "ExOprDivide";
     CHECK_OPS(2, 2);
@@ -1612,7 +1625,7 @@ int ExOprDivide(parseNodePtr p)
 //
 // Operator BitOr
 //
-int ExOprBitOr(parseNodePtr p)
+int ExOprBitOr(ParseNodePtr p)
 {
     const char* method = "ExOprBitOr";
     CHECK_OPS(2, 2);
@@ -1622,7 +1635,7 @@ int ExOprBitOr(parseNodePtr p)
 //
 // Operator BitAnd
 //
-int ExOprBitAnd(parseNodePtr p)
+int ExOprBitAnd(ParseNodePtr p)
 {
     const char* method = "ExOprBitAnd";
     CHECK_OPS(2, 2);
@@ -1632,7 +1645,7 @@ int ExOprBitAnd(parseNodePtr p)
 //
 // Operator XOR
 //
-int ExOprXor(parseNodePtr p)
+int ExOprXor(ParseNodePtr p)
 {
     const char* method = "ExOprXor";
     CHECK_OPS(2, 2);
@@ -1642,7 +1655,7 @@ int ExOprXor(parseNodePtr p)
 //
 // Operator LessThan
 //
-int ExOprLessThan(parseNodePtr p)
+int ExOprLessThan(ParseNodePtr p)
 {
     const char* method = "ExOprLessThan";
     CHECK_OPS(2, 2);
@@ -1652,7 +1665,7 @@ int ExOprLessThan(parseNodePtr p)
 //
 // Operator GreaterThan
 //
-int ExOprGreaterThan(parseNodePtr p)
+int ExOprGreaterThan(ParseNodePtr p)
 {
     const char* method = "ExOprGreaterThan";
     CHECK_OPS(2, 2);
@@ -1662,7 +1675,7 @@ int ExOprGreaterThan(parseNodePtr p)
 //
 // Operator Or
 //
-int ExOprOr(parseNodePtr p)
+int ExOprOr(ParseNodePtr p)
 {
     const char* method = "ExOprOr";
     CHECK_OPS(2, 2);
@@ -1672,7 +1685,7 @@ int ExOprOr(parseNodePtr p)
 //
 // Operator And
 //
-int ExOprAnd(parseNodePtr p)
+int ExOprAnd(ParseNodePtr p)
 {
     const char* method = "ExOprAnd";
     CHECK_OPS(2, 2);
@@ -1682,7 +1695,7 @@ int ExOprAnd(parseNodePtr p)
 //
 // Operator Equals
 //
-int ExOprEqual(parseNodePtr p)
+int ExOprEqual(ParseNodePtr p)
 {
     const char* method = "ExOprEqual";
     CHECK_OPS(2, 2);
@@ -1692,7 +1705,7 @@ int ExOprEqual(parseNodePtr p)
 //
 // Operator Not Equal
 //
-int ExOprNotEqual(parseNodePtr p)
+int ExOprNotEqual(ParseNodePtr p)
 {
     const char* method = "ExOprNotEqual";
     CHECK_OPS(2, 2);
@@ -1702,7 +1715,7 @@ int ExOprNotEqual(parseNodePtr p)
 //
 // Operator Greater Than Or Equal
 //
-int ExOprGreaterThanOrEqual(parseNodePtr p)
+int ExOprGreaterThanOrEqual(ParseNodePtr p)
 {
     const char* method = "ExOprGreaterThanOrEqual";
     CHECK_OPS(2, 2);
@@ -1712,7 +1725,7 @@ int ExOprGreaterThanOrEqual(parseNodePtr p)
 //
 // Operator LessThan Or Equal
 //
-int ExOprLessThanOrEqual(parseNodePtr p)
+int ExOprLessThanOrEqual(ParseNodePtr p)
 {
     const char* method = "ExOprLessThanOrEqual";
     CHECK_OPS(2, 2);
@@ -1722,11 +1735,11 @@ int ExOprLessThanOrEqual(parseNodePtr p)
 //
 // Expand an operator
 //
-int ExOperator(parseNodePtr p)
+int ExOperator(ParseNodePtr p)
 {
     const char* method = "ExOperator";
 
-    struct OpTable* entry = BSearch(p->opr.oper, ExOprTable, NUM_OPR_EXP);
+    struct op_table* entry = BSearch(p->opr.oper, ExOprTable, NUM_OPR_EXP);
     if (entry)
         return entry->function(p);
 
@@ -1739,12 +1752,10 @@ int ExOperator(parseNodePtr p)
 /// </summary>
 /// <param name="p">The parseNodePtr p.</param>
 /// <returns>int.</returns>
-int Ex(parseNodePtr p)
+int Ex(ParseNodePtr p)
 {
 
     const char* method = "Ex";
-
-    // VALIDATE_TREE
 
     ExLevel++;
 
@@ -1754,13 +1765,11 @@ int Ex(parseNodePtr p)
         return 0;
     }
 
-    struct OpTable* entry = BSearch(p->type, ExTable, NUM_EX_EXP);
+    struct op_table* entry = BSearch(p->type, ExTable, NUM_EX_EXP);
     if (entry)
     {
         const int result = entry->function(p);
         ExLevel--;
-
-        // VALIDATE_TREE
 
         return result;
     }
@@ -1772,10 +1781,10 @@ int Ex(parseNodePtr p)
 }
 
 /// <summary>
-/// Determines if p IS an initialized symbol.
+/// Determines if p is an initialized symbol.
 /// </summary>
 /// <param name="p">The node pointer.</param>
-int IsUnInitializedSymbol(parseNodePtr p)
+int IsUnInitializedSymbol(ParseNodePtr p)
 {
     if (p->type == type_id)
     {
@@ -1794,7 +1803,7 @@ int IsUnInitializedSymbol(parseNodePtr p)
 /// Determines p has uninitialized symbol
 /// </summary>
 /// <param name="p">The p.</param>
-int HasUnInitializedSymbol(parseNodePtr p)
+int HasUnInitializedSymbol(ParseNodePtr p)
 {
     for (int index = 0; index < p->nops; index++)
     {

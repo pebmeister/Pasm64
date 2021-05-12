@@ -8,6 +8,7 @@
 #include "str.h"
 #include "mem.h"
 
+#pragma warning(disable:4996)
 
 #define PATH_MAX  4096
 
@@ -23,6 +24,7 @@ FILE* OpenFile(const char* file, char* mode)
     for (char* dir = Directories; *dir != 0;)
     {
         char* p = Path;
+
         while (*dir != 0 && *dir != ';')
         {
             *p++ = *dir++;
@@ -34,6 +36,8 @@ FILE* OpenFile(const char* file, char* mode)
             return fd;
 
         if (*dir == ';')
+            dir++;
+        while (*dir == ' ' || *dir == '\t')
             dir++;
     }
     return NULL;
@@ -68,11 +72,11 @@ FileLine* ReadFileLines(const char* fileName)
             }
             if (fileNode == NULL)
             {
-                Error(module, error_outof_memory);
+                Error(module, error_out_of_memory);
                 return NULL;
             }
             memset(fileNode, 0, sizeof(FileLine));
-            fileNode->line = StrDup(InternalBuffer);
+            fileNode->line = STR_DUP(InternalBuffer);
             fileNode->line_number = line++;
         }
     }

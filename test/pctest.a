@@ -1,0 +1,10 @@
+
+    .org $c000
+    
+    .repeat
+        .byte 1
+    .until * > $C0FF
+    
+    nop
+    
+    

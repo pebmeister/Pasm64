@@ -24,7 +24,7 @@ int TotalBytesWritten = 0;
 /// </summary>
 /// <param name="p">The parseNode.</param>
 /// <returns>int.</returns>
-int GenerateOut(parseNodePtr p)
+int GenerateOut(ParseNodePtr p)
 {
     size_t bytesWritten;
     int op;
@@ -241,7 +241,7 @@ int GenerateOut(parseNodePtr p)
 /// </summary>
 /// <param name="p">The parseNode.</param>
 /// <returns>int.</returns>
-int GetOpByteCount(parseNodePtr p)
+int GetOpByteCount(ParseNodePtr p)
 {
     int byteCount;
     const char* module = "GetOpByteCount";

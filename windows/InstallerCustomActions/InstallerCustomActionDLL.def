@@ -1,0 +1,4 @@
+LIBRARY "InstallerCustomActions"
+EXPORTS
+	SetPathEnvironmentVariable
+    RemovePathEnvironmentVariable

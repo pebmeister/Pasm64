@@ -1,0 +1,8 @@
+﻿  pch.cpp
+  dllmain.cpp
+  InstallerCustomActions.cpp
+  registry.cpp
+  TraceOut.cpp
+  Generating Code...
+     Creating library C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\InstallerCustomActions.lib and object C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\InstallerCustomActions.exp
+  InstallerCustomActions.vcxproj -> C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\InstallerCustomActions.dll

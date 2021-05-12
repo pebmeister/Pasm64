@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "str.h"
 #include "mem.h"
 
 #include "error.h"
@@ -28,7 +29,15 @@ MemoryNode* FreeAllocationTable = NULL;
 int IsValidNode(MemoryNode* node)
 {
     const char* module = "IsValidNode";
-    unsigned char* p = (unsigned char*)node->ptr + node->size;
+    unsigned char* p = node->mem;
+    for (int n = 0; n < PROTECTION_BUFFER_SIZE; ++n)
+        if (*(p + n) != 0x45)
+        {
+            FatalError(module, error_memory_corruption_detected);
+            return 0;
+        }
+
+    p = (unsigned char*)node->ptr + node->size;
     for (int n = 0; n < PROTECTION_BUFFER_SIZE; ++n)
         if (*(p + n) != 0x45)
         {
@@ -49,6 +58,19 @@ int IsTreeValid(void)
     return 1;
 }
 
+void MarkNode(MemoryNode* node)
+{
+    node->ptr = (unsigned char*)node->mem + PROTECTION_BUFFER_SIZE;
+    unsigned char* p = (unsigned char*)node->mem;
+    for (int n = 0; n < PROTECTION_BUFFER_SIZE; ++n)
+        *(p + n) = 0x45;
+
+    p = (unsigned char*)node->ptr + node->size;
+    for (int n = 0; n < PROTECTION_BUFFER_SIZE; ++n)
+        *(p + n) = 0x45;
+
+}
+
 void* AllocateMemory(const size_t size, char* file, const int line)
 {
     const char* function = "AllocateMemory";
@@ -56,18 +78,17 @@ void* AllocateMemory(const size_t size, char* file, const int line)
     MemoryNode* node = (MemoryNode*)malloc(sizeof(MemoryNode));
     if (node == NULL)
     {
-        FatalError(function, error_outof_memory);
+        FatalError(function, error_out_of_memory);
         return NULL;
     }
    
     memset(node, 0, sizeof(MemoryNode));
-
     node->size = size;
     node->allocated_size = size + PROTECTION_BUFFER_SIZE * 2;
     node->mem = malloc(node->allocated_size);
     if (node->mem == NULL)
     {
-        FatalError(function, error_outof_memory);
+        FatalError(function, error_out_of_memory);
         return NULL;
     }
 
@@ -75,11 +96,8 @@ void* AllocateMemory(const size_t size, char* file, const int line)
     node->file = strdup(file);  // NOLINT(clang-diagnostic-deprecated-declarations)
     node->line = line;
 
-    unsigned char* p = (unsigned char*)node->mem + node->size;
-    for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
-        *(p + n) = 0x45;
+    MarkNode(node);
 
-    node->ptr = node->mem;
     if (AllocationTable == NULL)
     {
         AllocationTable = node;
@@ -98,17 +116,21 @@ void* AllocateMemory(const size_t size, char* file, const int line)
 
 void FreeMemoryNode(MemoryNode* node)
 {
-    memset(node->mem, 0, node->allocated_size);
-    free(node->mem);
-    free(node->file);
-    memset(node, 0, sizeof(MemoryNode));
-    free(node);
+    FreeMemoryInternal(node->mem, node->size);
+    FreeStrInternal(node->file);
+    FreeMemoryInternal(node, sizeof(MemoryNode));
 }
 
 void FreeMemory(void* ptr)
 {
-    
-    if (!IsTreeValid()) return;
+    const char* function = "FreeMemory";
+
+    if (ptr == NULL)
+        return;
+
+    RemoveStringNode(ptr);
+
+    MemoryNode* prev = AllocationTable;
 
     if (ptr == AllocationTable->ptr)
     {
@@ -118,17 +140,17 @@ void FreeMemory(void* ptr)
         return;
     }
 
-    for (MemoryNode* p = AllocationTable; p->next; p = p->next)
+    for (MemoryNode* p = AllocationTable->next; p; p = p->next)
     {
-        MemoryNode* next = p->next;
-        if (ptr == next->ptr)
+        if (ptr == p->ptr)
         {
-            p->next = next->next;
-            FreeMemoryNode(next);
+            prev->next = p->next;
+            FreeMemoryNode(p);
             return;
         }
+        prev = p;
     }
-    printf("Error\n");
+    Warning(function, error_free_unknown_pointer);
 }
 
 void* ReallocateMemory(void* ptr, const size_t size, char* file, int line)
@@ -139,23 +161,16 @@ void* ReallocateMemory(void* ptr, const size_t size, char* file, int line)
     {
         if (node->ptr == ptr)
         {
-            node->size = size;
-            node->allocated_size = size + PROTECTION_BUFFER_SIZE * 2;
-            node->mem = realloc(node->mem, node->allocated_size);
-            if (!node->mem)
+            void* copy = AllocateMemory(size, file, (int)size);
+            if (copy == NULL)
             {
-                FatalError(function, error_outof_memory);
+                FatalError(function, error_out_of_memory);
                 return NULL;
             }
-            node->ptr = (unsigned char*)node->mem;
-            for (int n = 0; n < PROTECTION_BUFFER_SIZE * 2; ++n)
-                *(((unsigned char*)node->ptr) + size + n) = 0x45;
-
-            free(node->file);
-            // ReSharper disable once CppDeprecatedEntity
-            node->file = strdup(file);  // NOLINT(clang-diagnostic-deprecated-declarations)
-            node->line = line;
-            return node->ptr;
+            memcpy(copy, node->ptr, size);
+            FreeMemory(node->ptr);
+            node->ptr = copy;
+            return copy;
         }
     }
     FatalError(function, error_free_unknown_pointer);
@@ -164,12 +179,26 @@ void* ReallocateMemory(void* ptr, const size_t size, char* file, int line)
 
 void FreeAllocatedMemory(void)
 {
+    VALIDATE_TREE
+
     MemoryNode* p = AllocationTable;
     while (p != NULL)
     {
         FreeMemory(p->ptr);
         p = AllocationTable;
     }
+}
+
+void PrintMemoryAllocationSummary(void)
+{
+    unsigned long long total = 0;
+    unsigned long long numNodes = 0;
+    for (MemoryNode* p = AllocationTable; p; p = p->next)
+    {
+        total += p->size;
+        ++numNodes;
+    }
+    printf("    Total %llu nodes    %llu K allocated.\n", numNodes, total / 1024);
 }
 
 void PrintMemoryAllocation(void)
@@ -180,7 +209,18 @@ void PrintMemoryAllocation(void)
     {
         total += p->size;
         ++numNodes;
-        printf("%-20s %-5d %lu\n", p->file, p->line, p->size);
+        printf("%-20s %-5d %lu\n", p->file, p->line, (unsigned long)p->size);
     }
-    printf("    Total %llu nodes    %llu K\n\n", numNodes, total / 1024);
+    printf("    Total %llu nodes    %llu K\n", numNodes, total / 1024);
+}
+
+void FreeMemoryInternal(void* p, size_t size)
+{
+    memset(p, 0x54, size);
+    free(p);
+}
+
+void FreeStrInternal(char* str)
+{
+    FreeMemoryInternal(str, strlen(str));
 }

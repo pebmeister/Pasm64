@@ -26,10 +26,13 @@ extern char* CurFileName;
 
 char* fileStack [MAX_INCLUDE_STACK] = { 0 };
 int fileLineStack [MAX_INCLUDE_STACK] = { 0 };
-int fileStackIndex = 0;
+int ifdefStack[MAX_INCLUDE_STACK] = { 0 };
 
+int fileStackIndex = 0;
+int ifdefcount = 0;
 int inDoLoop = 0;
 int inMacroDef = 0;
+int lastif = 0;
 
 #define OP(op)              { yylval.iValue = _ ## op; return OPCODE; }
 #define OP_REL(op)          { yylval.iValue = _ ## op ## 0 + yytext[3] - '0'; return OPCODE; }
@@ -48,13 +51,15 @@ int inMacroDef = 0;
 %}
 
 %x C_COMMENT
+%xx IF_DEF
 
 ES                          (\\(['"\?\\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))
 LOGOR                       [|][|]
 BITOR                       [|]
 LOGAND                      [&][&]
 BITAND                      [&]
-STRVALUE					(\"([^"\\\n]|{ES})*\")+	
+STRVALUE					(\"([^"\\\n]|{ES})*\")+
+SYMB                        [A-Za-z_][A-Za-z0-9_.]*
 %%
 
 "ORA"                       OP(ora)
@@ -156,10 +161,51 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 "SMB"[0-7]                  OP_65C02_REL(smb)
 
 [\xD\xA]|[\xA]|[\xD]        return EOL;
+".IFDEF"[ /t]+{SYMB}        {
+                                if (ifdefcount >= MAX_INCLUDE_STACK -1) yyerror("Stack overflow");
 
+                                lastif = 0;
+                                ifdefStack[ifdefcount++] = lastif;
+                                char* p = yytext;
+                                while (*p != ' ' && *p != '\t') ++p;
+                                while (*p == ' ' || *p == '\t') ++p;
+
+                                SymbolTablePtr sym = LookUpSymbol(p); 
+                                if (sym == NULL)
+                                {
+                                    BEGIN(IF_DEF);
+                                }
+                            }
+".IFNDEF"[ /t]+{SYMB}       {
+                                if (ifdefcount >= MAX_INCLUDE_STACK -1) yyerror("Stack overflow");
+
+                                lastif = 0;
+                                ifdefStack[ifdefcount++] = lastif;
+                                char* p = yytext;
+                                while (*p != ' ' && *p != '\t') ++p;
+                                while (*p == ' ' || *p == '\t') ++p;
+
+                                SymbolTablePtr sym = LookUpSymbol(p); 
+                                if (sym != NULL)
+                                {
+                                    BEGIN(IF_DEF);
+                                }
+                            }
+<IF_DEF>.|[\n]              { /* ignore ifdef false */ }
+<IF_DEF>".ENDIF"            { --ifdefcount; BEGIN(INITIAL); }
+".ENDIF"                    {
+                                if (ifdefcount == 0) return ENDIF;
+
+                                lastif = ifdefStack[--ifdefcount];
+                                if (lastif != 0) 
+                                {
+                                    return ENDIF; 
+                                }
+                            }
+".IF"                       { lastif = 1; ifdefStack[ifdefcount++] = lastif; return IF; }
+".ELSE"                     return ELSE;
 ".BYTE"                     return BYTE;
 ".DB"                       return BYTE;
-".DCB"                      return BYTE;
 ".WORD"                     return WORD;
 ".DW"                       return WORD;
 ".DCW"                      return WORD;
@@ -180,9 +226,6 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 ".REPEAT"                   return REPEAT;
 ".UNTIL"                    return UNTIL;
 ".END"                      return END;
-".ENDIF"                    return ENDIF;
-".IF"                       return IF;
-".ELSE"                     return ELSE;
 ".PRINT"                    return PRINT;
 "\?"                        return PRINT;
 ".PRINTALL"                 return PRINTALL;                   
@@ -229,18 +272,18 @@ STRVALUE					(\"([^"\\\n]|{ES})*\")+
 ".WARN"[ /t]*"ON"           { NoWarnings = FALSE; }
 ".WARN"[ /t]*"OFF"          { NoWarnings = TRUE; }
 ".C64"                      { OutFileFormat = c64; }
-^"-"                        { yylval.strValue = StrDup(yytext); return SYMBOL; }
-^"+"                        { yylval.strValue = StrDup(yytext); return SYMBOL; }
-[@][0-9]+                   {
+^"-"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
+^"+"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
+[@][1-9]+[0-9]*             {
                                 if (!inMacroDef)
                                     REJECT;
-                                yylval.strValue = StrDup(yytext); 
+                                yylval.strValue = STR_DUP(yytext); 
                                 return SYMBOL;
                             }
 [\+|\-]+                    {
                                 if (strlen(yytext) > 1)
                                 {
-                                    yylval.strValue = StrDup(yytext); 
+                                    yylval.strValue = STR_DUP(yytext); 
                                     return SYMBOL;
                                 }
                                 else
@@ -257,17 +300,18 @@ $[0-9A-Fa-f]*               INT(1, 16)
 0b[0-1]*                    INT(2, 2)
 [\'][\\][0-7]{3}[\']        INT(2, 8)
 
-{STRVALUE}					{ yylval.strValue = StrDup(yytext); return STRING_LITERAL; }
+{STRVALUE}					{ yylval.strValue = STR_DUP(yytext); return STRING_LITERAL; }
 "*"[ /t]*[=]                { unput('='); return PCASSIGN; }
 "*"[ /t]*".EQU"             { unput('='); return PCASSIGN; }
 "X"                         { return 'X'; }
 "Y"                         { return 'Y'; }
-[A-Za-z_][A-Za-z0-9_.]*:?   { yylval.strValue = StrDup(yytext); return SYMBOL; }
+{SYMB}:?                    { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 "/*"                        { BEGIN(C_COMMENT); }
 <C_COMMENT>"*/"             { BEGIN(INITIAL); }
 <C_COMMENT>.|[\n]           { /* ignore comments */ }
 ;[^\n]*                     { /* ignore comments */ }
 [/][/][^\n]*                { /* ignore comments */ }
+
 "~"                         { return '~'; }
 "^"                         { return '^'; }
 [-<>=+*/#,();=\n]           { return *yytext; }
@@ -287,7 +331,7 @@ $[0-9A-Fa-f]*               INT(1, 16)
                                 {
                                     yyterminate();
                                 }
-                            }
+                            }      
 .                           { yyerror("syntax error"); }
 
 %%
@@ -316,6 +360,6 @@ int OpenIncludeFile(char* file)
         yyerror(file);
         FatalError(module, error_cant_open_include_file);
     }
-	yypush_buffer_state(yy_create_buffer( yyin, YY_BUF_SIZE ));
+    yypush_buffer_state(yy_create_buffer( yyin, YY_BUF_SIZE ));
     return 0;
 }

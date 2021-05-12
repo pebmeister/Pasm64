@@ -2,11 +2,10 @@
 // Assembly         : 
 // Author           : Paul
 // Created          : 02-23-2015
-//
-// Last Modified By : Paul
-// Last Modified On : 02-23-2015
 // ***********************************************************************
 #pragma warning(disable:4996)
+
+#include "str.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -15,23 +14,87 @@
 #include "error.h"
 #include "mem.h"
 
+StrNode* StrTable = NULL;
+
+void AddStringNode(char* str, char* file, const int line)
+{
+    const char* module = "AddStringNode";
+    StrNode* node = malloc(sizeof(StrNode));
+    if (node == NULL)
+    {
+        FatalError(module, error_out_of_memory);
+        return;
+    }
+    memset(node, 0, sizeof(StrNode));
+
+    node->str = str;
+    const int len = (int)strlen(file);
+    node->file = (char*)malloc(len + 1);
+    if (node->file == NULL)
+    {
+        FatalError(module, error_out_of_memory);
+        return;
+    }
+    strcpy(node->file, file);
+    node->line = line;
+
+    if (StrTable == NULL)
+    {
+        StrTable = node;
+        return;
+    }
+    StrNode* n = StrTable;
+    for (; n->next; n = n->next)
+        ;
+    n->next = node;
+}
+
+void RemoveStringNode(const void* str)
+{
+    if (StrTable == NULL)
+        return;
+
+    if (StrTable->str == str)
+    {
+        StrNode* next = StrTable->next;
+        FreeStrInternal(StrTable->file);
+        FreeMemoryInternal(StrTable, sizeof(StrNode));
+        StrTable = next;
+        return;
+    }
+
+    for (StrNode* n = StrTable; n->next; n = n->next)
+    {
+        StrNode* next = n->next;
+        if (next->str == str)
+        {
+            n->next = next->next;
+            FreeStrInternal(next->file);
+            FreeMemoryInternal(next, sizeof(StrNode));
+            return;
+        }
+    }
+}
+
 /// <summary>
 /// duplicates the specified string.
 /// </summary>
 /// <param name="string">The string.</param>
+/// <param name="file"></param>
+/// <param name="line"></param>
 /// <returns>char *.</returns>
-char* StrDup(const char* string)
+char* StrDuplicate(const char* string, char* file, const int line)
 {
     const int len = (int)strlen(string);
-    const char* module = "StrDup";
+    const char* module = "StrDuplicate";
     char* buffer = (char*)ALLOCATE(len + 1);
 
     if (buffer == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
-
+    AddStringNode(buffer, file, line);
 
     return strcpy(buffer, string);
 }
@@ -68,11 +131,11 @@ char* StrLower(const char* string)
     const char* module = "StrLower";
 
     const int len = (int)strlen(string);
-    char* buffer = StrDup(string);
+    char* buffer = STR_DUP(string);
     
     if (buffer == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     for (int i = 0; i < len; ++i)
@@ -95,7 +158,7 @@ char* SantizeString(char* str)
 
     if (outStr == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     memset(outStr, 0, len);
@@ -178,4 +241,12 @@ char* SantizeString(char* str)
     }
 
     return outStr;
+}
+
+void DumpStrings(void)
+{
+    for (StrNode* node = StrTable; node; node = node->next)
+    {
+        printf("%-70s %-5d %s\n", node->file, node->line, node->str);
+    }
 }

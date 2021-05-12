@@ -1,0 +1,2 @@
+#define INSTALLERCUSTOMACTIONS_API __declspec(dllexport)
+#define INSTALLERCUSTOMACTIONS_API __declspec(dllimport)

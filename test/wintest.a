@@ -4,13 +4,13 @@
     .ORG $1000
 
         lda #'\t'
-
-
-
-    .inc "test.a"
-    .inc "branchtest.a"
-    .load "textfile.txt"
-    .inc "scripttest.a"
+        
+    .ifdef INCLUDES
+        .inc "test.a"
+        .inc "branchtest.a"
+        .load "textfile.txt"
+        .inc "scripttest.a"
+    .endif
     
     .illegal OFF    ; no illegal opcodes
 
@@ -21,11 +21,12 @@
         phx
         phy
         //  bbr0 20,LoadSLASH
-        
-    loadTAB
-        lda #'\t'
-    LoadSLASH
-        lda #'\\'
+    .ifdef PIZZA // YAY      
+        loadTAB
+            lda #'\t'
+        LoadSLASH
+            lda #'\\'
+    .endif
 
     .warn off
     bne end

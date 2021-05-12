@@ -34,7 +34,7 @@ typedef struct file_entry
 } FileEntry;
 
 extern void GenerateListFile(FILE* lstFile);
-extern int GenerateListNode(parseNodePtr p);
+extern int GenerateListNode(ParseNodePtr p);
 extern FileLine* GetFileLine(char* file, int line);
 extern void FreeListTable(void);
 extern void FreeFileTable(void);

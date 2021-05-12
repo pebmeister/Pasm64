@@ -12,7 +12,7 @@
 
 enum 
 {
-    error_outof_memory = 0,
+    error_out_of_memory = 0,
     error_missing_output_file,
     error_output_file_specified_more_than_once,
     error_missing_symbol_file,

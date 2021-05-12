@@ -28,55 +28,55 @@ int MaxMacroParam = 0;
 DictionaryPtr SymbolDictionary = NULL;
 MacroStackEntry * MacroStack = NULL;
 
-#define MINUS_SYM_GROW_SIZE 20
-#define GROW_THRESHOLD 5
+#define MINUS_SYM_GROW_SIZE 1000
+#define GROW_THRESHOLD 100
 
-MinusSym* MinusSymTable = NULL;
+PlusMinusSym* MinusSymTable = NULL;
 int MinusSymTableSize = 0;
 int MinusSymTableIndex = 0;
 
-PlusSym* PlusSymTable = NULL;
+PlusMinusSym* PlusSymTable = NULL;
 int PlusSymTableSize = 0;
 int PlusSymTableIndex = 0;
 
-int MinusSymCmpFunction(const void* a, const void* b);
-int PlusSymCmpFunction(const void* a, const void* b);
+
+int PlusMinusSymCmpFunction(const void* a, const void* b);
 
 int MacroIndex = 0;
 void SanitizeSymbol(SymbolTablePtr symbol);
 int SymCmpFunction(const void* a, const void* b);
+int ComparePluMinusSymValue(const struct plus_minus_sym* a, const char* file, int line);
+int PlusMinusSymCmpFunction(const void* a, const void* b);
+
+int ComparePluMinusSym(const struct plus_minus_sym* a, const struct plus_minus_sym* b)
+{
+    const int result = StrICmp(a->file, b->file);
+    if (result != 0) return result;
+    return a->line - b->line;
+}
 
 //
 // Compare function for qsort
 //
-int MinusSymCmpFunction(const void* a, const void* b)
+int PlusMinusSymCmpFunction(const void* a, const void* b)
 {
-    int result = StrICmp(((const struct minus_sym*)a)->file, ((const struct minus_sym*)b)->file);
-    if (result != 0) return result;
-
-    result = ((const struct minus_sym*)a)->line - ((const struct minus_sym*)b)->line;
-    return result;
+    return ComparePluMinusSym(a,  b);
 }
 
-int PlusSymCmpFunction(const void* a, const void* b)
+int ComparePluMinusSymValue(const struct plus_minus_sym* a, const char* file, int l)
 {
-    int result = StrICmp(((const struct plus_sym*)a)->file, ((const struct plus_sym*)b)->file);
-    if (result != 0) return result;
-
-    result = ((const struct plus_sym*)a)->line - ((const struct plus_sym*)b)->line;
-    return result;
+    struct plus_minus_sym b = { file, l, 0 };
+    return ComparePluMinusSym(a, &b);
 }
 
-int FindMinusSymDef(char* file, const int line)
+
+int FindMinusSymDef(const char* file, const int line)
 {
     if (MinusSymTableSize <= 0) return -1;
 
     for (int index = 0; index < MinusSymTableIndex; ++index)
     {
-        if (StrICmp(MinusSymTable[index].file, file) != 0)
-            continue;
-
-        if (MinusSymTable[index].line == line)
+        if (ComparePluMinusSymValue(&MinusSymTable[index], file, line) == 0)
         {
             return index;
         }
@@ -84,16 +84,14 @@ int FindMinusSymDef(char* file, const int line)
     return -1;
 }
 
-int FindPlusSymDef(char* file, const int line)
+int FindPlusSymDef(const char* file, const int line)
 {
     if (PlusSymTableSize <= 0) return -1;
 
     for (int index = 0; index < PlusSymTableIndex; ++index)
     {
-        if (StrICmp(PlusSymTable[index].file, file) != 0)
-            continue;
 
-        if (PlusSymTable[index].line == line)
+        if (ComparePluMinusSymValue(&PlusSymTable[index], file, line) == 0)
         {
             return index;
         }
@@ -101,15 +99,15 @@ int FindPlusSymDef(char* file, const int line)
     return -1;
 }
 
-int FindMinusSym(const int depth, char* file, const int line)
+int FindMinusSym(const int depth, const char* file, const int line)
 {
     if (MinusSymTableSize <= 0) return -1;
     int foundIndex = -1;
     for (int index = 0; index < MinusSymTableIndex; ++index)
     {
-        if (StrICmp(MinusSymTable[index].file, file) != 0)
+        if (StrICmp(file, MinusSymTable[index].file))
             continue;
-       
+
         if (MinusSymTable[index].line <= line) 
         {
             foundIndex = index;
@@ -122,14 +120,14 @@ int FindMinusSym(const int depth, char* file, const int line)
     return -1;
 }
 
-int FindPlusSym(const int depth, char* file, const int line)
+int FindPlusSym(const int depth, const char* file, const int line)
 {
     IsTreeValid();
 
     if (PlusSymTableSize <= 0) return -1;
     for (int index = 0; index < PlusSymTableIndex; ++index)
     {
-        if (StrICmp(PlusSymTable[index].file, file) != 0)
+        if (StrICmp(file, PlusSymTable[index].file))
             continue;
 
         if (PlusSymTable[index].line > line)
@@ -146,7 +144,7 @@ int FindPlusSym(const int depth, char* file, const int line)
     return -1;
 }
 
-void AddMinusSym(char* file, const int line)
+void AddMinusSym(const char* file, const int line, const int value)
 {
     const char* module = "AddMinusSym";
     IsTreeValid();
@@ -154,69 +152,74 @@ void AddMinusSym(char* file, const int line)
     if (MinusSymTable == NULL)
     {
         MinusSymTableSize = MINUS_SYM_GROW_SIZE;
-        MinusSymTable = (MinusSym*)ALLOCATE(sizeof(struct minus_sym) * MinusSymTableSize);
+        MinusSymTable = (struct plus_minus_sym*)ALLOCATE(sizeof(struct plus_minus_sym) * MinusSymTableSize);
         if (MinusSymTable == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
         }
 
-        memset(MinusSymTable, 0, sizeof(struct minus_sym) * MinusSymTableSize);
+        memset(MinusSymTable, 0, sizeof(struct plus_minus_sym) * MinusSymTableSize);
     }
     if (MinusSymTableSize - MinusSymTableIndex < GROW_THRESHOLD)
     {
         MinusSymTableSize += MINUS_SYM_GROW_SIZE;
-        MinusSymTable = (MinusSym*)REALLOCATE(MinusSymTable, sizeof(struct minus_sym) * MinusSymTableSize);
+        MinusSymTable = (struct plus_minus_sym*)REALLOCATE(MinusSymTable, sizeof(struct plus_minus_sym) * MinusSymTableSize);
         if (MinusSymTable == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
         }        
     }
 
-    MinusSymTable[MinusSymTableIndex].file = StrDup(file);
+    MinusSymTable[MinusSymTableIndex].file = STR_DUP(file);
     MinusSymTable[MinusSymTableIndex].line = line;
+    MinusSymTable[MinusSymTableIndex].value = value;
     ++MinusSymTableIndex;
 
     IsTreeValid();
 
-    qsort(MinusSymTable, MinusSymTableIndex, sizeof(struct minus_sym), MinusSymCmpFunction);
+    qsort(MinusSymTable, MinusSymTableIndex, sizeof(struct plus_minus_sym), PlusMinusSymCmpFunction);
 
     IsTreeValid();
 }
 
-void AddPlusSym(char* file, const int line)
+void AddPlusSym(const char* file, const int line, const int value)
 {
+ 
     const char* module = "AddPlusSym";
+
+    // printf("%s %s %d\n", module, file, value);
 
     IsTreeValid();
 
     if (PlusSymTable == NULL)
     {
         PlusSymTableSize = MINUS_SYM_GROW_SIZE;
-        PlusSymTable = (PlusSym*)ALLOCATE(sizeof(struct plus_sym) * PlusSymTableSize);
+        PlusSymTable = (struct plus_minus_sym*) ALLOCATE(sizeof(struct plus_minus_sym) * PlusSymTableSize);
         if (PlusSymTable == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
         }
 
-        memset(PlusSymTable, 0, sizeof(struct plus_sym) * PlusSymTableSize);
+        memset(PlusSymTable, 0, sizeof(struct plus_minus_sym) * PlusSymTableSize);
     }
     if (PlusSymTableSize - PlusSymTableIndex < GROW_THRESHOLD)
     {
         PlusSymTableSize += MINUS_SYM_GROW_SIZE;
-        PlusSymTable = (PlusSym*)REALLOCATE(PlusSymTable, sizeof(struct plus_sym) * PlusSymTableSize);
+        PlusSymTable = (struct plus_minus_sym*)REALLOCATE(PlusSymTable, sizeof(struct plus_minus_sym) * PlusSymTableSize);
         if (PlusSymTable == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
         }
     }
     IsTreeValid();
 
-    PlusSymTable[PlusSymTableIndex].file = StrDup(file);
+    PlusSymTable[PlusSymTableIndex].file = STR_DUP(file);
     PlusSymTable[PlusSymTableIndex].line = line;
+    PlusSymTable[PlusSymTableIndex].value = value;
     ++PlusSymTableIndex;
 
     IsTreeValid();
-    qsort(PlusSymTable, PlusSymTableIndex, sizeof(struct plus_sym), PlusSymCmpFunction);
+    qsort(PlusSymTable, PlusSymTableIndex, sizeof(struct plus_minus_sym), PlusMinusSymCmpFunction);
 
     IsTreeValid();
 }
@@ -230,10 +233,8 @@ SymbolTablePtr AddSymbol(char* name)
 {
     if (name == NULL) return NULL;
 
-    IsTreeValid();
-
     SymbolTable sym = { 0 };
-    char* tempSection = CurrentSection;
+    char* tempSection = CurrentScope;
     const char* module = "AddSymbol";
     
     if (SymbolDictionary == NULL)
@@ -241,13 +242,13 @@ SymbolTablePtr AddSymbol(char* name)
         SymbolDictionary = DictCreate(sizeof(SymbolTable));
         if (SymbolDictionary == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
     }
 
     if (strstr(name, "."))
-        CurrentSection = NULL;
+        CurrentScope = NULL;
    
     if (name[0] == '.')
     {
@@ -261,48 +262,48 @@ SymbolTablePtr AddSymbol(char* name)
     SymbolTablePtr tmpPtr = LookUpSymbol(name);
     if (tmpPtr != NULL)
     {
-        CurrentSection = tempSection;
+        CurrentScope = tempSection;
         return tmpPtr;
     }
 
-    sym.name = StrDup(name);
+    sym.name = STR_DUP(name);
     if (sym.name == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
     sym.ismacroparam = name[0] == '@';
-    if (CurrentSection)
+    if (CurrentScope)
     {
-        sym.section = StrDup(CurrentSection);
-        if (sym.section == NULL)
+        sym.scope = STR_DUP(CurrentScope);
+        if (sym.scope == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
     }
-    if (sym.section)
+    if (sym.scope)
     {
-        len = (int)strlen(sym.name) + (int)strlen(sym.section) + 2;
+        len = (int)strlen(sym.name) + (int)strlen(sym.scope) + 2;
         sym.fullname = (char*)ALLOCATE(len);
         if (sym.fullname == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
-        sprintf(sym.fullname, "%s.%s", sym.section, sym.name);
+        sprintf(sym.fullname, "%s.%s", sym.scope, sym.name);
     }
     else
     {
-        sym.fullname = StrDup(sym.name);
+        sym.fullname = STR_DUP(sym.name);
         if (sym.fullname == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
     }
-    CurrentSection = tempSection;
+    CurrentScope = tempSection;
 
     tmpPtr = (SymbolTablePtr) DictInsert(&SymbolDictionary, sym.fullname, &sym);
     SanitizeSymbol(tmpPtr);
@@ -321,10 +322,10 @@ void SanitizeSymbol(SymbolTablePtr symbol)
 
     if (symbol->ismacroparam)
     {
-        if (symbol->section)
+        if (symbol->scope)
         {
-            FREE(symbol->section);
-            symbol->section = NULL;
+            FREE(symbol->scope);
+            symbol->scope = NULL;
             return;
         }
     }
@@ -336,28 +337,28 @@ void SanitizeSymbol(SymbolTablePtr symbol)
     while (symbol->name[len] != '.')
         len--;
     symbol->name[len] = 0;
-    char* tempSection = StrDup(symbol->name);
-    char* tempName = StrDup(&symbol->name[len + 1]);
+    char* tempSection = STR_DUP(symbol->name);
+    char* tempName = STR_DUP(&symbol->name[len + 1]);
     if (tempName == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return;
     }
     if (symbol->name)
         FREE(symbol->name);
     symbol->name = tempName;
-    if (symbol->section)
+    if (symbol->scope)
     {
-        len = (int)strlen(symbol->section) + (int)strlen(tempSection) + 2;
+        len = (int)strlen(symbol->scope) + (int)strlen(tempSection) + 2;
         combinedSection = (char*)ALLOCATE(len);
         if (combinedSection == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return;
         }
-        sprintf(combinedSection, "%s.%s", symbol->section, tempSection);
-        FREE(symbol->section);
-        symbol->section = combinedSection;
+        sprintf(combinedSection, "%s.%s", symbol->scope, tempSection);
+        FREE(symbol->scope);
+        symbol->scope = combinedSection;
     }
     else
     {
@@ -365,13 +366,13 @@ void SanitizeSymbol(SymbolTablePtr symbol)
         combinedSection = (char*)ALLOCATE(len);
         if (combinedSection == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return;
         }
         strcpy(combinedSection, tempSection);
-        symbol->section = combinedSection;
+        symbol->scope = combinedSection;
     }
-    // FREE(tempSection);
+    FREE(tempSection);
 }
 
 /// <summary>
@@ -430,31 +431,28 @@ SymbolTablePtr LookUpSymbol(char* name)
             SymbolDictionary = DictCreate(sizeof(SymbolTable));
             if (SymbolDictionary == NULL)
             {
-                FatalError(module, error_outof_memory);
+                FatalError(module, error_out_of_memory);
                 return NULL;
             }
         }
         return NULL;
     }
 
-    if (CurrentSection)
+    if (CurrentScope)
     {
-        const int len = (int)strlen(CurrentSection) + (int)strlen(name) + 2;
+        const int len = (int)strlen(CurrentScope) + (int)strlen(name) + 2;
         char* tempName = (char*)ALLOCATE(len);
         if (tempName == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
-        sprintf(tempName, "%s.%s", CurrentSection, name);
+        sprintf(tempName, "%s.%s", CurrentScope, name);
         // ReSharper disable once CppLocalVariableMayBeConst
         SymbolTablePtr tmpPtr = (SymbolTablePtr)DictSearch(SymbolDictionary, tempName);
-        if (tmpPtr)
-        {
-            FREE(tempName);
-            return tmpPtr;
-        }
         FREE(tempName);
+        if (tmpPtr)
+            return tmpPtr;
     }
 
     return (SymbolTablePtr) DictSearch(SymbolDictionary, name);
@@ -476,7 +474,7 @@ void DumpSymbols(FILE* symFile)
     SymPtr symbolArray = (SymPtr)ALLOCATE(SymbolDictionary->number_elements * sizeof(Sym));
     if (symbolArray == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return;
     }
 
@@ -613,16 +611,16 @@ void PushMacroParams(void)
             MacroStack = (MacroStackEntry*) ALLOCATE(newStackSize * sizeof(MacroStackEntry));
             if (MacroStack == NULL)
             {
-                FatalError(module, error_outof_memory);
+                FatalError(module, error_out_of_memory);
                 return;
             }
         }
         else
         {
-            MacroStackEntry* temp = (MacroStackEntry* )REALLOCATE(MacroStack, newStackSize * sizeof(MacroStackEntry));
+            MacroStackEntry* temp = REALLOCATE(MacroStack, newStackSize * sizeof(MacroStackEntry));
             if (temp == NULL)
             {
-                FatalError(module, error_outof_memory);
+                FatalError(module, error_out_of_memory);
                 return;
             }
             MacroStack = temp;
@@ -639,11 +637,12 @@ void PushMacroParams(void)
         MacroStack[MacroIndex].values = (int*) ALLOCATE((maxMacro + 1) * sizeof(long));
         if (MacroStack[MacroIndex].values == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return;
         }
 
-        for (int index = 0; index <= maxMacro; index++)
+        MacroStack[MacroIndex].values[0] = 0;
+        for (int index = 1; index <= maxMacro; index++)
         {
             // ReSharper disable once CppLocalVariableMayBeConst
             SymbolTablePtr tmpPtr = LookUpMacroParam(index);
@@ -676,7 +675,7 @@ void PopMacroParams(void)
         return;
     }
  
-    for (int index = 0; index < MacroStack[MacroIndex].num_nodes; index++)
+    for (int index = 1; index < MacroStack[MacroIndex].num_nodes; index++)
     {
         // ReSharper disable once CppLocalVariableMayBeConst
         SymbolTablePtr tmpPtr = LookUpMacroParam(index);
@@ -720,16 +719,5 @@ void DeleteSymbolTable(void)
     MacroStackSize = 0;
     MacroIndex = 0;
 
-    for (int n = 0; n < MinusSymTableIndex; ++n)
-    {
-        FREE(MinusSymTable[n].file);
-    }
-    FREE(MinusSymTable);
-
-    for (int n = 0; n < PlusSymTableIndex; ++n)
-    {
-        FREE(PlusSymTable[n].file);
-    }
     FREE(PlusSymTable);
-
 }

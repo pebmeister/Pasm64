@@ -10,9 +10,11 @@
 #pragma warning(disable:6386)
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
+// ReSharper disable once CppUnusedIncludeDirective
+#include <stdlib.h>
 #include <string.h> 
+
 
 #include "opcodes.h"
 #include "pasm64.h"
@@ -22,15 +24,17 @@
 #include "error.h"
 #include "mem.h"
 
+int NameIsValid(char* name);
+
 /// <summary>
 /// The head node
 /// </summary>
-parseNodePtr HeadNode = 0;
+ParseNodePtr HeadNode = 0;
 
 /// <summary>
 /// The current node
 /// </summary>
-parseNodePtr CurrentNode = 0;
+ParseNodePtr CurrentNode = 0;
 
 /// <summary>
 /// The print nest level
@@ -41,15 +45,15 @@ int PrintNestLevel = 0;
 /// Allocates the node.
 /// </summary>
 /// <returns>parseNode *.</returns>
-parseNodePtr AllocateNode(int nops)
+ParseNodePtr AllocateNode(int nops)
 { 
     const char* module = "AllocateNode";
 
-    parseNodePtr p;
-    size_t size = sizeof(parseNode);
-    if ((p = (parseNode *)ALLOCATE(size)) == NULL)
+    ParseNodePtr p;
+    size_t size = sizeof(ParseNode);
+    if ((p = (ParseNode *)ALLOCATE(size)) == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     memset(p, 0, size);
@@ -64,10 +68,10 @@ parseNodePtr AllocateNode(int nops)
 
     if (nops > 0)
     {
-        size = nops * sizeof(parseNodePtr);
-        if ((p->op = (struct parseNode**)ALLOCATE(size)) == NULL)
+        size = nops * sizeof(ParseNodePtr);
+        if ((p->op = (struct parse_node**)ALLOCATE(size)) == NULL)
         {
-            FatalError(module, error_outof_memory);
+            FatalError(module, error_out_of_memory);
             return NULL;
         }
         memset(p->op, 0, size);
@@ -81,14 +85,14 @@ parseNodePtr AllocateNode(int nops)
 /// <param name="value">The value.</param>
 /// <param name="isPc"></param>
 /// <returns>parseNode *.</returns>
-parseNodePtr Con(const int value, const int isPc) 
+ParseNodePtr Con(const int value, const int isPc) 
 {
     const char* module = "con";
 
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     p->type = type_con;
@@ -105,18 +109,18 @@ parseNodePtr Con(const int value, const int isPc)
 //
 // create a string node
 //
-parseNodePtr Str(char* value) 
+ParseNodePtr Str(char* value) 
 {
     const char* module = "str";
 
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
 
     // char* str = StrDup(value);
-    char* str = StrDup(value);
+    char* str = STR_DUP(value);
 
     if (str == NULL || p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
@@ -130,10 +134,13 @@ parseNodePtr Str(char* value)
     }
 
     /* copy information */
+    if (p->str.value)
+        FREE(p->str.value);
+
     p->str.value = SantizeString(str);
     if (p->str.value == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     p->str.len = (int)strlen(p->str.value);
@@ -146,26 +153,26 @@ parseNodePtr Str(char* value)
 /// </summary>
 /// <param name="name">The name of symbol.</param>
 /// <returns>parseNodePtr.</returns>
-parseNodePtr Id(char* name) 
+ParseNodePtr Id(char* name) 
 {
     const char* module = "id";
 
     /* allocate node */
     // ReSharper disable once CppLocalVariableMayBeConst
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
     /* copy information */
     p->type = type_id;
-    p->id.name = StrDup(name);
+    p->id.name = name; // StrDup(name);
     if (p->id.name == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     return p;
@@ -176,25 +183,25 @@ parseNodePtr Id(char* name)
 /// </summary>
 /// <param name="name">The id of symbol.</param>
 /// <returns>parseNodePtr.</returns>
-parseNodePtr MacroId(char* name) 
+ParseNodePtr MacroId(char* name) 
 {
     const char* module = "MacroId";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
     /* copy information */
     p->type = type_macro_id;
-    p->id.name = StrDup(name);
+    p->id.name = STR_DUP(name);
     if (p->id.name == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     // FREE(name);
@@ -207,24 +214,24 @@ parseNodePtr MacroId(char* name)
 /// <param name="name">macro to execute.</param>
 /// <param name="macroParams">macro parameters.</param>
 /// <returns>parseNodePtr.</returns>
-parseNodePtr MacroEx(char* name, parseNodePtr macroParams) 
+ParseNodePtr MacroEx(char* name, ParseNodePtr macroParams) 
 {
     const char* module = "MacroEx";
 
-    parseNodePtr macro = MacroId(name);
+    ParseNodePtr macro = MacroId(name);
     /* allocate node */
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
 
     if (p == NULL || macro == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
     /* copy information */
     p->type = type_macro_ex;
     p->macro.macro = macro;
-    p->macro.macroParams = macroParams;
+    p->macro.macro_params = macroParams;
   
     return p;
 }
@@ -235,16 +242,16 @@ parseNodePtr MacroEx(char* name, parseNodePtr macroParams)
 /// <param name="dataSize">size of data.</param>
 /// <param name="data">macro parameters.</param>
 /// <returns>parseNodePtr.</returns>
-parseNodePtr Data(const int dataSize, parseNodePtr data) 
+ParseNodePtr Data(const int dataSize, ParseNodePtr data) 
 {
     const char* module = "data";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode(0);
+    ParseNodePtr p = AllocateNode(0);
 
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
@@ -263,16 +270,16 @@ parseNodePtr Data(const int dataSize, parseNodePtr data)
 /// <param name="nops">The number of ops.</param>
 /// <param name="...">...</param>
 /// <returns>parseNodePtr.</returns>
-parseNodePtr Opr(int op, int nops, ...) 
+ParseNodePtr Opr(int op, int nops, ...) 
 {
     va_list ap;
     const char* module = "opr";
 
     /* allocate node */
-    parseNodePtr p = AllocateNode(nops);
+    ParseNodePtr p = AllocateNode(nops);
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
@@ -284,7 +291,7 @@ parseNodePtr Opr(int op, int nops, ...)
     {
         va_start(ap, nops);
         for (int i = 0; i < nops; i++)
-            p->op[i] = va_arg(ap, parseNodePtr);
+            p->op[i] = va_arg(ap, ParseNodePtr);
         va_end(ap);
     }
 
@@ -299,17 +306,17 @@ parseNodePtr Opr(int op, int nops, ...)
 /// <param name="nops">The number of ops.</param>
 /// <param name="..."></param>
 /// <returns>parseNode *.</returns>
-parseNodePtr Opcode(int opr, int mode, int nops, ...) 
+ParseNodePtr Opcode(int opr, int mode, int nops, ...) 
 {
     va_list ap;
     int index;
     const char* module = "opcode";
 
-    parseNodePtr p = AllocateNode(nops);
+    ParseNodePtr p = AllocateNode(nops);
 
     if (p == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
 
@@ -341,7 +348,7 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
     {
         va_start(ap, nops);
         for (index = 0; index < nops; index++)
-            p->op[index] = va_arg(ap, parseNodePtr);
+            p->op[index] = va_arg(ap, ParseNodePtr);
         va_end(ap);
     }
     int code = GetOpCode(opr, mode);
@@ -418,10 +425,10 @@ parseNodePtr Opcode(int opr, int mode, int nops, ...)
 /// </summary>
 void FreeParseTree(void)
 {
-    parseNodePtr p = HeadNode;
+    ParseNodePtr p = HeadNode;
     for (; p != NULL;)
     {
-        parseNodePtr next = p->next;
+        ParseNodePtr next = p->next;
         FreeParseNode(p);
         p = next;
     }
@@ -439,7 +446,7 @@ void PrintIndent(void)
 
 int IsValidParseTree(void)
 {
-    for (parseNodePtr p = HeadNode; p; p = p->next)
+    for (ParseNodePtr p = HeadNode; p; p = p->next)
     {
         if (!IsValidParseNode(p))
             return 0;
@@ -447,7 +454,7 @@ int IsValidParseTree(void)
     return 1;
 }
 
-int IsValidParseNode(parseNodePtr p)
+int IsValidParseNode(ParseNodePtr p)
 {
     if (p == NULL) return 0;
 
@@ -463,10 +470,64 @@ int IsValidParseNode(parseNodePtr p)
     return 1;
 }
 
+size_t Count = 0;
+int LastPass = 0;
+// 
+// free a node
+//
+void FreeParseNode(ParseNodePtr p)
+{
+    if (p == NULL) return;
+
+    if (p->allocated)
+    {
+        if (p->type == type_str)
+        {
+            FREE(p->str.value);
+        }
+
+        if ((p->type == type_id || p->type == type_macro_id) && p->id.name)
+        {
+            if (NameIsValid(p->id.name))
+            {
+                if (LastPass != Pass)
+                {
+                    Count = 1;
+                    LastPass = Pass;
+                }
+                // printf("PASS %d Symbol count %llu\n", Pass, Count);
+                FREE(p->id.name);
+                ++Count;
+            }
+        }
+        if (p->nops > 0)
+        {
+            FREE(p->op);
+        }
+        FREE(p);
+    }
+}
+
+int NameIsValid(char* name)
+{
+    if (name == NULL) return 0;
+
+    for (; *name; name++)
+    {
+
+        char c = *name;
+        if ((c != '+' && c != '-') && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '@'))
+            continue;
+
+        return 0;
+    }
+    return 1;
+}
+
 //
 // Print a node
 //
-void PrintNode(parseNodePtr p)
+void PrintNode(ParseNodePtr p)
 {
     if (LogFile == NULL || p == NULL)
         return;
@@ -513,7 +574,7 @@ void PrintNode(parseNodePtr p)
                 PrintIndent();
                 fprintf(LogFile, "     macroNode    %p\n", p->id.i->macro_node);
                 PrintIndent();
-                fprintf(LogFile, "     section      %s\n", p->id.i->section ? p->id.i->section : "NULL");
+                fprintf(LogFile, "     scope      %s\n", p->id.i->scope ? p->id.i->scope : "NULL");
                 PrintIndent();
                 fprintf(LogFile, "     name         %s\n", p->id.i->name);
             }
@@ -867,7 +928,7 @@ void PrintNode(parseNodePtr p)
             fprintf(LogFile, "type typeData\n");
             PrintIndent();
             fprintf(LogFile, "size %d\n", p->data.size);
-            PrintNode((parseNodePtr) p->data.data);
+            PrintNode((ParseNodePtr) p->data.data);
             for (index = 0; index < p->nops; index++)
                 PrintNode(p->op[index]);
             break;
@@ -890,23 +951,4 @@ void PrintNode(parseNodePtr p)
     PrintNestLevel--;
 }
 
-// 
-// free a node
-//
-void FreeParseNode(parseNodePtr p)
-{
-    if (p == NULL) return;
 
-    if (p->allocated)
-    {
-        if (p->nops > 0)
-            FREE(p->op);
-
-        if (p->type == type_str)
-        {
-            FREE(p->str.value);
-        }
-        p->allocated = 0;        
-        FREE(p);
-    }
-}

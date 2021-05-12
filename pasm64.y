@@ -33,7 +33,7 @@
     int iValue;                 /* integer value */
     char* strValue;      		/* string */
     char* sIndex;               /* symbol table pointer */
-    parseNode *nPtr;            /* node pointer */
+    struct parse_node *nPtr;    /* node pointer */
 };
 
 %token <iValue> INTEGER
@@ -190,18 +190,6 @@ opcode
     | OPCODE '(' subexpr ')' ',' 'Y'    { $$ = Opcode($1, zpiy, 1, $3);                 }
     | OPCODE expr ',' subexpr           { $$ = Opcode($1, zr, 2, $2, $4);               }    
 
-    | OPCODE '-'                        { $$ = Opcode($1, a, 1, Id("-"));               }
-    | OPCODE '-' ',' 'X'                { $$ = Opcode($1, ax, 1, Id("-"));              }
-    | OPCODE '-' ',' 'Y'                { $$ = Opcode($1, ay, 1, Id("-"));              }
-    | OPCODE '(' '-' ')'                { $$ = Opcode($1, ind, 1, Id("-"));             }
-    | OPCODE '(' '-' ',' 'X' ')'        { $$ = Opcode($1, aix, 1, Id("-"));             }
-
-    | OPCODE '+'                        { $$ = Opcode($1, a, 1, Id("+"));               }
-    | OPCODE '+' ',' 'X'                { $$ = Opcode($1, ax, 1, Id("+"));              }
-    | OPCODE '+' ',' 'Y'                { $$ = Opcode($1, ay, 1, Id("+"));              }
-    | OPCODE '(' '+' ')'                { $$ = Opcode($1, ind, 1, Id("+"));             }
-    | OPCODE '(' '+' ',' 'X' ')'        { $$ = Opcode($1, aix, 1, Id("+"));             }
-
     | ORG subexpr                       { $$ = Opr(ORG, 1, $2);                         }
     | DS subexpr                        { $$ = Opr(DS, 1, $2);                          }
     | BYTE expr_list                    { $$ = Data(1, $2);                             }
@@ -244,6 +232,8 @@ expr
     | subexpr '-' subexpr               { $$ = Opr('-', 2, $1, $3);                     }
     | subexpr '*' subexpr               { $$ = Opr('*', 2, $1, $3);                     }
     | subexpr '/' subexpr               { $$ = Opr('/', 2, $1, $3);                     }
+    | '-'                               { $$ = Id("-")                                  }
+    | '+'                               { $$ = Id("+")                                  }
     ;
 
 %%

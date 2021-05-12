@@ -115,7 +115,7 @@ typedef union YYSTYPE
     int iValue;                 /* integer value */
     char* strValue;      		/* string */
     char* sIndex;               /* symbol table pointer */
-    parseNode *nPtr;            /* node pointer */
+    struct parse_node *nPtr;    /* node pointer */
 
 
 

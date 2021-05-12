@@ -10,6 +10,8 @@
 #include "error.h"
 #include "pasm64.h"
 
+char* Function;
+
 /// <summary>
 /// The errors
 /// </summary>

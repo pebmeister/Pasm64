@@ -28,7 +28,7 @@ typedef struct symbol_table
     int ismacroparam;
     int isvar;
     int isminus;
-    char* section;
+    char* scope;
     char* name;
     char* fullname;
     void* macro_node;
@@ -81,7 +81,7 @@ typedef struct
 typedef struct 
 {
     void* macro;
-    void* macroParams;
+    void* macro_params;
 } MacParseNode;
 
 /* data definition node */
@@ -92,7 +92,7 @@ typedef struct
 } DataParseNode;
 
 /* nodes union */
-typedef struct parseNode
+typedef struct parse_node
 {
     NodeEnum type;              /* type of node */
 
@@ -108,10 +108,10 @@ typedef struct parseNode
     };
     int allocated;
     int nops;                    /* number of operands */
-    struct parseNode **op;       /* operands */
-    struct parseNode* next;      /* next node in tree */
-    struct parseNode* prev;      /* previous node */
-} parseNode, *parseNodePtr;
+    struct parse_node **op;       /* operands */
+    struct parse_node* next;      /* next node in tree */
+    struct parse_node* prev;      /* previous node */
+} ParseNode, *ParseNodePtr;
 
 extern int yylineno;
 extern FILE* yyin;
@@ -138,7 +138,7 @@ extern char* CurFileName;
 extern char* LogFileName;
 extern char* SymFileName;
 extern char* OutputFileName;
-extern char* CurrentSection;
+extern char* CurrentScope;
 extern char* ListFileName;
 extern int MaxAddress;
 extern char* Directories;
@@ -151,9 +151,9 @@ extern char* InternalBuffer;
 extern int NoWarnings;
 
 /* our api */ 
-extern int Ex(parseNode *p);
+extern int Ex(ParseNode *p);
 extern void InitEx(void);
-extern int HasUnInitializedSymbol(parseNodePtr p);
+extern int HasUnInitializedSymbol(ParseNodePtr p);
 extern void yywarn(const char *s);
 extern int OpenIncludeFile(char* file);
 

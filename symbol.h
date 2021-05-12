@@ -23,29 +23,22 @@ typedef struct  macro_stack_entry
     int* values;
 } MacroStackEntry;
 
-typedef struct minus_sym
+typedef struct plus_minus_sym
 {
-    int value;
-    char* file;
+    const char* file;
     int line;
-} MinusSym;
-
-typedef struct plus_sym
-{
     int value;
-    char* file;
-    int line;
-} PlusSym;
+} PlusMinusSym;
 
-extern MinusSym* MinusSymTable;
-extern int FindMinusSym(int depth, char* file, int line);
-extern int FindMinusSymDef(char* file, int line);
-extern void AddMinusSym(char* file, int line);
+extern PlusMinusSym* MinusSymTable;
+extern int FindMinusSym(int depth, const char* file, int line);
+extern int FindMinusSymDef(const char* file, int line);
+extern void AddMinusSym(const char* file, int line, int value);
 
-extern PlusSym* PlusSymTable;
-extern int FindPlusSym(int depth, char* file, int line);
-extern int FindPlusSymDef(char* file, int line);
-extern void AddPlusSym(char* file, int line);
+extern PlusMinusSym* PlusSymTable;
+extern int FindPlusSym(int depth, const char* file, int line);
+extern int FindPlusSymDef(const char* file, int line);
+extern void AddPlusSym(const char* file, int line, int value);
 
 extern void PushMacroParams(void);
 extern void PopMacroParams(void);

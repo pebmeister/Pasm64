@@ -1,44 +1,20 @@
-
-
-    ora $1A,x
-    ora (229,x)
-
-    nop
-
-    nop
-    asl
-    .var aaa,bbb
-
-
-    aaa = 1
-    aaa = aaa + 1
-    lda #aaa
-    brk
-
-    loops
-
-    ; while loop
-
-    .while (aaa<10)
-
-        aaa = aaa + 1
-        ldx #aaa
-
-        .if (aaa>6)
-            brk
-            brk
-            brk
-        .else
-            bbb = 0
-            .repeat
-                nop
-                bbb = bbb + 2
-            .until (bbb < 6)
-        .endif
-    .wend
-
-    ldx #1
-    ldy #%110101
-
+  
+   .org 1000
+  jmp cheese
+  help
+-
+    lda ham
+-
+    ldy -
+ham
+    bne -
+    jsr --
     rts
-
+   
+cheese
+    
+    jsr help
+    
+ 
+    rts
+    

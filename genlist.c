@@ -5,7 +5,6 @@
 #pragma warning(disable:4996)
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 
@@ -36,7 +35,7 @@ FileLine* GetFileLine(char* file, const int line)
         if (fileEntry)
         {
             memset(fileEntry, 0, sizeof(FileEntry));
-            fileEntry->filename = StrDup(file);
+            fileEntry->filename = file;
             fileEntry->lines = ReadFileLines(file);
             if (prev)
                 prev->next = fileEntry;
@@ -70,7 +69,7 @@ ListTablePtr ListHead = NULL;
 //
 // This should only be called on the FinalPass
 // when all symbols/macros are resolved
-int GenerateListNode(parseNodePtr p)
+int GenerateListNode(ParseNodePtr p)
 {
     int col = 0;
     int bytes = 0;
@@ -451,22 +450,22 @@ ListTablePtr AddList(char* file, int line, char* output)
     ListTablePtr varPtr = (ListTablePtr)ALLOCATE(sizeof(ListTable));
     if (varPtr == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     memset(varPtr, 0, sizeof(ListTable));
 
-    varPtr->filename = StrDup(file);
+    varPtr->filename = STR_DUP(file);
     if (varPtr->filename == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     varPtr->line = line + 1;
-    varPtr->output = StrDup(output);
+    varPtr->output = STR_DUP(output);
     if (varPtr->output == NULL)
     {
-        FatalError(module, error_outof_memory);
+        FatalError(module, error_out_of_memory);
         return NULL;
     }
     ListTablePtr tmpPtr = ListHead;
@@ -545,10 +544,8 @@ void GenerateListFile(FILE* lstFile)
 //
 // Free the list table
 void FreeListTable(void)
-{    
-    ListTablePtr tmpPtr = ListHead;
-
-    for (; tmpPtr != NULL;)
+{
+    for (ListTablePtr tmpPtr = ListHead; tmpPtr != NULL;)
     {
         // ReSharper disable once CppLocalVariableMayBeConst
         ListTablePtr nextNode = tmpPtr->next;
@@ -578,13 +575,11 @@ void ResetFileLines(void)
 
 void FreeFileTable(void)
 {
-    FileEntry* fileEntry = SourceFileList;
-    for (; fileEntry != NULL;)
+    for (FileEntry * fileEntry = SourceFileList; fileEntry != NULL;)
     {
         FileEntry* tmpPtr = fileEntry->next;
 
-        FileLine* fileLines = fileEntry->lines;
-        for (;fileLines != NULL;)
+        for (FileLine * fileLines = fileEntry->lines;fileLines != NULL;)
         {
             FileLine* tmpFileLines = fileLines->next;
             FREE(fileLines->line);
