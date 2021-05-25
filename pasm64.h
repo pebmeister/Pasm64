@@ -2,10 +2,6 @@
 // Author           : Paul Baxter
 // Created          : 11-29-2015
 //
-// copyright (c) 2015 Paul Baxter
-//
-// Last Modified By : Paul
-// Last Modified On : 11-29-2015
 // ***********************************************************************
 #pragma once
 #include <stdio.h>
@@ -18,7 +14,7 @@ enum OutputFileType
     c64
 };
 
-typedef enum { type_unknown = 0, type_head_node = 1, type_con, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
+typedef enum { type_unknown = 0, type_head_node = 1, type_con, type_label, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
 
 typedef struct symbol_table
 {
@@ -26,6 +22,8 @@ typedef struct symbol_table
     int initialized;
     int ismacroname;
     int ismacroparam;
+    int islabel;
+    int islocal;
     int isvar;
     int isminus;
     char* scope;
@@ -82,6 +80,7 @@ typedef struct
 {
     void* macro;
     void* macro_params;
+    char* name;
 } MacParseNode;
 
 /* data definition node */
@@ -113,13 +112,13 @@ typedef struct parse_node
     struct parse_node* prev;      /* previous node */
 } ParseNode, *ParseNodePtr;
 
+extern void yyerror(const char* s);
+extern void yyrestart(FILE* input_file);
+extern int yyparse(void);
+
 extern int yylineno;
 extern FILE* yyin;
 extern int yylex(void);
-extern void yyerror(const char *s);
-extern void yyrestart(FILE * input_file );
-extern int yyparse (void);
-
 
 extern int OriginSpecified;
 extern int End;
@@ -130,6 +129,7 @@ extern int Org;
 extern int PC;
 extern int DataSize;
 extern int UnRollLoop;
+extern int MaxAddress;
 extern FILE* OutputFile;
 extern FILE* ListFile;
 extern FILE* SymFile;
@@ -139,16 +139,17 @@ extern char* LogFileName;
 extern char* SymFileName;
 extern char* OutputFileName;
 extern char* CurrentScope;
+extern char* LastLabel;
 extern char* ListFileName;
-extern int MaxAddress;
 extern char* Directories;
 
 extern enum OutputFileType OutFileFormat;
 
 extern int TotalBytesWritten;
 extern int SymbolValueChanged;
-extern char* InternalBuffer;
 extern int NoWarnings;
+extern int InMacroDef;
+extern char* InternalBuffer;
 
 /* our api */ 
 extern int Ex(ParseNode *p);
@@ -156,6 +157,7 @@ extern void InitEx(void);
 extern int HasUnInitializedSymbol(ParseNodePtr p);
 extern void yywarn(const char *s);
 extern int OpenIncludeFile(char* file);
+extern void ResetMacroDict(void);
 
 #define LOG(n,p)      if (LogFile != NULL) \
 {\

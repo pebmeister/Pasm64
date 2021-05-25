@@ -1,3 +1,4 @@
+
 ;********************************************
 ;*                                          *
 ;* SAVEZP                                   *
@@ -8,12 +9,21 @@
 ;*                                          *
 ;********************************************
                 .macro SAVEZP
-                ldy #@3 -1
+.if \3 > 2
+                ldy #\3 -1
 -
-                lda @1,y
-                sta @2,y
+                lda \1,y
+                sta \2,y
                 dey
                 bpl -
+.else
+                lda \1
+                sta \2
+    .if \3 > 1
+                lda \1 + 1
+                sta \2 + 1
+    .endif          
+.endif      
                 .endm
 
 ;********************************************
@@ -90,18 +100,18 @@
 ;*                                          *
 ;********************************************
                 .macro BCD2STR
-                lda @1                  ;   load the byte to convert
+                lda \1                  ;   load the byte to convert
                 and #$F0                ;   get the high nibble
                 lsr                     ;   shift to low nibble
                 lsr
                 lsr
                 lsr
                 ora #'0'                ;   or '0' to make it numeric
-                sta @2                  ;   save the PETASCII low byte
-                lda @1                  ;   reload the byte to convert
+                sta \2                  ;   save the PETASCII low byte
+                lda \1                  ;   reload the byte to convert
                 and #$0F                ;   get the lo nibble
                 ora #'0'                ;   or '0' to make it numeric
-                sta @2 + 1              ;   save the PETASCII high byte
+                sta \2 + 1              ;   save the PETASCII high byte
                 .endm
 
 ;********************************************
@@ -116,33 +126,33 @@
 ;*                                          *
 ;********************************************
                 .macro MULT10
-                asl @1
-                rol @1 + 1              ;   multiply by 2
+                asl \1
+                rol \1 + 1              ;   multiply by 2
 
                 ;
                 ;   save the number * 2
                 ;
-                ldx @1                  ;   save low byte in x
-                ldy @1 + 1              ;   save high byte in y
+                ldx \1                  ;   save low byte in x
+                ldy \1 + 1              ;   save high byte in y
 
                 ;
                 ;   continue shifting for multiply by 4 and 8
                 ;
-                asl @1
-                rol @1 + 1              ;   multiply by 4
-                asl @1
-                rol @1 + 1              ;   multiply by 8
+                asl \1
+                rol \1 + 1              ;   multiply by 4
+                asl \1
+                rol \1 + 1              ;   multiply by 8
 
                 ;
                 ;   now add up the result
                 ;
                 clc                     ;   clear carry
                 txa                     ;   load low byte of 2x
-                adc @1                  ;   add to 8x low byte
-                sta @1                  ;   store low byte
+                adc \1                  ;   add to 8x low byte
+                sta \1                  ;   store low byte
                 tya                     ;   load the high byte of 2x
-                adc @1 + 1              ;   add to 8x high
-                sta @1 + 1              ;   store high byte
+                adc \1 + 1              ;   add to 8x high
+                sta \1 + 1              ;   store high byte
                 .endm
 
 ;********************************************
@@ -155,36 +165,37 @@
 ;*                                          *
 ;********************************************
                 .macro MULT16
-                lda @2
+                lda \2
                 pha
-                lda @2 + 1
+                lda \2 + 1
                 pha
                 lda #$00
-                sta @3 + 2              ;   clear upper bits of @3
-                sta @3 + 3
+                sta \3 + 2              ;   clear upper bits of \3
+                sta \3 + 3
                 ldx #$10                ;   set binary count to 16
--
-                lsr @2 + 1              ;   divide @2 by 2
-                ror @2
+@M000
+                lsr \2 + 1              ;   divide \2 by 2
+                ror \2
 
-                bcc M001                   ;   bcc +  FOWARD  labals dont work yet in macros
+                bcc @M001               ;   bcc +  FOWARD  labels dont work yet
+                                        ;   in macros so use local label
                 
-                lda @3 + 2              ;   get upper half of @3 and add @1
+                lda \3 + 2              ;   get upper half of \3 and add \1
                 clc
-                adc @1
-                sta @3 + 2
-                lda @3 + 3
-                adc @1 + 1
-M001
-                ror                     ;   rotate partial @3
-                sta @3 + 3
-                ror @3 + 2
-                ror @3 + 1
-                ror @3
+                adc \1
+                sta \3 + 2
+                lda \3 + 3
+                adc \1 + 1
+@M001
+                ror                     ;   rotate partial \3
+                sta \3 + 3
+                ror \3 + 2
+                ror \3 + 1
+                ror \3
                 dex
-                bne -
+                bne @M000
                 pla
-                sta @2 + 1
+                sta \2 + 1
                 pla
-                sta @2
+                sta \2
                 .endm

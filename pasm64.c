@@ -11,6 +11,8 @@
 #include <string.h>
 
 #include "pasm64.h"
+
+#include "dictionary.h"
 #include "node.h"
 #include "symbol.h"
 #include "opcodes.h"
@@ -26,6 +28,8 @@
 #define INT16_MAX 32767
 #endif
 
+int InMacroDef = 0;
+
 // for 6502 and 65C02
 int MaxAddress = 0xFFFF;
 
@@ -34,6 +38,8 @@ int SymbolValueChanged = 0;
 
 // nest level of ex();
 int ExLevel = 0;
+
+DictionaryPtr MacroDict = NULL;
 
 //
 // how to expand an expression
@@ -70,16 +76,19 @@ const int Cmp[] =
     _cpy,
     _cpx
 };
+
 const int Ld[] =
 {
     _ldy,
     _ldx
 };
+
 const int Inc[] =
 {
     _iny,
     _inx
 };
+
 const int Dec[] =
 {
     _dey,
@@ -91,6 +100,7 @@ const int Dec[] =
     if (PC > MaxAddress) FatalError(method, error_program_counter_out_of_range)
 
 char* CurrentScope = NULL;
+char* LastLabel = NULL;
 
 // functions to determine if a symbol is defined
 int IsUnInitializedSymbol(ParseNodePtr p);
@@ -100,6 +110,7 @@ int IsUnInitializedSymbol(ParseNodePtr p);
 //
 int ExConstant(ParseNodePtr p);
 int ExSymbol(ParseNodePtr p);
+int ExLabel(ParseNodePtr p);
 int ExMacroExpansion(ParseNodePtr p);
 int ExMacroSymbol(ParseNodePtr p);
 int ExData(ParseNodePtr p);
@@ -258,13 +269,14 @@ struct op_table ExOprTable [] =
 //
 struct op_table ExTable[] =
 {
-    { type_con,      ExConstant              },
-    { type_id,       ExSymbol                },
-    { type_macro_id,  ExMacroSymbol          },
-    { type_macro_ex,  ExMacroExpansion       },
-    { type_data,     ExData                  },
-    { type_op_code,   ExOpCode               },
-    { type_opr,      ExOperator              }
+    { type_con,         ExConstant          },
+    { type_id,          ExSymbol            },
+    { type_label,       ExLabel             },
+    { type_macro_id,    ExMacroSymbol       },
+    { type_macro_ex,    ExMacroExpansion    },
+    { type_data,        ExData              },
+    { type_op_code,     ExOpCode            },
+    { type_opr,         ExOperator          }
 };
 #define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct op_table))
 
@@ -452,9 +464,64 @@ int ExSymbol(ParseNodePtr p)
     }
 
     SymbolTablePtr sym = p->id.i;
+    if (p->id.name[0] == '@')
+    {
+        sym = AddSymbol(p->id.name);
+        p->id.i = sym;
+    }
     if (sym == NULL)
     {
-        p->id.i = AddSymbol(p->id.name);    
+        sym = AddSymbol(p->id.name);
+        p->id.i = sym;
+        if (sym == NULL)
+        {
+            // FatalError(method, error_out_of_memory);
+            return 0;
+        }
+    }
+    return sym->initialized ? sym->value : 0;
+}
+
+int ExLabel(ParseNodePtr p)
+{
+    const char* method = "ExLabel";
+
+    CHECK_OPS(0, 0);
+
+    if (p->id.name[0] == '-')
+    {
+        if (!PlusMinusSymNameIsValid(p->id.name))
+        {
+            Error(method, error_adding_symbol);
+            return 0;
+        }
+
+        const int index = FindMinusSym((int)strlen(p->id.name), CurFileName, yylineno);
+        if (index >= 0)
+            return MinusSymTable[index].value;
+
+        return 0;
+    }
+
+    if (p->id.name[0] == '+')
+    {
+        if (!PlusMinusSymNameIsValid(p->id.name))
+        {
+            Error(method, error_adding_symbol);
+            return 0;
+        }
+
+        const int index = FindPlusSym((int)strlen(p->id.name), CurFileName, yylineno);
+        if (index >= 0)
+            return PlusSymTable[index].value;
+
+        return 0;
+    }
+
+    SymbolTablePtr sym = p->id.i;
+    if (sym == NULL)
+    {
+        p->id.i = AddSymbol(p->id.name);
         sym = p->id.i;
         if (sym == NULL)
         {
@@ -462,6 +529,9 @@ int ExSymbol(ParseNodePtr p)
             return 0;
         }
     }
+    if (!sym->initialized && p ->nops > 0)
+        Ex(p->op[0]);
+
     return sym->initialized ? sym->value : 0;
 }
 
@@ -747,11 +817,15 @@ int ExOpCode(ParseNodePtr p)
         int code2;
         for (int index = 0; index < p->nops; index++)
         {
-            const int opValue = Ex(p->op[index]);
-            
+            const ParseNodePtr pp = p->op[index];
+            int opValue = Ex(pp);
+
+            // fix for local labels
+            if (opValue == 0 && p->opcode.mode == r && p->nops == 1 && pp->type == type_id && pp->id.name[0] == '@')
+                opValue = PC;
+
             largeOp = largeOp | ((opValue & ~0xFF) != 0);
 
-            
             outOfRange =  outOfRange | ((((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp)));
             if (outOfRange)
             {
@@ -764,7 +838,7 @@ int ExOpCode(ParseNodePtr p)
                 // make sure a branch is in range
                 const int op = opValue - (p->opcode.pc + 2);               
 
-                if (op > 128 || op < -127)
+                if ( op > 128 || op < -127)
                 {
                     // reverse the logic and insert a jmp
                     switch (p->opcode.instruction)
@@ -844,7 +918,6 @@ int ExOpCode(ParseNodePtr p)
                 p->opcode.opcode = code2;
             }
         }
-
     }
 
     CHECK_OPS(0, INT16_MAX);
@@ -1006,6 +1079,7 @@ int ExOprExpressionList(ParseNodePtr p)
                 switch (pp->type)  // NOLINT(clang-diagnostic-switch-enum)
                 {
                     case type_id:
+                    case type_label:
                         sym = pp->id.i;
                         if (sym == NULL)
                         {
@@ -1018,7 +1092,7 @@ int ExOprExpressionList(ParseNodePtr p)
                             }
                             sym->isvar = TRUE;
                         }
-                        sym->value = 0;
+                        sym->value = pp->type == type_label ? PC : 0;
                         sym->initialized = TRUE;
                         break;
 
@@ -1042,6 +1116,7 @@ int ExOprExpressionList(ParseNodePtr p)
                 {
                     case type_con:
                     case type_id:
+                    case type_label:
                     case type_opr:
                         break;
 
@@ -1056,7 +1131,7 @@ int ExOprExpressionList(ParseNodePtr p)
                 if (++MacroParameterIndex > MaxMacroParam)
                     MaxMacroParam = MacroParameterIndex;
 
-                sprintf(symName, "@%d", MacroParameterIndex);
+                sprintf(symName, "\\%d", MacroParameterIndex);
                 sym = AddSymbol(symName);
                 if (sym != NULL)
                 {
@@ -1078,6 +1153,7 @@ int ExOprExpressionList(ParseNodePtr p)
                         {
                             case type_con:
                             case type_id:
+                            case type_label:
                             case type_opr:
                             case type_str:
                                 break;
@@ -1152,15 +1228,54 @@ int ExOprExpressionList(ParseNodePtr p)
     return 0;
 }
 
+struct macro_dict_entry
+{
+    int times_executed;
+};
+
+struct macro_dict_entry* CreateMacroEntry(const char* name)
+{
+    if (MacroDict == NULL)
+        MacroDict = DictCreate(sizeof(struct macro_dict_entry*));
+
+    struct macro_dict_entry* macroDictEntry = DictSearch(MacroDict, name);
+    if (macroDictEntry == NULL)
+    {
+        macroDictEntry = ALLOCATE(sizeof(struct macro_dict_entry));
+        macroDictEntry->times_executed = 0;
+        DictInsert(&MacroDict, name, macroDictEntry);
+    }
+    return macroDictEntry;
+}
+
+void ResetMacroDict(void)
+{
+    if (MacroDict == NULL)
+        return;
+
+    for (int index = 0; index < MacroDict->size; index++)
+    {
+        for (ElementPtr element = MacroDict->table[index]; element != 0; element = element->next)
+        {
+            struct macro_dict_entry* entry = element->value;
+            entry->times_executed = 0;
+        }
+    }
+}
+
 //
 // Expand macro symbol
 //
 int ExMacroSymbol(ParseNodePtr p)
 {
-    
     const char* method = "ExMacroSymbol";
 
+    struct macro_dict_entry* macroDictEntry = CreateMacroEntry(p->id.name);
+
     CHECK_OPS(0, 0);
+    char* temp = LastLabel;
+    sprintf(InternalBuffer, "%s::%d", p->id.name, macroDictEntry->times_executed);
+    LastLabel = STR_DUP(InternalBuffer);
 
     ExSymbol(p);
 
@@ -1168,6 +1283,9 @@ int ExMacroSymbol(ParseNodePtr p)
     if (! sym  || !sym->macro_node)
         return 0;
     Ex((ParseNodePtr)(sym->macro_node));
+
+    LastLabel = temp;
+
     return sym->value;
 }
 
@@ -1179,17 +1297,25 @@ int ExMacroExpansion(ParseNodePtr p)
     const char* method = "ExMacroExpansion";
     CHECK_OPS(0, 0);
 
+    struct macro_dict_entry* macroDictEntry = CreateMacroEntry(p->macro.name);
     PushMacroParams();
 
     ExpansionType = macro_parameter;
     MacroParameterIndex = 0;
 
     if (p->macro.macro_params != NULL)
-        Ex(((ParseNodePtr)p->macro.macro_params));
+        Ex(p->macro.macro_params);
+
+    char* temp = LastLabel;
+    sprintf(InternalBuffer, "%s::%d", p->macro.name, macroDictEntry->times_executed);
+    LastLabel = STR_DUP(InternalBuffer);
 
     if (p->macro.macro != NULL)
-        Ex(((ParseNodePtr)p->macro.macro));
+        Ex((ParseNodePtr) p->macro.macro);
 
+    macroDictEntry->times_executed++;
+
+    LastLabel = temp;
     PopMacroParams();
 
     return 0;
@@ -1204,17 +1330,22 @@ int ExOprMacroDefinition(ParseNodePtr p)
 
     CHECK_OPS(2, 2);
 
-    const SymbolTablePtr sym = AddSymbol(p->op[0]->id.name);
+    const ParseNodePtr macroId = p->op[0];
+    // Ex(macroId);
+    CreateMacroEntry(macroId->id.name);
+
+    const SymbolTablePtr sym = AddSymbol(macroId->id.name);
     if (sym == NULL)
     {
         FatalError(method, error_out_of_memory);
         return 0;
     }
+
     p->id.i = sym;
     sym->ismacroname = TRUE;
     sym->initialized = TRUE;
     sym->macro_node = p->op[1];
-     
+    sym->value = PC;
     return 0;
 }
 
@@ -1309,6 +1440,7 @@ int ExOprFor(ParseNodePtr p)
             return 0;
         }
     }
+
     Ex(p->op[0]);
     if (p->op[3]->id.i == NULL)
         p->op[3]->id.i = AddSymbol(p->op[3]->id.name);
@@ -1486,7 +1618,6 @@ int ExOprEqu(ParseNodePtr p)
 
     if (StrICmp(p->op[0]->id.name, "-" ) == 0)
     {
-
         int index = FindMinusSymDef(CurFileName, yylineno);
         if (index < 0) AddMinusSym(CurFileName, yylineno, op);
 
@@ -1521,7 +1652,7 @@ int ExOprEqu(ParseNodePtr p)
         return op;
     }
 
-    if ((p->op[0])->id.i == NULL)
+    if ((p->op[0])->id.i == NULL || (p->op[0])->id.name[0] == '@')
         (p->op[0])->id.i = AddSymbol((p->op[0])->id.name);
     SymbolTablePtr sym = (p->op[0])->id.i;
     if (sym == NULL)
@@ -1548,6 +1679,8 @@ int ExOprEqu(ParseNodePtr p)
         }
         SetSymbolValue(sym, op);
         sym->initialized = TRUE;
+        if (p->op[0]->type == type_label)
+            sym->islabel = TRUE;
     }
     return 0;
 }
@@ -1786,7 +1919,7 @@ int Ex(ParseNodePtr p)
 /// <param name="p">The node pointer.</param>
 int IsUnInitializedSymbol(ParseNodePtr p)
 {
-    if (p->type == type_id)
+    if (p->type == type_label || p->type == type_id)
     {
         if (p->id.i == NULL)
              return TRUE;

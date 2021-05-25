@@ -1,10 +1,11 @@
 ﻿  pch.cpp
   dllmain.cpp
   InstallerCustomActions.cpp
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\InstallerCustomActions\InstallerCustomActions.cpp(57,5): error C2664: 'LRESULT SendMessageTimeoutW(HWND,UINT,WPARAM,LPARAM,UINT,UINT,PDWORD_PTR)': cannot convert argument 7 from 'DWORD *' to 'PDWORD_PTR'
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\InstallerCustomActions\InstallerCustomActions.cpp(58,31): message : Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\winuser.h(3757,1): message : see declaration of 'SendMessageTimeoutW'
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\InstallerCustomActions\InstallerCustomActions.cpp(125,5): error C2664: 'LRESULT SendMessageTimeoutW(HWND,UINT,WPARAM,LPARAM,UINT,UINT,PDWORD_PTR)': cannot convert argument 7 from 'DWORD *' to 'PDWORD_PTR'
+C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\InstallerCustomActions\InstallerCustomActions.cpp(126,15): message : Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\winuser.h(3757,1): message : see declaration of 'SendMessageTimeoutW'
+  registry.cpp
   TraceOut.cpp
-     Creating library C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\x64\Release\InstallerCustomActions.lib and object C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\x64\Release\InstallerCustomActions.exp
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 20 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  InstallerCustomActions.vcxproj -> C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\x64\Release\InstallerCustomActions.dll

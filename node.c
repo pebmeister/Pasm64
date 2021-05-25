@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <string.h> 
 
-
 #include "opcodes.h"
 #include "pasm64.h"
 #include "pasm64.tab.h"
@@ -23,6 +22,7 @@
 #include "str.h"
 #include "error.h"
 #include "mem.h"
+#include "symbol.h"
 
 int NameIsValid(char* name);
 
@@ -148,14 +148,9 @@ ParseNodePtr Str(char* value)
     return p;
 }
 
-/// <summary>
-/// Identifier specified name.
-/// </summary>
-/// <param name="name">The name of symbol.</param>
-/// <returns>parseNodePtr.</returns>
-ParseNodePtr Id(char* name) 
+ParseNodePtr IdNodeCommon(char* name, NodeEnum  nodeType)
 {
-    const char* module = "id";
+    const char* module = "IdNodeCommon";
 
     /* allocate node */
     // ReSharper disable once CppLocalVariableMayBeConst
@@ -168,7 +163,7 @@ ParseNodePtr Id(char* name)
     }
 
     /* copy information */
-    p->type = type_id;
+    p->type = nodeType;
     p->id.name = name; // StrDup(name);
     if (p->id.name == NULL)
     {
@@ -179,33 +174,39 @@ ParseNodePtr Id(char* name)
 }
 
 /// <summary>
+/// Identifier specified name.
+/// </summary>
+/// <param name="name">The name of symbol.</param>
+/// <returns>parseNodePtr.</returns>
+ParseNodePtr Id(char* name) 
+{
+    return IdNodeCommon(name, type_id);
+}
+
+/// <summary>
+/// Identifier specified name.
+/// </summary>
+/// <param name="name">The name of symbol.</param>
+/// <returns>parseNodePtr.</returns>
+ParseNodePtr Label(char* name)
+{
+    if (name[0] != '@' && name[0] != '-' && name[0] != '+')
+        LastLabel = name;
+    else if (LastLabel != NULL && name[0] == '@')
+    {
+        name = FormatLocalSym(name, LastLabel);
+    }
+    return IdNodeCommon(name, type_label);
+}
+
+/// <summary>
 /// Macro Identifier specified name.
 /// </summary>
 /// <param name="name">The id of symbol.</param>
 /// <returns>parseNodePtr.</returns>
 ParseNodePtr MacroId(char* name) 
 {
-    const char* module = "MacroId";
-
-    /* allocate node */
-    ParseNodePtr p = AllocateNode(0);
-
-    if (p == NULL)
-    {
-        FatalError(module, error_out_of_memory);
-        return NULL;
-    }
-
-    /* copy information */
-    p->type = type_macro_id;
-    p->id.name = STR_DUP(name);
-    if (p->id.name == NULL)
-    {
-        FatalError(module, error_out_of_memory);
-        return NULL;
-    }
-    // FREE(name);
-    return p;
+    return IdNodeCommon(name, type_macro_id);
 }
 
 /// <summary>
@@ -216,6 +217,7 @@ ParseNodePtr MacroId(char* name)
 /// <returns>parseNodePtr.</returns>
 ParseNodePtr MacroEx(char* name, ParseNodePtr macroParams) 
 {
+    // ReSharper disable once CppTooWideScope
     const char* module = "MacroEx";
 
     ParseNodePtr macro = MacroId(name);
@@ -231,6 +233,7 @@ ParseNodePtr MacroEx(char* name, ParseNodePtr macroParams)
     /* copy information */
     p->type = type_macro_ex;
     p->macro.macro = macro;
+    p->macro.name = name;
     p->macro.macro_params = macroParams;
   
     return p;
@@ -402,12 +405,6 @@ ParseNodePtr Opcode(int opr, int mode, int nops, ...)
     }
     for (index = 0; index < nops; index++)
     {
-        //if (mode == r)
-        //{
-        //    LogFile = stdout;
-        //    PrintNode(p->op[index]);
-        //    LogFile = NULL;
-        //}
         Ex(p->op[index]);
     }    
 
@@ -425,8 +422,7 @@ ParseNodePtr Opcode(int opr, int mode, int nops, ...)
 /// </summary>
 void FreeParseTree(void)
 {
-    ParseNodePtr p = HeadNode;
-    for (; p != NULL;)
+    for (ParseNodePtr p = HeadNode; p != NULL;)
     {
         ParseNodePtr next = p->next;
         FreeParseNode(p);
@@ -495,7 +491,6 @@ void FreeParseNode(ParseNodePtr p)
                     Count = 1;
                     LastPass = Pass;
                 }
-                // printf("PASS %d Symbol count %llu\n", Pass, Count);
                 FREE(p->id.name);
                 ++Count;
             }
@@ -511,12 +506,11 @@ void FreeParseNode(ParseNodePtr p)
 int NameIsValid(char* name)
 {
     if (name == NULL) return 0;
-
+    
     for (; *name; name++)
     {
-
         char c = *name;
-        if ((c != '+' && c != '-') && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '@'))
+        if ((c != '+' && c != '-' && c != '@') && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '\\'))
             continue;
 
         return 0;
@@ -532,6 +526,7 @@ void PrintNode(ParseNodePtr p)
     if (LogFile == NULL || p == NULL)
         return;
 
+    // ReSharper disable once CppTooWideScope
     int index;
 
     PrintIndent();
@@ -551,8 +546,25 @@ void PrintNode(ParseNodePtr p)
 
         case type_id:
         case type_macro_id:
+        case type_label:
             PrintIndent();
-            fprintf(LogFile, "type %s\n", p->type == type_id ? "typeId" : "typeMacroId");
+            switch (p->type)  // NOLINT(clang-diagnostic-switch-enum)
+            {
+            case type_id:
+                fprintf(LogFile, "type %s\n", "type_id");
+                break;
+
+            case type_label:
+                fprintf(LogFile, "type %s\n", "type_label");
+                break;
+
+            case type_macro_id:
+                fprintf(LogFile, "type %s\n", "type_macro_id");
+                break;
+
+            default:
+                break;
+            }
             PrintIndent();
             fprintf(LogFile, "name %s\n", p->id.name);
             PrintIndent();
@@ -950,5 +962,3 @@ void PrintNode(ParseNodePtr p)
     fprintf(LogFile, "\n");
     PrintNestLevel--;
 }
-
-

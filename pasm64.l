@@ -59,7 +59,7 @@ BITOR                       [|]
 LOGAND                      [&][&]
 BITAND                      [&]
 STRVALUE					(\"([^"\\\n]|{ES})*\")+
-SYMB                        [A-Za-z_][A-Za-z0-9_.]*
+SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 %%
 
 "ORA"                       OP(ora)
@@ -240,10 +240,10 @@ SYMB                        [A-Za-z_][A-Za-z0-9_.]*
 ".ORG"                      return ORG;
 ".SECTION"                  return SECTION;
 ".ENDSECTION"               return ENDSECTION;
- ".SECT"                    return SECTION;
- ".ENDS"                    return ENDSECTION;
- ".INC"                     return INC;
- ".LOAD"                    return LOAD;
+".SECT"                     return SECTION;
+".ENDS"                     return ENDSECTION;
+".INC"                      return INC;
+".LOAD"                     return LOAD;
 ".WHILE"                    { 
                                 if (inDoLoop > 0) 
                                 { 
@@ -274,7 +274,7 @@ SYMB                        [A-Za-z_][A-Za-z0-9_.]*
 ".C64"                      { OutFileFormat = c64; }
 ^"-"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 ^"+"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
-[@][1-9]+[0-9]*             {
+[\\][1-9]+[0-9]*            {
                                 if (!inMacroDef)
                                     REJECT;
                                 yylval.strValue = STR_DUP(yytext); 

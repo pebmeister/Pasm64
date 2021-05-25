@@ -10,6 +10,7 @@
 extern ParseNodePtr Opr(int op, int nops, ...);
 extern ParseNodePtr Opcode(int opr, int mode, int nops, ...);
 extern ParseNodePtr Id(char* name);
+extern ParseNodePtr Label(char* name);
 extern ParseNodePtr MacroId(char* name);
 extern ParseNodePtr Con(int value, int isPc);
 extern ParseNodePtr Str(char* value);

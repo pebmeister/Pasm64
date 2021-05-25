@@ -12,7 +12,7 @@
 
 extern void* AllocateMemory(size_t size, char* file, int line);
 extern void* ReallocateMemory(void* ptr, size_t size, char* file, int line);
-extern void FreeMemory(void* ptr);
+extern void FreeMemory(const void* ptr);
 extern int IsTreeValid(void);
 extern void PrintMemoryAllocation(void);
 extern void PrintMemoryAllocationSummary(void);

@@ -933,10 +933,10 @@ $0133: $4C $00 $C0       jmp $C000                                jmp EXECADDR  
 $0136: $20 $52 $45       .db ' ', 'R', 'E'        MSG             .db " RENUM",0
 $0139: $4E $55 $4D       .db 'N', 'U', 'M'        
 $013C: $00               .db $00                  
-$013D: $52 $45 $4E       .db 'R', 'E', 'N'        NAME            .str "RENUM"         ;   enter name of prg-to-load here
+$013D: $52 $45 $4E       .db 'R', 'E', 'N'        NAME            .str "RENUM"            ;   enter name of prg-to-load here
 $0140: $55 $4D           .db 'U', 'M'             
-                                                                  NAMELEN         = *-NAME
-                                                                  EXECADDR        = $C000 ;   set to the 1st instruction's address of prg-to-load
+                                                                  NAMELEN = *-NAME
+                                                                  EXECADDR = $C000        ;   set to the 1st instruction's address of prg-to-load
                                                   
                                                                                           ;   now comes the smart part:
                                                                   .while * < $200

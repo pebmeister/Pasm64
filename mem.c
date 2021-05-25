@@ -121,7 +121,7 @@ void FreeMemoryNode(MemoryNode* node)
     FreeMemoryInternal(node, sizeof(MemoryNode));
 }
 
-void FreeMemory(void* ptr)
+void FreeMemory(const void* ptr)
 {
     const char* function = "FreeMemory";
 

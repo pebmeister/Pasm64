@@ -6,6 +6,9 @@
 #pragma warning(disable:4065)
 #pragma warning(disable:4996)
 
+// ReSharper disable once CommentTypo
+// -log renum.log -dir "C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\Installer\Samples\Commodore\renumber\;C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\Installer\Samples\Commodore\include\\" macros.asm pagezero.asm kernal.asm basic.asm install.asm wedge.asm vars.asm main.asm init.asm pass1.asm pass2.asm getlinenum.asm findlinenum.asm insertlinenum.asm movelines.asm util.asm debug.asm storage.asm -C64 -l renumber.lst -v -o renumber.prg
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -68,6 +71,8 @@ void ResetLex(void)
 
     SymbolValueChanged = 0;
 
+    LastLabel = NULL;
+
     // reset the Program Counter
     PC = 0x1000;
 
@@ -95,6 +100,8 @@ void ResetLex(void)
         return;
     }
     HeadNode->type = type_head_node;
+
+    ResetMacroDict();
 }
 
 //
@@ -414,7 +421,7 @@ int main(const int argc, char* argv[])
         Error(module, error_no_input_file_specified);
         Usage();
         return -1;
-    }        
+    }
 
     // Pass Loop
     // loop until all symbols are resolved
@@ -618,7 +625,10 @@ int main(const int argc, char* argv[])
         {
             ResetFileLines();
             GenerateListFile(stdout);
+
+            DumpSymbols(stdout);
         }
+
 
         if (WarningCount > 0)
         {

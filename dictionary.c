@@ -145,7 +145,7 @@ static DictionaryPtr Grow(DictionaryPtr d)
 /// <param name="dd">The address of dictionary pointer.</param>
 /// <param name="key">The key.</param>
 /// <param name="value">The value.</param>
-void* DictInsert(DictionaryPtr *dd, char *key, void *value)
+void* DictInsert(DictionaryPtr *dd, const char *key, void *value)
 {
     // ReSharper disable once CppLocalVariableMayBeConst
     DictionaryPtr d = *dd;

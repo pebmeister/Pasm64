@@ -88,7 +88,7 @@ stmt
     | EOL                               { $$ = Opr(STATEMENT, 0);                       }
     ;
 
-stmt_list
+stmt_list  
     : stmt                              { $$ = $1;                                      }
     | stmt_list stmt                    { $$ = Opr(STATEMENT, 2, $1, $2);               }
     ;
@@ -137,7 +137,11 @@ expr_list
     ;
           
 macrodef
-    : MACRO SYMBOL stmt_list ENDMACRO   { $$ = Opr(MACRO, 2, MacroId($2), $3);          }
+    : MACRO SYMBOL stmt_list ENDMACRO   {
+                                            InMacroDef++;
+                                            $$ = Opr(MACRO, 2, MacroId($2), $3); 
+                                            InMacroDef--;
+                                        }
     ;
 
 macrocall
@@ -174,7 +178,7 @@ symbol_value
                                             }
                                             else
                                             {
-                                                $$ = Opr('=', 2, Id($1), Con(PC, TRUE));
+                                                $$ = Opr('=', 2, Label($1), Con(PC, TRUE));
                                             }
                                         }
     ;

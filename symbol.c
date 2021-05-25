@@ -3,8 +3,6 @@
 // Author           : Paul
 // Created          : 02-23-2015
 //
-// Last Modified By : Paul
-// Last Modified On : 02-23-2015
 // ***********************************************************************
 // ReSharper disable CppClangTidyReadabilityRedundantDeclaration
 #pragma warning(disable:4996)
@@ -68,7 +66,6 @@ int ComparePluMinusSymValue(const struct plus_minus_sym* a, const char* file, in
     struct plus_minus_sym b = { file, l, 0 };
     return ComparePluMinusSym(a, &b);
 }
-
 
 int FindMinusSymDef(const char* file, const int line)
 {
@@ -184,9 +181,15 @@ void AddMinusSym(const char* file, const int line, const int value)
 
 void AddPlusSym(const char* file, const int line, const int value)
 {
- 
+
+
     const char* module = "AddPlusSym";
 
+    if (MacroIndex > 0)
+    {
+        FatalError(module, error_plus_sym_not_allowed_in_macro);
+        return;
+    }
     // printf("%s %s %d\n", module, file, value);
 
     IsTreeValid();
@@ -224,6 +227,16 @@ void AddPlusSym(const char* file, const int line, const int value)
     IsTreeValid();
 }
 
+char* FormatLocalSym(char* name, char* lastLabel)
+{
+    const int newLen = (int) (strlen(LastLabel) + 1 + strlen(name) + 1 + 2);  // NOLINT(bugprone-narrowing-conversions, cppcoreguidelines-narrowing-conversions)
+    char* newName = (char*)ALLOCATE(newLen);
+    sprintf(newName, "%s__%s", LastLabel, name);
+    name = STR_DUP(newName);
+    FREE(newName);
+    return name;
+}
+
 /// <summary>
 /// Add a symbol to the SymbolTable.
 /// </summary>
@@ -232,11 +245,12 @@ void AddPlusSym(const char* file, const int line, const int value)
 SymbolTablePtr AddSymbol(char* name)
 {
     if (name == NULL) return NULL;
+    if (InMacroDef > 0) return NULL;
 
     SymbolTable sym = { 0 };
     char* tempSection = CurrentScope;
     const char* module = "AddSymbol";
-    
+
     if (SymbolDictionary == NULL)
     {
         SymbolDictionary = DictCreate(sizeof(SymbolTable));
@@ -246,15 +260,22 @@ SymbolTablePtr AddSymbol(char* name)
             return NULL;
         }
     }
+    DictionaryPtr* d = &SymbolDictionary;
 
     if (strstr(name, "."))
         CurrentScope = NULL;
-   
+
     if (name[0] == '.')
     {
         name++;
     }
-
+    sym.ismacroparam = name[0] == '\\';
+    sym.islocal = name[0] == '@';
+    if (sym.islocal && LastLabel != NULL)
+    {
+        name = FormatLocalSym(name, LastLabel);
+    }
+    
     int len = (int)strlen(name);
     if (name[len-1] == ':')
         name[len-1] = 0;
@@ -273,7 +294,6 @@ SymbolTablePtr AddSymbol(char* name)
         return NULL;
     }
 
-    sym.ismacroparam = name[0] == '@';
     if (CurrentScope)
     {
         sym.scope = STR_DUP(CurrentScope);
@@ -303,9 +323,15 @@ SymbolTablePtr AddSymbol(char* name)
             return NULL;
         }
     }
-    CurrentScope = tempSection;
 
-    tmpPtr = (SymbolTablePtr) DictInsert(&SymbolDictionary, sym.fullname, &sym);
+    if (sym.name[0] == '@')
+    {
+        sym.initialized = TRUE;
+        sym.value = 0;
+    }
+
+    CurrentScope = tempSection;    
+    tmpPtr = (SymbolTablePtr) DictInsert(d, sym.fullname, &sym);
     SanitizeSymbol(tmpPtr);
 
     return tmpPtr;
@@ -387,16 +413,17 @@ SymbolTablePtr SetSymbolValue(SymbolTablePtr sym, const int value)
 
     if ((sym != NULL) && (sym->value != value))
     {
+
         if (((value & ~0xFFFF) != 0) && !sym->isvar)
         {
             Error(module, error_value_outof_range);
             return NULL;
         }
-        sym->value = value;
         if (!sym->ismacroparam && !sym->isvar)
         {
             SymbolValueChanged++;
         }
+        sym->value = value;
     }
     return sym;
 }
@@ -406,12 +433,12 @@ SymbolTablePtr SetSymbolValue(SymbolTablePtr sym, const int value)
 /// </summary>
 /// <param name="paramNumber">The parameter number.</param>
 /// <returns>SymbolTablePtr.</returns>
-SymbolTablePtr LookUpMacroParam(int paramNumber)
+SymbolTablePtr LookUpMacroParam(const int paramNumber)
 {
     char macroParamName[MAX_MACRO_PARAM_NAME_LEN] = { 0 };
     
-    sprintf(macroParamName, "@%d", paramNumber);
-    return (SymbolTablePtr) DictSearch(SymbolDictionary, macroParamName);
+    sprintf(macroParamName, "\\%d", paramNumber);
+    return DictSearch(SymbolDictionary, macroParamName);
 }
 
 /// <summary>
@@ -422,7 +449,6 @@ SymbolTablePtr LookUpMacroParam(int paramNumber)
 SymbolTablePtr LookUpSymbol(char* name)
 {
     const char* module = "LookUpSymbol";
-
     if (SymbolDictionary == NULL)
     {
         SymbolDictionary = DictCreate(sizeof(SymbolTable));
@@ -455,7 +481,7 @@ SymbolTablePtr LookUpSymbol(char* name)
             return tmpPtr;
     }
 
-    return (SymbolTablePtr) DictSearch(SymbolDictionary, name);
+    return DictSearch(SymbolDictionary, name);
 }
 
 /// <summary>
@@ -569,11 +595,10 @@ int UnResolvedSymbols()
 
     for (int index = 0; index < SymbolDictionary->size; index++)
     {
-        ElementPtr elem = SymbolDictionary->table[index];
-        for ( ; elem; elem = elem->next)
+        for (ElementPtr elem = SymbolDictionary->table[index]; elem; elem = elem->next)
         {
             // ReSharper disable once CppLocalVariableMayBeConst
-            SymbolTablePtr sym = (SymbolTablePtr)(elem->value);
+            SymbolTablePtr sym = elem->value;
 
             if (sym->initialized == FALSE && sym->ismacroname == FALSE &&
                 sym->isvar == FALSE && sym->ismacroparam == FALSE)
@@ -582,6 +607,7 @@ int UnResolvedSymbols()
             }
         }
     }
+
     return count;
 }
 

@@ -4,6 +4,5 @@
   pasm64.c
   pasm64.flex.c
   pasm64.tab.c
-  symbol.c
   Generating Code...
   pasms64.vcxproj -> C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\pasms64\Debug\pasm64.exe

@@ -69,7 +69,8 @@ const char* Errors[] =
     "Unable to open include file.",
     "Memory corruption detected.",
     "Attempt to free unallocated memory.",
-    "Verbose specified more than once"
+    "Verbose specified more than once.",
+    "Plus local symbol not allowed in macro."
 };
 #define NUM_ERRORS (sizeof(Errors)/sizeof(char*))
 

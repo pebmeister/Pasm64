@@ -7,10 +7,10 @@
 
             jsr DUMP_NEWLINE
 
-            lda #>@1
-            ldy #<@1
+            lda #>\1
+            ldy #<\1
             jsr DUMP_STR
-            lda @2       
+            lda \2       
             jsr DUMP_BYTE
 
             POPAY            
@@ -22,11 +22,11 @@
 
             jsr DUMP_NEWLINE
 
-            lda #>@1
-            ldy #<@1
+            lda #>\1
+            ldy #<\1
             jsr DUMP_STR
-            lda @2 
-            ldy @2 + 1
+            lda \2 
+            ldy \2 + 1
             jsr DUMP_BYTE
 
             POPAY

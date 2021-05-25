@@ -17,7 +17,7 @@ typedef struct element
     /// <summary>
     /// The key
     /// </summary>
-    char *key;
+    const char *key;
     /// <summary>
     /// The value
     /// </summary>
@@ -61,7 +61,7 @@ extern void DictDestroy(DictionaryPtr);
    insert a new key-value pair into an existing dictionary
    the dictionary may expanded which why address of pointer is passed 
 */
-extern void* DictInsert(DictionaryPtr*, char *key, void *value);
+extern void* DictInsert(DictionaryPtr*, const char *key, void *value);
 
 /* return the most recently inserted value associated with a key */
 /* or 0 if no matching key is present */
