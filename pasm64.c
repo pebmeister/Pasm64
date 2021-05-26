@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "pasm64.h"
-
 #include "dictionary.h"
 #include "node.h"
 #include "symbol.h"
