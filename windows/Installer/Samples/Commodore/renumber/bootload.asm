@@ -40,6 +40,5 @@ NAME            .str "RENUM"            ;   enter name of prg-to-load here
                 EXECADDR = $C000        ;   set to the 1st instruction's address of prg-to-load
 
                                         ;   now comes the smart part:
-                .while * < $200
-                    .byte $01
-                .wend
+                .fill $01, $200-*
+                

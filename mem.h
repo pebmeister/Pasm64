@@ -2,8 +2,11 @@
 
 #ifdef MEM_DEBUG
 #include <stdlib.h>
+#else
+#include <malloc.h>
 #endif
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "pasm64.h"
 #ifdef MEM_DEBUG
 #include "node.h"
@@ -35,7 +38,7 @@ extern void FreeStrInternal(char* str);
 #define REALLOCATE(p,n) realloc((p),(n))
 // DO NOT REMOVE *(char*)(p) = 0x00.
 // IT IS USED TO FLAG THAT IT HAS BEEN DEALLOCATED
-#define FREE(p)  { *(char*)(p) = 0x00; free((p)); }
+#define FREE(p)  { *(char*)(p) = 0x00; free((char*)(p)); }
 #define VALIDATE_TREE
 
 #endif

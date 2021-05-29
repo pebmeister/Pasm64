@@ -31,7 +31,7 @@ enum
     error_opening_output_file,
     error_opening_list_file,
     error_creating_list_node,
-    error_value_outof_range,
+    error_value_out_of_range,
     error_missing_parameter,
     error_writing_list_file,
     error_reading_source_file,
@@ -71,3 +71,6 @@ enum
 extern void Error(const char* module, int error);
 extern void Warning(const char* module, int error);
 extern void FatalError(const char* module, int error);
+
+extern int WarningCount;
+extern int ErrorCount;

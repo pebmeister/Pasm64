@@ -5,12 +5,11 @@
 // ***********************************************************************
 #pragma warning(disable:4996)
 
-#include "str.h"
-
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "str.h"
 #include "error.h"
 #include "mem.h"
 

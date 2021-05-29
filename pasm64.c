@@ -4,6 +4,7 @@
 // ***********************************************************************
 
 // ReSharper disable CppClangTidyMiscMisplacedConst
+// ReSharper disable CppClangTidyClangDiagnosticExtraSemiStmt
 #pragma warning(disable:4996)
 
 #include <stdio.h>
@@ -39,6 +40,8 @@ int SymbolValueChanged = 0;
 int ExLevel = 0;
 
 DictionaryPtr MacroDict = NULL;
+
+int PrintListState = 1;
 
 //
 // how to expand an expression
@@ -114,6 +117,7 @@ int ExMacroExpansion(ParseNodePtr p);
 int ExMacroSymbol(ParseNodePtr p);
 int ExData(ParseNodePtr p);
 int ExOpCode(ParseNodePtr p);
+int ExPrintState(ParseNodePtr p);
 int ExOperator(ParseNodePtr p);
 int ExOprLoByte(ParseNodePtr p);
 int ExOprHiByte(ParseNodePtr p);
@@ -158,6 +162,7 @@ int ExOprEndSection(ParseNodePtr p);
 int ExOprVar(ParseNodePtr p);
 int ExOprInclude(ParseNodePtr p);
 int ExOprLoad(ParseNodePtr p);
+int ExOprFill(ParseNodePtr p);
 
 //
 // Program Counter
@@ -203,6 +208,8 @@ int ForYCount = 0;
 // node to inject a byte
 //
 ParseNodePtr GenByteNode = NULL;
+ParseNodePtr GenFillNode1 = NULL;
+ParseNodePtr GenFillNode2 = NULL;
 
 //
 // expansion type for expressions
@@ -260,6 +267,7 @@ struct op_table ExOprTable [] =
     { VAR,          ExOprVar                },
     { INC,          ExOprInclude            },
     { LOAD,         ExOprLoad               },
+    { FILL,         ExOprFill               },
 };
 #define NUM_OPR_EXP (sizeof(ExOprTable) / sizeof(struct op_table))
 
@@ -275,6 +283,7 @@ struct op_table ExTable[] =
     { type_macro_ex,    ExMacroExpansion    },
     { type_data,        ExData              },
     { type_op_code,     ExOpCode            },
+    { type_print,       ExPrintState        },
     { type_opr,         ExOperator          }
 };
 #define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct op_table))
@@ -361,6 +370,57 @@ int ExOprInclude(ParseNodePtr p)
     OpenIncludeFile(file);
 
     return 1;
+}
+
+int ExOprFill(ParseNodePtr p)
+{
+    const char* method = "ExOprFill";
+    CHECK_OPS(2, 2);
+
+    const int byt = Ex(p->op[0]);
+    int count = Ex(p->op[1]);
+
+    if (byt < 0 || byt > 255)
+    {
+        FatalError(method, error_value_out_of_range);
+    }
+    if (count < 0)
+    {
+        FatalError(method, error_value_out_of_range);
+    }
+    if (FinalPass)
+    {       
+        while (count > 0)
+        {
+            if (count > 1)
+            {
+                if (GenFillNode2 == NULL)
+                {
+                    GenFillNode2 = Data(2, Con(byt << 8 | byt, FALSE));
+                }
+                GenerateOut(GenFillNode2);
+                GenerateListNode(GenFillNode2);
+                PC += 2;
+                count -= 2;
+            }
+            else if (count == 1)
+            {
+                if (GenFillNode1 == NULL)
+                {
+                    GenFillNode1 = Data(1, Con(byt, FALSE));
+                }
+                GenerateOut(GenFillNode1);
+                GenerateListNode(GenFillNode1);
+                PC++;
+                count --;
+            }
+        }
+    }
+    else
+    {
+        PC += count > 0 ? count : 1;
+    }
+    return byt;
 }
 
 int ExOprLoad(ParseNodePtr p)
@@ -567,7 +627,7 @@ int ExOprForReg(ParseNodePtr p)
     // range check
     if (start < 0 || start > 255)
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
         return 0;
     }
 
@@ -577,7 +637,7 @@ int ExOprForReg(ParseNodePtr p)
     // range check
     if (end < 0 || end > 255)
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
         return 0;
     }
 
@@ -594,7 +654,7 @@ int ExOprForReg(ParseNodePtr p)
     // increment nest level
     if ( ++(*forLoopCounter) != 1)
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
     }
 
     // inject (ldx | ldy) #start opcode node
@@ -612,7 +672,7 @@ int ExOprForReg(ParseNodePtr p)
     {
         if (--(*forLoopCounter) != 0)
         {
-            Error(method, error_value_outof_range);
+            Error(method, error_value_out_of_range);
         }
         return 0;
     }
@@ -656,7 +716,7 @@ int ExOprForReg(ParseNodePtr p)
 
     if (--(*forLoopCounter) != 0)
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
     }
     return 0;
 }
@@ -670,18 +730,14 @@ int ExData(ParseNodePtr p)
 
     CHECK_OPS(0, 0);
 
+    ExpansionType = data_byte;
+    DataSize = p->data.size;
     if (p->data.size == 0)
     {
         ExpansionType = data_string;
         DataSize = 0;
     }
-    else
-    {
-        ExpansionType = data_byte;
-        DataSize = p->data.size;
-    }
-    Ex((ParseNodePtr)p->data.data);
-    return 0;
+    return Ex((ParseNodePtr)p->data.data);
 }
 
 //
@@ -828,7 +884,7 @@ int ExOpCode(ParseNodePtr p)
             outOfRange =  outOfRange | ((((opValue & ~0xFFFF) != 0)) || ((opBytes < 2) && (largeOp)));
             if (outOfRange)
             {
-                Error(method, error_value_outof_range);
+                Error(method, error_value_out_of_range);
                 break;
             }
 
@@ -935,6 +991,18 @@ int ExOpCode(ParseNodePtr p)
     return 0;
 }
 
+int ExPrintState(ParseNodePtr p)
+{
+    const char* method = "ExPrint";
+    CHECK_OPS(0, 0);
+
+    if (FinalPass)
+    {
+        GenerateListNode(p);
+    }
+    return 1;
+}
+
 //
 // Operator Not
 //
@@ -1008,7 +1076,7 @@ int ExOprPcAssign(ParseNodePtr p)
     {
         if (op < PC)
         {
-            Error(method, error_value_outof_range);
+            Error(method, error_value_out_of_range);
         }
         else if (op > PC)
         {
@@ -1124,7 +1192,7 @@ int ExOprExpressionList(ParseNodePtr p)
                     case type_data:
                     case type_str:
                     default:
-                        Error(method, error_value_outof_range);
+                        Error(method, error_value_out_of_range);
                         return 0;
                 }
                 if (++MacroParameterIndex > MaxMacroParam)
@@ -1161,7 +1229,7 @@ int ExOprExpressionList(ParseNodePtr p)
                             case type_macro_ex:
                             case type_data:
                             default:
-                                Error(method, error_value_outof_range);
+                                Error(method, error_value_out_of_range);
                                 return 0;
                         }
                         GenerateListNode(pp);
@@ -1182,7 +1250,7 @@ int ExOprExpressionList(ParseNodePtr p)
             case data_string:
                 if (pp->type != type_str)
                 {
-                    Error(method, error_value_outof_range);
+                    Error(method, error_value_out_of_range);
                     return 0;
                 }
                 if (FinalPass)
@@ -1247,6 +1315,9 @@ struct macro_dict_entry* CreateMacroEntry(const char* name)
     return macroDictEntry;
 }
 
+//
+// reset the time dict
+//
 void ResetMacroDict(void)
 {
     if (MacroDict == NULL)
@@ -1459,7 +1530,7 @@ int ExOprFor(ParseNodePtr p)
     }
     if (UnRollLoop && (endval < 0) && (endval > 255))
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
         return 0;
     }
     if (UnRollLoop)
@@ -1483,7 +1554,7 @@ int ExOprFor(ParseNodePtr p)
     }
     else
     {
-        Error(method, error_value_outof_range);
+        Error(method, error_value_out_of_range);
     }
     return 0;
 }

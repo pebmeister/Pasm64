@@ -5,6 +5,7 @@
 
 // ReSharper disable CppLocalVariableMayBeConst
 // ReSharper disable CppParameterMayBeConst
+// ReSharper disable CppClangTidyClangDiagnosticExtraSemiStmt
 #pragma warning(disable:4996)
 #pragma warning(disable:6385)
 #pragma warning(disable:6386)
@@ -207,6 +208,15 @@ ParseNodePtr Label(char* name)
 ParseNodePtr MacroId(char* name) 
 {
     return IdNodeCommon(name, type_macro_id);
+}
+
+ParseNodePtr PrintState(int op)
+{
+    ParseNodePtr p = AllocateNode(0);
+    p->type = type_print;
+    p->pr.printstate = op;
+
+    return p;
 }
 
 /// <summary>

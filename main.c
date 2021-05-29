@@ -6,8 +6,7 @@
 #pragma warning(disable:4065)
 #pragma warning(disable:4996)
 
-// ReSharper disable once CommentTypo
-// -log renum.log -dir "C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\Installer\Samples\Commodore\renumber\;C:\Users\jaret\source\repos\pebmeister\Pasm64\windows\Installer\Samples\Commodore\include\\" macros.asm pagezero.asm kernal.asm basic.asm install.asm wedge.asm vars.asm main.asm init.asm pass1.asm pass2.asm getlinenum.asm findlinenum.asm insertlinenum.asm movelines.asm util.asm debug.asm storage.asm -C64 -l renumber.lst -v -o renumber.prg
+// -log renum.log -dir "$(SolutionDir)..\Installer\Samples\Commodore\renumber\;$(SolutionDir)..\Installer\Samples\Commodore\include\\" macros.asm pagezero.asm kernal.asm basic.asm install.asm wedge.asm vars.asm main.asm init.asm pass1.asm pass2.asm getlinenum.asm findlinenum.asm insertlinenum.asm movelines.asm util.asm debug.asm storage.asm -C64 -l renumber.lst -v -o renumber.prg
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -685,59 +684,3 @@ int main(const int argc, char* argv[])
     return 0;
 }
 
-/// <summary>
-/// message routine.
-/// </summary>
-/// <param name="s">The s.</param>
-void yymessage(const char* s)
-{
-    if (yyin && CurFileName != NULL && InternalBuffer != NULL)
-    {
-        int curline;
-
-        fprintf(stderr, "%s File %s near line %d\n", s, CurFileName, yylineno + 1);
-
-        const long curpos = ftell(yyin);
-        fseek(yyin, 0, SEEK_SET);
-        for (curline = 1; curline < yylineno - 2; curline++)
-            fgets(InternalBuffer, MAX_LINE_LEN, yyin);
-
-        for (; curline < yylineno + 3; curline++)
-        {
-            if (!feof(yyin))
-            {
-                *InternalBuffer = 0;
-                fgets(InternalBuffer, MAX_LINE_LEN, yyin);
-                fprintf(stderr, "%-5d  ", curline);
-                fputs(InternalBuffer, stderr);
-            }
-        }
-        fputs("\n", stderr);
-        fseek(yyin, curpos, SEEK_SET);
-    }
-    else
-        fprintf(stderr, "%s\n", s);
-}
-
-/// <summary>
-/// Error routine.
-/// </summary>
-/// <param name="s">The error string.</param>
-void yyerror(const char *s)
-{
-    yymessage(s);
-    ErrorCount++;
-}
-
-/// <summary>
-/// warn routine.
-/// </summary>
-/// <param name="s">The warning string.</param>
-void yywarn(const char *s)
-{
-    if (NoWarnings)
-        return;
-
-    yymessage(s);
-    WarningCount++;
-}

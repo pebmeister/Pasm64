@@ -45,7 +45,7 @@
 %token END DO MACRO ENDMACRO ENDIF WEND STATEMENT EXPRLIST STR
 %token FOR NEXT TO DOWNTO STEP NOT
 %token EOL BYTE WORD LOBYTE HIBYTE DS INC LOAD
-%token REGX REGY VAR MSYM PSYM
+%token REGX REGY VAR MSYM PSYM FILL PRINTON PRINTOFF
 %token SECTION ENDSECTION
 
 %nonassoc ELSE UMINUS '~'
@@ -61,7 +61,7 @@
 %type <nPtr> macrodef macrocall expr_list symbol_list
 %type <nPtr> symbol_assign symbol_value var_def pc_assign 
 %type <nPtr> expr subexpr ifexpr loopexpr
-%type <nPtr> section endsection
+%type <nPtr> section endsection directive
 %%
 
 program 
@@ -71,6 +71,7 @@ program
         
 stmt    
     : opcode EOL                        { $$ = $1;                                      }
+    | directive EOL                     { $$ = $1;                                      }
     | symbol_value EOL                  { $$ = $1;                                      }
     | symbol_value opcode EOL           { Ex($1); $$ = $2;                              }
     | symbol_assign EOL                 { $$ = $1;                                      }
@@ -193,16 +194,21 @@ opcode
     | OPCODE '(' subexpr ',' 'X' ')'    { $$ = Opcode($1, aix, 1, $3);                  }
     | OPCODE '(' subexpr ')' ',' 'Y'    { $$ = Opcode($1, zpiy, 1, $3);                 }
     | OPCODE expr ',' subexpr           { $$ = Opcode($1, zr, 2, $2, $4);               }    
-
     | ORG subexpr                       { $$ = Opr(ORG, 1, $2);                         }
     | DS subexpr                        { $$ = Opr(DS, 1, $2);                          }
     | BYTE expr_list                    { $$ = Data(1, $2);                             }
     | WORD expr_list                    { $$ = Data(2, $2);                             }
 	| STR expr_list					    { $$ = Data(0, $2);	 							}
+    | FILL subexpr ',' subexpr          { $$ = Opr(FILL, 2, $2, $4);                    }
     | PRINT                             { $$ = Opr(PRINT, 0);                           }
     | PRINT expr_list                   { $$ = Opr(PRINT, 1, $2);                       }
     | PRINTALL                          { $$ = Opr(PRINTALL, 0);                        }
-    | PRINTALL expr_list                { $$ = Opr(PRINTALL, 1, $2);                    }
+    | PRINTALL expr_list                { $$ = Opr(PRINTALL, 1, $2);                    }    
+    ;
+
+directive
+    : PRINTON                           { $$ = PrintState(1);                           }
+    | PRINTOFF                          { $$ = PrintState(0);                           }
     ;
 
 subexpr

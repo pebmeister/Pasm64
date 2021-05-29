@@ -416,7 +416,7 @@ SymbolTablePtr SetSymbolValue(SymbolTablePtr sym, const int value)
 
         if (((value & ~0xFFFF) != 0) && !sym->isvar)
         {
-            Error(module, error_value_outof_range);
+            Error(module, error_value_out_of_range);
             return NULL;
         }
         if (!sym->ismacroparam && !sym->isvar)
@@ -478,10 +478,17 @@ SymbolTablePtr LookUpSymbol(char* name)
         SymbolTablePtr tmpPtr = (SymbolTablePtr)DictSearch(SymbolDictionary, tempName);
         FREE(tempName);
         if (tmpPtr)
+        {
+            tmpPtr->times_accessed++;
             return tmpPtr;
+        }
     }
 
-    return DictSearch(SymbolDictionary, name);
+    // ReSharper disable once CppLocalVariableMayBeConst
+    SymbolTablePtr tmpPtr = (SymbolTablePtr)DictSearch(SymbolDictionary, name);
+    if (tmpPtr)
+        tmpPtr->times_accessed++;
+    return tmpPtr;
 }
 
 /// <summary>
@@ -506,16 +513,16 @@ void DumpSymbols(FILE* symFile)
 
     for (index = 0; index < SymbolDictionary->size; index++)
     {
-        ElementPtr elem = SymbolDictionary->table[index];
-        for ( ; elem; elem = elem->next)
+        for (ElementPtr elem = SymbolDictionary->table[index]; elem; elem = elem->next)
         {
             // ReSharper disable once CppLocalVariableMayBeConst
             SymbolTablePtr sym = (SymbolTablePtr)(elem->value);
 
-            if (sym->ismacroname == FALSE && sym->isvar == FALSE && sym->ismacroparam == FALSE)
+            if (sym->ismacroname == FALSE && sym->isvar == FALSE && sym->ismacroparam == FALSE && sym->times_accessed >= Pass && !sym->islocal)
             {
                 symbolArray[count].name = sym->fullname;
                 symbolArray[count].value = sym->value;
+                symbolArray[count].times_accessed = sym->times_accessed;
                 count++;
             }
         }
@@ -560,8 +567,7 @@ void DumpUnResolvedSymbols()
 
     for (int index = 0; index < SymbolDictionary->size; index++)
     {
-        ElementPtr elem = SymbolDictionary->table[index];
-        for ( ; elem; elem = elem->next)
+        for (ElementPtr elem = SymbolDictionary->table[index]; elem; elem = elem->next)
         {
             // ReSharper disable once CppLocalVariableMayBeConst
             SymbolTablePtr sym = (SymbolTablePtr)(elem->value);
@@ -744,6 +750,11 @@ void DeleteSymbolTable(void)
     }
     MacroStackSize = 0;
     MacroIndex = 0;
+    if (PlusSymTable)
+        FREE(PlusSymTable);
+    if (MinusSymTable)
+        FREE(MinusSymTable);
 
-    FREE(PlusSymTable);
+    PlusSymTable = NULL;
+    MinusSymTable = NULL;
 }

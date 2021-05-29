@@ -1,3 +1,5 @@
+.print OFF
+
 ; ======================================================================================
 ;   Memory locations 0-255 ($0-$FF) have a special significance in 6502
 ;   machine language programming (the 6510 microprocessor in the
@@ -528,3 +530,5 @@ RIBUF   = $F7                           ;   pointer rs232 input buffer f7-f8
 ROBUF   = $F9                           ;   pointer rs232 ouput buffer f9-fa
 FREKZP  = $FB                           ;   free 0 page fb-fe
 BASZPT  = $FF                           ;   temporary floatingpoint to ascii
+
+.print ON

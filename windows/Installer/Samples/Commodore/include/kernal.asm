@@ -1,3 +1,5 @@
+.print off
+
 TEXT    = $0286
 IERROR  = $0300
 IMAIN   = $0302
@@ -58,3 +60,5 @@ CHROUT  = $FFD2
 
 BORDER  = $D020
 SCREENC = $D021
+
+.print on

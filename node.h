@@ -16,6 +16,9 @@ extern ParseNodePtr Con(int value, int isPc);
 extern ParseNodePtr Str(char* value);
 extern ParseNodePtr MacroEx(char* name, ParseNodePtr macroParams);
 extern ParseNodePtr Data(int dataSize, ParseNodePtr data);
+extern ParseNodePtr PrintState(int op);
+
+
 extern void PrintNode(ParseNodePtr p);
 extern void FreeParseNode(ParseNodePtr p);
 extern void FreeParseTree(void);

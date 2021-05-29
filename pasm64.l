@@ -244,9 +244,10 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 ".ENDS"                     return ENDSECTION;
 ".INC"                      return INC;
 ".LOAD"                     return LOAD;
+".FILL"                     return FILL;
 ".WHILE"                    { 
                                 if (inDoLoop > 0) 
-                                { 
+                                {
                                     inDoLoop--; 
                                     return ENDDO; 
                                 } 
@@ -272,6 +273,8 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 ".WARN"[ /t]*"ON"           { NoWarnings = FALSE; }
 ".WARN"[ /t]*"OFF"          { NoWarnings = TRUE; }
 ".C64"                      { OutFileFormat = c64; }
+".PRINT"[ /t]"ON"           { return PRINTON; }
+".PRINT"[ /t]"OFF"          { return PRINTOFF; }
 ^"-"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 ^"+"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 [\\][1-9]+[0-9]*            {

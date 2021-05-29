@@ -1,3 +1,4 @@
+.print off
 
 STMDSP  = $A00C
 FUNDSPTABLE = $A052
@@ -280,3 +281,5 @@ CANTCONTINUE            = 26
 UNDEFINEDFUNCTION       = 27
 MSGVERIFY               = 28
 MSGLOAD                 = 29
+
+.print on

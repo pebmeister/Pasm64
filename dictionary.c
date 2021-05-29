@@ -1,3 +1,4 @@
+// ReSharper disable CppClangTidyClangDiagnosticExtraSemiStmt
 #pragma warning(disable: 4996)
 
 // ***********************************************************************
@@ -75,7 +76,7 @@ void DictDestroy(DictionaryPtr d)
         for (ElementPtr element = d->table[index]; element != 0; element = next)
         {
             next = element->next;
-            FREE(element->key);
+            FREE(element->key);  // NOLINT(clang-diagnostic-cast-qual)
             FREE(element->value);
             FREE(element);
         }

@@ -105,7 +105,7 @@ int GenerateOut(ParseNodePtr p)
 
         if ((hi != 0 && DataSize < 2) || overflow)
         {
-            Error(module, error_value_outof_range);
+            Error(module, error_value_out_of_range);
             return 0;
         }
         bytesWritten = fwrite(&lo, 1, 1, OutputFile);
@@ -164,7 +164,7 @@ int GenerateOut(ParseNodePtr p)
             op -= (p->opcode.pc + 2);               
             if (op > 128 || op < -127)
             {
-                Error(module, error_value_outof_range);
+                Error(module, error_value_out_of_range);
                 return 0;
             }
             op &= 0xFF;
@@ -181,7 +181,7 @@ int GenerateOut(ParseNodePtr p)
             lo = (unsigned char)(op & 0xFF);
             if (hi != 0)
             {
-                Error(module, error_value_outof_range);
+                Error(module, error_value_out_of_range);
                 return 0;
             }
             bytesWritten = fwrite(&lo, 1, 1, OutputFile);
@@ -201,7 +201,7 @@ int GenerateOut(ParseNodePtr p)
 
             if (op > 128 || op < -127)
             {
-                Error(module, error_value_outof_range);
+                Error(module, error_value_out_of_range);
                 return 0;
             }
             op &= 0xFF;

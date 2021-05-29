@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #define MAX_LINE_LEN  102400
+#define PRINT_STACK_SIZE 100
 
 enum OutputFileType
 {
@@ -14,11 +15,13 @@ enum OutputFileType
     c64
 };
 
-typedef enum { type_unknown = 0, type_head_node = 1, type_con, type_label, type_id, type_macro_id, type_macro_ex, type_opr, type_op_code, type_data, type_str } NodeEnum;
+typedef enum { type_unknown = 0, type_head_node = 1, type_con, type_label, type_id, type_macro_id, type_macro_ex,
+    type_opr, type_op_code, type_data, type_str, type_print } NodeEnum;
 
 typedef struct symbol_table
 {
     int value;
+    int times_accessed;
     int initialized;
     int ismacroname;
     int ismacroparam;
@@ -90,6 +93,11 @@ typedef struct
     void* data;
 } DataParseNode;
 
+typedef struct
+{
+    int printstate;
+} PrintStateNode;
+
 /* nodes union */
 typedef struct parse_node
 {
@@ -97,20 +105,22 @@ typedef struct parse_node
 
     union 
     {
-        ConParseNode con;        /* constants */
-        IdParseNode id;          /* identifiers */
-        OprParseNode opr;        /* operators */
-        opParseNode opcode;      /* opcodes */
-        MacParseNode macro;      /* macro execution */
-        DataParseNode data;      /* numeric data node */
-		StrParseNode str;		 /* string node */
+        ConParseNode con;       /* constants */
+        IdParseNode id;         /* identifiers */
+        OprParseNode opr;       /* operators */
+        opParseNode opcode;     /* opcodes */
+        MacParseNode macro;     /* macro execution */
+        DataParseNode data;     /* numeric data node */
+		StrParseNode str;		/* string node */
+        PrintStateNode pr;      /* print node */
     };
     int allocated;
-    int nops;                    /* number of operands */
-    struct parse_node **op;       /* operands */
-    struct parse_node* next;      /* next node in tree */
-    struct parse_node* prev;      /* previous node */
+    int nops;                   /* number of operands */
+    struct parse_node **op;     /* operands */
+    struct parse_node* next;    /* next node in tree */
+    struct parse_node* prev;    /* previous node */
 } ParseNode, *ParseNodePtr;
+
 
 extern void yyerror(const char* s);
 extern void yyrestart(FILE* input_file);
@@ -142,6 +152,8 @@ extern char* CurrentScope;
 extern char* LastLabel;
 extern char* ListFileName;
 extern char* Directories;
+
+extern int PrintListState;
 
 extern enum OutputFileType OutFileFormat;
 

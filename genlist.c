@@ -2,6 +2,7 @@
 // Author           : Paul Baxter
 // Created          : 02-23-2015
 // ***********************************************************************
+// ReSharper disable CppClangTidyClangDiagnosticExtraSemiStmt
 #pragma warning(disable:4996)
 
 #include <stdio.h>
@@ -17,7 +18,7 @@
 #include "genlist.h"
 #include "mem.h"
 
-#define SRC_LST_INDENT  25
+#define SRC_LST_INDENT  22
 
 FileEntry* SourceFileList = NULL;
 
@@ -87,6 +88,14 @@ int GenerateListNode(ParseNodePtr p)
         }
         return 0;
     }
+
+    if (p->type == type_print)
+    {
+        PrintListState = p->pr.printstate;
+        AddList(CurFileName, yylineno, "");
+        return 1;
+    }
+
 
     // get the program counter
     // if the node is an opcode get the PC from the opcode itself
@@ -454,6 +463,7 @@ ListTablePtr AddList(char* file, int line, char* output)
         return NULL;
     }
     memset(varPtr, 0, sizeof(ListTable));
+    varPtr->print_state = PrintListState;
 
     varPtr->filename = STR_DUP(file);
     if (varPtr->filename == NULL)
@@ -509,6 +519,9 @@ void GenerateListFile(FILE* lstFile)
         if (listNode->next && StrICmp(listNode->filename, listNode->next->filename) == 0 && listNode->next->line > listNode->line)
             endLine = listNode->next->line - 1;
 
+        if (listNode->print_state == 0)
+            continue;
+
         FileLine* lst = GetFileLine(listNode->filename, startLine);
         if (lst == NULL)
             continue;
@@ -516,19 +529,19 @@ void GenerateListFile(FILE* lstFile)
         InternalBuffer[0] = 0;
         if (lst->displayed == 0)
         {
-            sprintf(InternalBuffer, "%-50s%s", listNode->output, lst->line);
+            sprintf(InternalBuffer, "%-42s%s", listNode->output, lst->line);
             lst->displayed++;
         }
         else
         {
-            sprintf(InternalBuffer, "%-50s\n", listNode->output);
+            sprintf(InternalBuffer, "%-42s\n", listNode->output);
         }
         fputs(InternalBuffer, lstFile);
 
         for (lst = lst->next;  lst && lst->line_number <= endLine; lst = lst->next)
         {
             InternalBuffer[0] = 0;
-            sprintf(InternalBuffer, "%-50s", " ");
+            sprintf(InternalBuffer, "%-42s", " ");
             fputs(InternalBuffer, lstFile);
             if (lst->displayed == 0)
             {
@@ -562,6 +575,9 @@ void FreeListTable(void)
     }
 }
 
+/// <summary>
+/// Reset the displayed flag
+/// </summary>
 void ResetFileLines(void)
 {
     for (FileEntry* fileEntry = SourceFileList; fileEntry != NULL; fileEntry = fileEntry->next)

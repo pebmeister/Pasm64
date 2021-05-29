@@ -15,6 +15,7 @@ typedef struct list_table
     int line;
     char* filename;
     char* output;
+    int print_state;
     struct list_table* next;
 } ListTable, *ListTablePtr;
 
