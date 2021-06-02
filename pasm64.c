@@ -43,10 +43,11 @@ DictionaryPtr MacroDict = NULL;
 
 int PrintListState = 1;
 
-//
-// how to expand an expression
-//
 // ReSharper disable once CppInconsistentNaming
+
+/// <summary>
+/// how to expand an expression
+/// </summary>
 enum ExprExpansionType
 {
     macro_parameter,
@@ -57,9 +58,9 @@ enum ExprExpansionType
     symbol
 };
 
-//
-// function pointer to expand node
-//
+/// <summary>
+/// function pointer to expand node
+/// </summary>
 typedef int (*Expr)(ParseNodePtr p);
 
 //
@@ -288,24 +289,30 @@ struct op_table ExTable[] =
 };
 #define NUM_EX_EXP (sizeof(ExTable) / sizeof(struct op_table))
 
-//
-// Compare function for qsort
-//
+/// <summary>
+/// Compare function for qsort
+/// </summary>
+/// <param name="a">left side to compare</param>
+/// <param name="b">right side to compare</param>
+/// <returns></returns>
 int OpCmpfunc (const void * a, const void * b)
 {
     return ((const struct op_table*)a)->tag - ((const struct op_table*)b)->tag;
 }
 
-// 
-// Init Ex
-// sort tables
-//
+/// <summary>
+/// Init Ex
+/// Sort tables
+/// </summary>
 void InitEx(void)
 {
     qsort(&ExOprTable, NUM_OPR_EXP, sizeof(struct op_table), OpCmpfunc);
     qsort(&ExTable, NUM_EX_EXP, sizeof(struct op_table), OpCmpfunc);
 }
 
+//
+// Validate - label name
+//
 int PlusMinusSymNameIsValid(char* name)
 {
     if (name == NULL) return 0;
@@ -361,6 +368,9 @@ int ExConstant(ParseNodePtr p)
     return p->con.value;
 }
 
+//
+// include node
+//
 int ExOprInclude(ParseNodePtr p)
 {
     const char* method = "ExOprInclude";
@@ -372,6 +382,9 @@ int ExOprInclude(ParseNodePtr p)
     return 1;
 }
 
+//
+// Fill mode
+//
 int ExOprFill(ParseNodePtr p)
 {
     const char* method = "ExOprFill";
@@ -423,6 +436,9 @@ int ExOprFill(ParseNodePtr p)
     return byt;
 }
 
+//
+// Load node
+//
 int ExOprLoad(ParseNodePtr p)
 {
     const char* method = "ExOprLoad";
@@ -541,6 +557,9 @@ int ExSymbol(ParseNodePtr p)
     return sym->initialized ? sym->value : 0;
 }
 
+//
+// Label node
+//
 int ExLabel(ParseNodePtr p)
 {
     const char* method = "ExLabel";
@@ -742,6 +761,7 @@ int ExData(ParseNodePtr p)
 
 //
 // Section
+//
 int ExOprSection(ParseNodePtr p)
 {
     const char* method = "ExOprSection";
@@ -1061,9 +1081,11 @@ int ExOprHiByte(ParseNodePtr p)
     return hi;
 }
 
-//
-// Operator PC assign
-//
+/// <summary>
+/// Operator PC assign
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprPcAssign(ParseNodePtr p)
 {
     const char* method = "ExOprPcAssign";
@@ -1101,9 +1123,11 @@ int ExOprPcAssign(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Org
-//
+/// <summary>
+/// Operator Org
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprOrg(ParseNodePtr p)
 {
     const char* method = "ExOprOrg";
@@ -1121,9 +1145,11 @@ int ExOprOrg(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Expression List
-//
+/// <summary>
+/// Operator Expression List
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprExpressionList(ParseNodePtr p)
 {
     SymbolTablePtr sym = NULL;
@@ -1295,13 +1321,20 @@ int ExOprExpressionList(ParseNodePtr p)
     return 0;
 }
 
+/// <summary>
+/// Holds the number of times a macro is executed
+/// </summary>
 struct macro_dict_entry
 {
     int times_executed;
 };
 
+/// <summary>
+/// Create a Macro entry
+/// </summary>
 struct macro_dict_entry* CreateMacroEntry(const char* name)
 {
+    const char* module = "CreateMacroEntry";
     if (MacroDict == NULL)
         MacroDict = DictCreate(sizeof(struct macro_dict_entry*));
 
@@ -1309,15 +1342,20 @@ struct macro_dict_entry* CreateMacroEntry(const char* name)
     if (macroDictEntry == NULL)
     {
         macroDictEntry = ALLOCATE(sizeof(struct macro_dict_entry));
+        if (macroDictEntry == NULL)
+        {
+            FatalError(module, error_out_of_memory);
+            return NULL;
+        }
         macroDictEntry->times_executed = 0;
         DictInsert(&MacroDict, name, macroDictEntry);
     }
     return macroDictEntry;
 }
 
-//
-// reset the time dict
-//
+/// <summary>
+/// Reset the Macro dictionary
+/// </summary>
 void ResetMacroDict(void)
 {
     if (MacroDict == NULL)
@@ -1333,9 +1371,11 @@ void ResetMacroDict(void)
     }
 }
 
-//
-// Expand macro symbol
-//
+/// <summary>
+/// Operator Macro Symbol
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExMacroSymbol(ParseNodePtr p)
 {
     const char* method = "ExMacroSymbol";
@@ -1359,9 +1399,11 @@ int ExMacroSymbol(ParseNodePtr p)
     return sym->value;
 }
 
-//
-// macro expansion
-//
+/// <summary>
+/// Operator Macro Expansion (macro call)
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExMacroExpansion(ParseNodePtr p)
 {
     const char* method = "ExMacroExpansion";
@@ -1391,9 +1433,11 @@ int ExMacroExpansion(ParseNodePtr p)
     return 0;
 }
 
-//
-// Expand a Macro definition
-//
+/// <summary>
+/// Operator Macro definition
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprMacroDefinition(ParseNodePtr p)
 {
     const char* method = "ExOprMacroDefinition";
@@ -1419,9 +1463,11 @@ int ExOprMacroDefinition(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator While
-//
+/// <summary>
+/// Operator While
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprWhile(ParseNodePtr p)
 {
     const char* method = "ExOprWhile";
@@ -1441,9 +1487,11 @@ int ExOprWhile(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Repeat
-//
+/// <summary>
+/// Operator Repeat
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprRepeat(ParseNodePtr p)
 {
     const char* method = "ExOprRepeat";
@@ -1463,9 +1511,11 @@ int ExOprRepeat(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Do
-//
+/// <summary>
+/// Operator Do
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprDo(ParseNodePtr p)
 {
     const char* method = "ExOprDo";
@@ -1484,9 +1534,11 @@ int ExOprDo(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator For
-//
+/// <summary>
+/// Operator For
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprFor(ParseNodePtr p)
 {
     SymbolTablePtr startSym = NULL;
@@ -1559,9 +1611,11 @@ int ExOprFor(ParseNodePtr p)
     return 0;
 }
 
-//
-// ExOperator If
-//
+/// <summary>
+/// Operator If
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprIf(ParseNodePtr p)
 {
     const char* method = "ExOprIf";
@@ -1578,9 +1632,11 @@ int ExOprIf(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator PrintAll
-//
+/// <summary>
+/// Operator PrintAll
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprPrintAll(ParseNodePtr p)
 {
     const char* method = "ExOprPrintAll";
@@ -1596,9 +1652,11 @@ int ExOprPrintAll(ParseNodePtr p)
     return 0;                               
 }
 
-//
-// Operator Print
-//
+/// <summary>
+/// Operator Print
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprPrint(ParseNodePtr p)
 {
     const char* method = "ExOprPrint";
@@ -1615,9 +1673,11 @@ int ExOprPrint(ParseNodePtr p)
     return 0;                               
 }
 
-//
-// Operator Ds
-//
+/// <summary>
+/// Operator Ds
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprDs(ParseNodePtr p)
 {
     const char* method = "ExOprDs";
@@ -1644,9 +1704,11 @@ int ExOprDs(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Statement
-//
+/// <summary>
+/// Operator Statement
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprStatement(ParseNodePtr p)
 {
     const char* method = "ExOprStatement";
@@ -1663,9 +1725,11 @@ int ExOprStatement(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator End
-//
+/// <summary>
+/// Operator End
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprEnd(ParseNodePtr p)
 {
     const char* method = "ExOprEnd";
@@ -1675,9 +1739,11 @@ int ExOprEnd(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator Equate
-//
+/// <summary>
+/// Operator Equate
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprEqu(ParseNodePtr p)
 {
     const char* method = "ExOprEqu";
@@ -1755,9 +1821,11 @@ int ExOprEqu(ParseNodePtr p)
     return 0;
 }
 
-//
-// Operator UMinus
-//
+/// <summary>
+/// Operator UMinus
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprUMinus(ParseNodePtr p)
 {
     const char* method = "ExOprUMinus";
@@ -1765,9 +1833,11 @@ int ExOprUMinus(ParseNodePtr p)
     return -Ex(p->op[0]);
 }
 
-//
-// Operator Ones Complement
-//
+/// <summary>
+/// Operator Ones Complement
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprOnesComp(ParseNodePtr p)
 {
     int mask = 0xFF;
@@ -1779,9 +1849,11 @@ int ExOprOnesComp(ParseNodePtr p)
     return (~ v) & mask;
 }
 
-//
-// Operator Plus
-//
+/// <summary>
+/// Operator Plus
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprPlus(ParseNodePtr p)
 {
     const char* method = "ExOprPlus";
@@ -1789,9 +1861,11 @@ int ExOprPlus(ParseNodePtr p)
     return Ex(p->op[0]) + Ex(p->op[1]);
 }
 
-//
-// Operator Minus
-//
+/// <summary>
+/// Operator Minus
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprMinus(ParseNodePtr p)
 {
     const char* method = "ExOprMinus";
@@ -1799,9 +1873,11 @@ int ExOprMinus(ParseNodePtr p)
     return Ex(p->op[0]) - Ex(p->op[1]);
 }
 
-//
-// Operator Multiply
-//
+/// <summary>
+/// Operator Multiply
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprMultiply(ParseNodePtr p)
 {
     const char* method = "ExOprMultiply";
@@ -1809,9 +1885,11 @@ int ExOprMultiply(ParseNodePtr p)
     return Ex(p->op[0]) * Ex(p->op[1]);
 }
 
-//
-// Operator Divide
-//
+/// <summary>
+/// Operator Divide
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprDivide(ParseNodePtr p)
 {
     const char* method = "ExOprDivide";
@@ -1825,9 +1903,11 @@ int ExOprDivide(ParseNodePtr p)
     return Ex(p->op[0]) / Ex(p->op[1]);
 }
 
-//
-// Operator BitOr
-//
+/// <summary>
+/// Operator BitOr
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprBitOr(ParseNodePtr p)
 {
     const char* method = "ExOprBitOr";
@@ -1835,9 +1915,11 @@ int ExOprBitOr(ParseNodePtr p)
     return Ex(p->op[0]) | Ex(p->op[1]);
 }
 
-//
-// Operator BitAnd
-//
+/// <summary>
+/// Operator BitAnd
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprBitAnd(ParseNodePtr p)
 {
     const char* method = "ExOprBitAnd";
@@ -1845,9 +1927,11 @@ int ExOprBitAnd(ParseNodePtr p)
     return Ex(p->op[0]) & Ex(p->op[1]);
 }
 
-//
-// Operator XOR
-//
+/// <summary>
+/// Operator XOR
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprXor(ParseNodePtr p)
 {
     const char* method = "ExOprXor";
@@ -1855,9 +1939,11 @@ int ExOprXor(ParseNodePtr p)
     return Ex(p->op[0]) ^ Ex(p->op[1]);
 }
 
-//
-// Operator LessThan
-//
+/// <summary>
+/// Operator LessThan
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprLessThan(ParseNodePtr p)
 {
     const char* method = "ExOprLessThan";
@@ -1865,9 +1951,11 @@ int ExOprLessThan(ParseNodePtr p)
     return Ex(p->op[0]) < Ex(p->op[1]);
 }
 
-//
-// Operator GreaterThan
-//
+/// <summary>
+/// Operator GreaterThan
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprGreaterThan(ParseNodePtr p)
 {
     const char* method = "ExOprGreaterThan";
@@ -1875,9 +1963,11 @@ int ExOprGreaterThan(ParseNodePtr p)
     return Ex(p->op[0]) > Ex(p->op[1]);
 }
 
-//
-// Operator Or
-//
+/// <summary>
+/// Operator Or
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprOr(ParseNodePtr p)
 {
     const char* method = "ExOprOr";
@@ -1885,9 +1975,11 @@ int ExOprOr(ParseNodePtr p)
     return Ex(p->op[0]) || Ex(p->op[1]);
 }
 
-//
-// Operator And
-//
+/// <summary>
+/// Operator And
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprAnd(ParseNodePtr p)
 {
     const char* method = "ExOprAnd";
@@ -1895,9 +1987,11 @@ int ExOprAnd(ParseNodePtr p)
     return Ex(p->op[0]) && Ex(p->op[1]);
 }
 
-//
-// Operator Equals
-//
+/// <summary>
+/// Operator Equals
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprEqual(ParseNodePtr p)
 {
     const char* method = "ExOprEqual";
@@ -1905,9 +1999,11 @@ int ExOprEqual(ParseNodePtr p)
     return Ex(p->op[0]) == Ex(p->op[1]);
 }
 
-//
-// Operator Not Equal
-//
+/// <summary>
+/// Operator Not Equal
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprNotEqual(ParseNodePtr p)
 {
     const char* method = "ExOprNotEqual";
@@ -1915,9 +2011,11 @@ int ExOprNotEqual(ParseNodePtr p)
     return Ex(p->op[0]) != Ex(p->op[1]);
 }
 
-//
-// Operator Greater Than Or Equal
-//
+/// <summary>
+/// Operator Greater Than Or Equal
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprGreaterThanOrEqual(ParseNodePtr p)
 {
     const char* method = "ExOprGreaterThanOrEqual";
@@ -1925,9 +2023,11 @@ int ExOprGreaterThanOrEqual(ParseNodePtr p)
     return Ex(p->op[0]) >= Ex(p->op[1]);
 }
 
-//
-// Operator LessThan Or Equal
-//
+/// <summary>
+/// Operator LessThan Or Equal
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOprLessThanOrEqual(ParseNodePtr p)
 {
     const char* method = "ExOprLessThanOrEqual";
@@ -1935,9 +2035,11 @@ int ExOprLessThanOrEqual(ParseNodePtr p)
     return Ex(p->op[0]) <= Ex(p->op[1]);
 }
 
-//
-// Expand an operator
-//
+/// <summary>
+/// Expand an operator
+/// </summary>
+/// <param name="p">The parseNodePtr p.</param>
+/// <returns>int.</returns>
 int ExOperator(ParseNodePtr p)
 {
     const char* method = "ExOperator";

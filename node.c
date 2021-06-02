@@ -214,7 +214,7 @@ ParseNodePtr PrintState(int op)
 {
     ParseNodePtr p = AllocateNode(0);
     p->type = type_print;
-    p->pr.printstate = op;
+    p->pr.print_state = op;
 
     return p;
 }

@@ -91,11 +91,17 @@ int GenerateListNode(ParseNodePtr p)
 
     if (p->type == type_print)
     {
-        PrintListState = p->pr.printstate;
-        AddList(CurFileName, yylineno, "");
+        if (p->pr.print_state != PrintListState)
+        {
+            if (!p->pr.print_state)
+                PrintListState = p->pr.print_state;
+
+            const int adjust = p->pr.print_state ? 0 : -1;
+            AddList(CurFileName, yylineno + adjust, "");
+            PrintListState = p->pr.print_state;
+        }
         return 1;
     }
-
 
     // get the program counter
     // if the node is an opcode get the PC from the opcode itself
@@ -505,22 +511,30 @@ void GenerateListFile(FILE* lstFile)
     ListTablePtr listNode = ListHead;
     CurFileName = NULL;
 
+    auto state = 1;  // NOLINT(clang-diagnostic-implicit-int)
+    fprintf(lstFile, "\n");
     // loop through all list  nodes
     for (; listNode; listNode = listNode->next)
     {
         if (CurFileName == NULL || StrICmp(CurFileName, listNode->filename))
         {
             CurFileName = listNode->filename;
-            fprintf(lstFile, "\nProcessing %s\n\n", CurFileName);
+            fprintf(lstFile, "Processing %s\n", CurFileName);
         }
+
+        if (listNode->print_state != state)
+        {
+            state = listNode->print_state;
+            continue;
+        }
+
+        if (listNode->print_state == 0)
+            continue;
 
         const int startLine = listNode->line;
         int endLine = startLine;
         if (listNode->next && StrICmp(listNode->filename, listNode->next->filename) == 0 && listNode->next->line > listNode->line)
             endLine = listNode->next->line - 1;
-
-        if (listNode->print_state == 0)
-            continue;
 
         FileLine* lst = GetFileLine(listNode->filename, startLine);
         if (lst == NULL)

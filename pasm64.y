@@ -45,7 +45,7 @@
 %token END DO MACRO ENDMACRO ENDIF WEND STATEMENT EXPRLIST STR
 %token FOR NEXT TO DOWNTO STEP NOT
 %token EOL BYTE WORD LOBYTE HIBYTE DS INC LOAD
-%token REGX REGY VAR MSYM PSYM FILL PRINTON PRINTOFF
+%token REGX REGY VAR  FILL PRINTON PRINTOFF
 %token SECTION ENDSECTION
 
 %nonassoc ELSE UMINUS '~'
@@ -56,24 +56,24 @@
 %left '+' '-'
 %left '*' '/'
 
-%type <nPtr> stmt_list stmt include_file load_file
+%type <nPtr> stmt_list stmt
 %type <nPtr> opcode regloopexpr
 %type <nPtr> macrodef macrocall expr_list symbol_list
 %type <nPtr> symbol_assign symbol_value var_def pc_assign 
 %type <nPtr> expr subexpr ifexpr loopexpr
-%type <nPtr> section endsection directive
+%type <nPtr> directive
 %%
 
 program 
     : program stmt                      { Ex($2);                                       }
+    | program symbol_value stmt         { Ex($2); Ex($3);                               }
     | /* NULL */
     ;
-        
+
 stmt    
     : opcode EOL                        { $$ = $1;                                      }
     | directive EOL                     { $$ = $1;                                      }
     | symbol_value EOL                  { $$ = $1;                                      }
-    | symbol_value opcode EOL           { Ex($1); $$ = $2;                              }
     | symbol_assign EOL                 { $$ = $1;                                      }
     | pc_assign EOL                     { $$ = $1;                                      }
     | ifexpr EOL                        { $$ = $1;                                      }
@@ -81,33 +81,13 @@ stmt
     | regloopexpr EOL                   { $$ = $1;                                      }
     | macrodef EOL                      { $$ = $1;                                      }
     | macrocall EOL                     { $$ = $1;                                      }
-    | section EOL                       { $$ = $1;                                      }
-    | endsection EOL                    { $$ = $1;                                      }
     | var_def EOL                       { $$ = $1;                                      }
-    | include_file EOL                  { $$ = $1;                                      }
-    | load_file EOL                     { $$ = $1;                                      }
     | EOL                               { $$ = Opr(STATEMENT, 0);                       }
     ;
 
 stmt_list  
     : stmt                              { $$ = $1;                                      }
     | stmt_list stmt                    { $$ = Opr(STATEMENT, 2, $1, $2);               }
-    ;
-
-section
-    : SECTION SYMBOL                    { $$ = Opr(SECTION, 1, Id($2));                 }
-    ;
-
-endsection
-    : ENDSECTION                        { $$ = Opr(ENDSECTION, 0);                      }
-    ;
-
-include_file
-    : INC STRING_LITERAL                { $$ = Opr(INC, 1, Str($2));                    }
-    ;
-
-load_file
-    : LOAD STRING_LITERAL               { $$ = Opr(LOAD, 1, Str($2));                   }
     ;
 
 ifexpr 
@@ -194,27 +174,25 @@ opcode
     | OPCODE '(' subexpr ',' 'X' ')'    { $$ = Opcode($1, aix, 1, $3);                  }
     | OPCODE '(' subexpr ')' ',' 'Y'    { $$ = Opcode($1, zpiy, 1, $3);                 }
     | OPCODE expr ',' subexpr           { $$ = Opcode($1, zr, 2, $2, $4);               }    
-    | ORG subexpr                       { $$ = Opr(ORG, 1, $2);                         }
+    ;
+
+directive
+    : ORG subexpr                       { $$ = Opr(ORG, 1, $2);                         }
     | DS subexpr                        { $$ = Opr(DS, 1, $2);                          }
     | BYTE expr_list                    { $$ = Data(1, $2);                             }
     | WORD expr_list                    { $$ = Data(2, $2);                             }
-	| STR expr_list					    { $$ = Data(0, $2);	 							}
+    | STR expr_list					    { $$ = Data(0, $2);	 							}
     | FILL subexpr ',' subexpr          { $$ = Opr(FILL, 2, $2, $4);                    }
     | PRINT                             { $$ = Opr(PRINT, 0);                           }
     | PRINT expr_list                   { $$ = Opr(PRINT, 1, $2);                       }
     | PRINTALL                          { $$ = Opr(PRINTALL, 0);                        }
     | PRINTALL expr_list                { $$ = Opr(PRINTALL, 1, $2);                    }    
-    ;
-
-directive
-    : PRINTON                           { $$ = PrintState(1);                           }
+    | PRINTON                           { $$ = PrintState(1);                           }
     | PRINTOFF                          { $$ = PrintState(0);                           }
-    ;
-
-subexpr
-    : expr                              { $$ = $1;                                      }
-    | '*'                               { $$ = Con(PC, TRUE);                           }
-    | '(' subexpr ')'                   { $$ = $2;                                      }
+    | SECTION SYMBOL                    { $$ = Opr(SECTION, 1, Id($2));                 }
+    | ENDSECTION                        { $$ = Opr(ENDSECTION, 0);                      }
+    | INC STRING_LITERAL                { $$ = Opr(INC, 1, Str($2));                    }
+    | LOAD STRING_LITERAL               { $$ = Opr(LOAD, 1, Str($2));                   }
     ;
 
 expr
@@ -244,6 +222,12 @@ expr
     | subexpr '/' subexpr               { $$ = Opr('/', 2, $1, $3);                     }
     | '-'                               { $$ = Id("-")                                  }
     | '+'                               { $$ = Id("+")                                  }
+    ;
+
+subexpr
+    : expr                              { $$ = $1;                                      }
+    | '*'                               { $$ = Con(PC, TRUE);                           }
+    | '(' subexpr ')'                   { $$ = $2;                                      }
     ;
 
 %%

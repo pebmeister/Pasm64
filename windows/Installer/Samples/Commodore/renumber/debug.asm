@@ -1,38 +1,38 @@
 
 .ifdef debug
 
-            .macro DMP_BYT
+        .macro DMP_BYT
 
-            PUSHAY
+        PUSHAY
 
-            jsr DUMP_NEWLINE
+        jsr DUMP_NEWLINE
 
-            lda #>\1
-            ldy #<\1
-            jsr DUMP_STR
-            lda \2       
-            jsr DUMP_BYTE
+        lda #>\1
+        ldy #<\1
+        jsr DUMP_STR
+        lda \2       
+        jsr DUMP_BYTE
 
-            POPAY            
-            .endm
-       
-            .macro DMP_WRD
+        POPAY            
+        .endm
 
-            PUSHAY
+        .macro DMP_WRD
 
-            jsr DUMP_NEWLINE
+        PUSHAY
 
-            lda #>\1
-            ldy #<\1
-            jsr DUMP_STR
-            lda \2 
-            ldy \2 + 1
-            jsr DUMP_BYTE
+        jsr DUMP_NEWLINE
 
-            POPAY
-            
-            .endm
-    
+        lda #>\1
+        ldy #<\1
+        jsr DUMP_STR
+        lda \2 
+        ldy \2 + 1
+        jsr DUMP_BYTE
+
+        POPAY
+        
+        .endm
+
 ;********************************************
 ;*                                          *
 ;* DUMP_REGISTERS                           *
@@ -43,85 +43,85 @@
 ;*                                          *
 ;********************************************
 DUMP_REGISTER
-                php
+        php
 
-                sta ACC
-                stx XREG
-                sty YREG
+        sta ACC
+        stx XREG
+        sty YREG
 
-                pla
-                sta PSTATUS
+        pla
+        sta PSTATUS
 
-                tsx
-                inx                     ;   account for pushed return address
-                inx
-                stx SP
+        tsx
+        inx                     ;   account for pushed return address
+        inx
+        stx SP
 
-                ;
-                ;   get the return address
-                ;
-                pla
-                sta PC_ORIGINAL
-                pla
-                sta PC_ORIGINAL + 1
+        ;
+        ;   get the return address
+        ;
+        pla
+        sta PC_ORIGINAL
+        pla
+        sta PC_ORIGINAL + 1
 
-                cld
+        cld
 
-                sec                     ;   we need to fix pc on stack
-                lda PC_ORIGINAL
-                sbc #02
-                sta PC
-                lda PC_ORIGINAL + 1
-                sbc #0
-                sta PC + 1
+        sec                     ;   we need to fix pc on stack
+        lda PC_ORIGINAL
+        sbc #02
+        sta PC
+        lda PC_ORIGINAL + 1
+        sbc #0
+        sta PC + 1
 
-                ;
-                ;   dump a new line
-                ;
-                jsr DUMP_NEWLINE
-                bne +
+        ;
+        ;   dump a new line
+        ;
+        jsr DUMP_NEWLINE
+        bne +
 
--               .byte " SP=",0
--               .byte " Y=",0
--               .byte " X=",0
--               .byte " A=",0
--               .byte " PC=",0
+-       .byte " SP=",0
+-       .byte " Y=",0
+-       .byte " X=",0
+-       .byte " A=",0
+-       .byte " PC=",0
 
-                ;
-                ;   Program counter
-                ;
+        ;
+        ;   Program counter
+        ;
 +
-                DMP_WRD -,PC
+        DMP_WRD -,PC
 
-                ;
-                ;   A Register
-                ;
-                DMP_BYT --,ACC
+        ;
+        ;   A Register
+        ;
+        DMP_BYT --,ACC
 
-                ;
-                ;   X Register
-                ;
-                DMP_BYT ---,XREG
+        ;
+        ;   X Register
+        ;
+        DMP_BYT ---,XREG
 
-                ;
-                ;   Y Register
-                ;
-                DMP_BYT ----,YREG
+        ;
+        ;   Y Register
+        ;
+        DMP_BYT ----,YREG
 
-                ;
-                ;   Stack Pointer
-                ;
-                DMP_BYT -----,SP + 2
+        ;
+        ;   Stack Pointer
+        ;
+        DMP_BYT -----,SP + 2
 
-                ;
-                ;   pstatus flag
-                jsr DUMP_SPACE          ;   dump pstatus flags
-                lda #$80                ;   set mask forprocessor
-                sta STATTMP
-                ldy #0
-                ;
-                ; fall through
-                ;
+        ;
+        ;   pstatus flag
+        jsr DUMP_SPACE          ;   dump pstatus flags
+        lda #$80                ;   set mask forprocessor
+        sta STATTMP
+        ldy #0
+        ;
+        ; fall through
+        ;
 ;********************************************
 ;*                                          *
 ;* DUMP_STATUS                              *
@@ -132,36 +132,36 @@ DUMP_REGISTER
 ;*                                          *
 ;********************************************
 DUMP_STATUS
-                lda PSTATUS
-                and STATTMP
-                bne +
+        lda PSTATUS
+        and STATTMP
+        bne +
 
-                lda #'.'
-                bne ++
+        lda #'.'
+        bne ++
 +
-                lda DUMP_BITS,y
+        lda DUMP_BITS,y
 +
-                jsr CHROUT
-                lsr STATTMP
-                iny
-                cpy #8                  ;   is this the last bit?
-                bne DUMP_STATUS
+        jsr CHROUT
+        lsr STATTMP
+        iny
+        cpy #8                  ;   is this the last bit?
+        bne DUMP_STATUS
 
-                jsr DUMP_NEWLINE
-                                        ;   prepare for exit
-                                        ;   push orginal return address on stack
-                lda PC_ORIGINAL + 1
-                pha
-                lda PC_ORIGINAL
-                pha
+        jsr DUMP_NEWLINE
+                                ;   prepare for exit
+                                ;   push orginal return address on stack
+        lda PC_ORIGINAL + 1
+        pha
+        lda PC_ORIGINAL
+        pha
 
-                lda PSTATUS             ;   push original processor status
-                pha
-                lda ACC                 ;   restore accumulator
-                ldx XREG                ;   restore x
-                ldy YREG                ;   restore y
-                plp                     ;   pull processor status
-                rts                     ;   exit to caller
+        lda PSTATUS             ;   push original processor status
+        pha
+        lda ACC                 ;   restore accumulator
+        ldx XREG                ;   restore x
+        ldy YREG                ;   restore y
+        plp                     ;   pull processor status
+        rts                     ;   exit to caller
 
 
 ;   symbolic codes for pstatus register bits
@@ -186,9 +186,9 @@ STATTMP         .byte 0
 ;*                                          *
 ;********************************************
 DUMP_LI
-                DMP_BYT +,LININS
-                rts
-+               .byte " LI=",0
+        DMP_BYT +,LININS
+        rts
++       .byte " LI=",0
 
 ;********************************************
 ;*                                          *
@@ -200,9 +200,9 @@ DUMP_LI
 ;*                                          *
 ;********************************************
 DUMP_LN
-                DMP_WRD +,LNUM
-                rts
-+               .byte " LN=",0
+        DMP_WRD +,LNUM
+        rts
++       .byte " LN=",0
 
 ;********************************************
 ;*                                          *
@@ -214,8 +214,8 @@ DUMP_LN
 ;*                                          *
 ;********************************************
 DUMP_MX
-                DMP_WRD +,MAXIDX
-                rts
+        DMP_WRD +,MAXIDX
+        rts
 +               .byte " MX=",0
 
 ;********************************************
@@ -228,9 +228,9 @@ DUMP_MX
 ;*                                          *
 ;********************************************
 DUMP_MN
-                DMP_WRD +,MINIDX
-                rts
-+               .byte " MN=",0
+        DMP_WRD +,MINIDX
+        rts
++       .byte " MN=",0
 
 ;********************************************
 ;*                                          *
@@ -242,9 +242,9 @@ DUMP_MN
 ;*                                          *
 ;********************************************
 DUMP_TS
-                DMP_WRD +,TBLSZ
-                rts
-+               .byte " TS=",0
+        DMP_WRD +,TBLSZ
+        rts
++       .byte " TS=",0
 
 ;********************************************
 ;*                                          *
@@ -256,9 +256,9 @@ DUMP_TS
 ;*                                          *
 ;********************************************
 DUMP_I
-                DMP_WRD +,CURIDX
-                rts
-+               .byte " I=",0
+        DMP_WRD +,CURIDX
+        rts
++       .byte " I=",0
 
 ;********************************************
 ;*                                          *
@@ -270,9 +270,9 @@ DUMP_I
 ;*                                          *
 ;********************************************
 DUMP_TP
-                DMP_WRD +,TBLPTR
-                rts
-+               .byte " TP=", 0
+        DMP_WRD +,TBLPTR
+        rts
++       .byte " TP=", 0
 
 ;********************************************
 ;*                                          *
@@ -284,24 +284,24 @@ DUMP_TP
 ;*                                          *
 ;********************************************
 DUMP_TE
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
-                ldy #0
-                lda (TBLPTR),y
-                pha
-                iny
-                lda (TBLPTR),y
-                tay
-                pla
-                jsr DUMP_WORD
-                jsr DUMP_NEWLINE
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
+        ldy #0
+        lda (TBLPTR),y
+        pha
+        iny
+        lda (TBLPTR),y
+        tay
+        pla
+        jsr DUMP_WORD
+        jsr DUMP_NEWLINE
 
-                POPAY
-                rts
-+               .byte " TE=", 0
+        POPAY
+        rts
++       .byte " TE=", 0
 
 ;********************************************
 ;*                                          *
@@ -313,9 +313,9 @@ DUMP_TE
 ;*                                          *
 ;********************************************
 DUMP_NXTLN
-                DMP_WRD +,NXTLN
-                rts
-+               .byte " NXTLN=",0
+        DMP_WRD +,NXTLN
+        rts
++       .byte " NXTLN=",0
 
 ;********************************************
 ;*                                          *
@@ -327,15 +327,15 @@ DUMP_NXTLN
 ;*                                          *
 ;********************************************
 DUMP_FOUNDLINE
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
 
-                POPAY
-                rts
-+               .byte "FOUND LINE ",0
+        POPAY
+        rts
++       .byte "FOUND LINE ",0
 
 ;********************************************
 ;*                                          *
@@ -347,15 +347,15 @@ DUMP_FOUNDLINE
 ;*                                          *
 ;********************************************
 DUMP_LENGTH
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
 
-                POPAY
-                rts
-+               .byte "LEN=",0
+        POPAY
+        rts
++       .byte "LEN=",0
 
 ;********************************************
 ;*                                          *
@@ -367,15 +367,15 @@ DUMP_LENGTH
 ;*                                          *
 ;********************************************
 DUMP_STAR
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
 
-                POPAY
-                rts
-+               .byte "      *",0
+        POPAY
+        rts
++       .byte "      *",0
 
 ;********************************************
 ;*                                          *
@@ -387,15 +387,15 @@ DUMP_STAR
 ;*                                          *
 ;********************************************
 DUMP_PLUS
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
 
-                POPAY
-                rts
-+               .byte "      +",0
+        POPAY
+        rts
++       .byte "      +",0
 
 ;********************************************
 ;*                                          *
@@ -407,15 +407,15 @@ DUMP_PLUS
 ;*                                          *
 ;********************************************
 DUMP_MINUS
-                PUSHAY
+        PUSHAY
 
-                lda #>+
-                ldy #<+
-                jsr DUMP_STR
+        lda #>+
+        ldy #<+
+        jsr DUMP_STR
 
-                POPAY
-                rts
-+               .byte "      -",0
+        POPAY
+        rts
++       .byte "      -",0
 
 ;********************************************
 ;*                                          *
@@ -427,8 +427,8 @@ DUMP_MINUS
 ;*                                          *
 ;********************************************
 DUMP_NEWLINE
-                lda #13
-                jmp CHROUT
+        lda #13
+        jmp CHROUT
 
 ;********************************************
 ;*                                          *
@@ -440,8 +440,8 @@ DUMP_NEWLINE
 ;*                                          *
 ;********************************************
 DUMP_SPACE
-                lda #' '
-                jmp CHROUT
+        lda #' '
+        jmp CHROUT
 
 ;********************************************
 ;*                                          *
@@ -453,8 +453,8 @@ DUMP_SPACE
 ;*                                          *
 ;********************************************
 DUMP_EQUALS
-                lda #'='
-                jmp CHROUT
+        lda #'='
+        jmp CHROUT
 
 ;********************************************
 ;*                                          *
@@ -466,10 +466,10 @@ DUMP_EQUALS
 ;*                                          *
 ;********************************************
 DUMP_WORD
-                pha
-                tya
-                jsr DUMP_BYTE
-                pla
+        pha
+        tya
+        jsr DUMP_BYTE
+        pla
 
 ;********************************************
 ;*                                          *
@@ -481,15 +481,15 @@ DUMP_WORD
 ;*                                          *
 ;********************************************
 DUMP_BYTE
-                pha
-                lsr
-                lsr
-                lsr
-                lsr
-                jsr DUMP_NYBBLE
-                pla
-                and #$0F
-                ; fall through
+        pha
+        lsr
+        lsr
+        lsr
+        lsr
+        jsr DUMP_NYBBLE
+        pla
+        and #$0F
+        ; fall through
 
 ;********************************************
 ;*                                          *
@@ -502,12 +502,12 @@ DUMP_BYTE
 ;*                                          *
 ;********************************************
 DUMP_NYBBLE
-                ora #'0'
-                cmp #'9' + 1
-                bcc +
-                adc #'A' - ('9' + 2)
+        ora #'0'
+        cmp #'9' + 1
+        bcc +
+        adc #'A' - ('9' + 2)
 +
-                jmp CHROUT
+        jmp CHROUT
 
 ;********************************************
 ;*                                          *
@@ -520,17 +520,17 @@ DUMP_NYBBLE
 ;*                                          *
 ;********************************************
 DUMP_STR
-                sty DUMPSTR
-                sta DUMPSTR + 1
-                ldy #0
+        sty DUMPSTR
+        sta DUMPSTR + 1
+        ldy #0
 -
-                lda (DUMPSTR),y
-                beq +
-                jsr CHROUT
-                iny
-                bne -
+        lda (DUMPSTR),y
+        beq +
+        jsr CHROUT
+        iny
+        bne -
 +
-                rts
+        rts
 
 ;********************************************
 ;*                                          *
@@ -543,19 +543,19 @@ DUMP_STR
 ;*                                          *
 ;********************************************
 PRNTLN
-                ;
-                ;   get current line number
-                ;   store in bnvar
-                ;
-                ldy #LNOFF
-                lda (NXTLN),y
-                sta BNVAR
-                iny
-                lda (NXTLN),y
-                sta BNVAR+1
-                ;
-                ;   fall through to printnum
-                ;
+        ;
+        ;   get current line number
+        ;   store in bnvar
+        ;
+        ldy #LNOFF
+        lda (NXTLN),y
+        sta BNVAR
+        iny
+        lda (NXTLN),y
+        sta BNVAR+1
+        ;
+        ;   fall through to printnum
+        ;
 ;********************************************
 ;*                                          *
 ;*  PRINTNUM                                *
@@ -567,14 +567,14 @@ PRNTLN
 ;*                                          *
 ;********************************************
 PRINTNUM
-                ;
-                ;   convert to bcd and string
-                ;
-                jsr BINBCD16
+        ;
+        ;   convert to bcd and string
+        ;
+        jsr BINBCD16
 
-                ;
-                ;   fall through to printnum
-                ;
+        ;
+        ;   fall through to printnum
+        ;
 ;********************************************
 ;*                                          *
 ;*  PRINTBCDSTR                             *
@@ -586,31 +586,31 @@ PRINTNUM
 ;*                                          *
 ;********************************************
 PRINTBCDSTR
-                ;
-                ;   loop through 5 chars
-                ;
-                ldy #0
-                sty LDZFLG
+        ;
+        ;   loop through 5 chars
+        ;
+        ldy #0
+        sty LDZFLG
 -
-                lda BCDSTR,y
-                cmp #'0'
-                bne +
+        lda BCDSTR,y
+        cmp #'0'
+        bne +
 
-                cpy #4
-                beq +
+        cpy #4
+        beq +
 
-                ldx LDZFLG
-                beq ++
+        ldx LDZFLG
+        beq ++
 +
-                jsr CHROUT
-                inc LDZFLG
+        jsr CHROUT
+        inc LDZFLG
 +
-                iny
-                cpy #5
-                bne -
+        iny
+        cpy #5
+        bne -
 
-                lda #' '
+        lda #' '
 
-                jmp CHROUT
+        jmp CHROUT
 
 .endif

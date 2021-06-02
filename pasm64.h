@@ -95,7 +95,7 @@ typedef struct
 
 typedef struct
 {
-    int printstate;
+    int print_state;
 } PrintStateNode;
 
 /* nodes union */
@@ -177,3 +177,4 @@ extern void ResetMacroDict(void);
     PrintNode(p);\
     fprintf(LogFile, "\n");\
 }
+

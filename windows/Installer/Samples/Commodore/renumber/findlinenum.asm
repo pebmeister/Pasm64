@@ -7,164 +7,137 @@
 ;*                                          *
 ;********************************************
 FINDLINENUM
-                ;
-                ;   init maxidx
-                ;
-                lda TBLSZ
-                sta MAXIDX
-                lda TBLSZ + 1
-                sta MAXIDX + 1
+        ;
+        ;   init maxidx
+        ;
+        MOVE16 TBLSZ,MAXIDX
 
-                ;
-                ;   init lastidx
-                ;
-                lda #$FF
-                sta LASTIDX
-                sta LASTIDX + 1
+        ;
+        ;   init lastidx
+        ;
+        lda #$FF
+        sta LASTIDX
+        sta LASTIDX + 1
 
-                ;
-                ;   convert maxidx to bytes
-                ;
-                sec
-                asl MAXIDX
-                rol MAXIDX  + 1
+        ;
+        ;   convert maxidx to bytes
+        ;
+        sec
+        asl MAXIDX
+        rol MAXIDX  + 1
 
-                ;
-                ;   init minidx
-                ;
-                lda #0
-                sta MINIDX
-                sta MINIDX  + 1
+        ;
+        ;   init minidx
+        ;
+        lda #0
+        sta MINIDX
+        sta MINIDX  + 1
 
 .ifdef debug
-                jsr DUMP_LN
-                jsr DUMP_STAR
+        jsr DUMP_LN
+        jsr DUMP_STAR
 .endif
 -
 .ifdef debug
-                jsr DUMP_MX
-                jsr DUMP_MN
-                jsr DUMP_TS
+        jsr DUMP_MX
+        jsr DUMP_MN
+        jsr DUMP_TS
 .endif
-                ;
-                ;   calculate next index to table
-                ;   table is sorted so binary search
-                ;   maxidx  - minidx
-                ;
-                sec
-                lda MAXIDX              ;   curidx = maxidx - minidx
-                sbc MINIDX
-                sta CURIDX
-                lda MAXIDX + 1
-                sbc MINIDX + 1
-                sta CURIDX + 1
+        ;
+        ;   calculate next index to table
+        ;   table is sorted so binary search
+        ;   maxidx  - minidx
+        ;
+        SUB16 MAXIDX,MINIDX,CURIDX
 
-                ;
-                ;   divide by 2
-                ;
-                lsr CURIDX  + 1         ;   curidx >> 1
-                ror CURIDX
+        ;
+        ;   divide by 2
+        ;
+        lsr CURIDX  + 1         ;   curidx >> 1
+        ror CURIDX
 
-                ;
-                ;   add minidx
-                ;
-                clc                     ;   curidx += minidx
-                lda CURIDX
-                adc MINIDX
-                sta CURIDX
-                lda CURIDX  + 1
-                adc MINIDX  + 1
-                sta CURIDX  + 1
+        ;
+        ;   add minidx
+        ;
+        ;   curidx += minidx
+        ADD16 CURIDX,MINIDX,CURIDX
 
-                ;
-                ;   make CURIDX even (low byte)
-                ;
-                lda CURIDX              ;   curidx &= 0xFFFE
-                and #~%00000001
-                sta CURIDX
+        ;
+        ;   make CURIDX even (low byte)
+        ;
+        lda CURIDX              ;   curidx &= 0xFFFE
+        and #~%00000001
+        sta CURIDX
 
-                ;
-                ;   check to see if we tried this already
-                ;
-                cmp LASTIDX
-                bne +
-                lda CURIDX  + 1
-                cmp LASTIDX + 1
-                bne +
+        ;
+        ;   check to see if we tried this already
+        ;
+        cmp LASTIDX
+        bne +
+        lda CURIDX  + 1
+        cmp LASTIDX + 1
+        bne +
 
-                ;
-                ;   we can't find the line
-                ;
-                rts
+        ;
+        ;   we can't find the line
+        ;
+        rts
 +
-                ;
-                ;   save current index
-                ;
-                lda CURIDX
-                sta LASTIDX
-                lda CURIDX + 1
-                sta LASTIDX + 1
+        ;
+        ;   save current index
+        ;
+        MOVE16 CURIDX,LASTIDX
 
-                ;
-                ;   load tbl[curinx]
-                ;
-                clc
-                lda TBL
-                adc CURIDX
-                sta TBLPTR
-                lda TBL + 1
-                adc CURIDX + 1
-                sta TBLPTR + 1
+        ;
+        ;   load tbl[curinx]
+        ;
+        ADD16 TBL,CURIDX,TBLPTR
+
 .ifdef debug
-                jsr DUMP_NEWLINE
-                jsr DUMP_I
-                jsr DUMP_TP
-                jsr DUMP_TE
+        jsr DUMP_NEWLINE
+        jsr DUMP_I
+        jsr DUMP_TP
+        jsr DUMP_TE
 .endif
-                ;
-                ;   compare high byte
-                ;
-                ldy #1
-                lda (TBLPTR),y
-                cmp LNUM + 1
-                bne +
-                ;
-                ;   compare low byte
-                ;
-                dey
-                lda (TBLPTR),y
-                cmp LNUM
-                beq +++
+        ;
+        ;   compare high byte
+        ;
+        ldy #1
+        lda (TBLPTR),y
+        cmp LNUM + 1
+        bne +
+        ;
+        ;   compare low byte
+        ;
+        dey
+        lda (TBLPTR),y
+        cmp LNUM
+        beq +++
 +
-                ;
-                ;   not equal
-                ;
-                bcc +
+        ;
+        ;   not equal
+        ;
+        bcc +
+
 .ifdef debug
-                jsr DUMP_PLUS
+        jsr DUMP_PLUS
 .endif
-                ;
-                ;   table entry greater than lnum
-                ;
-                lda CURIDX
-                sta MAXIDX
-                lda CURIDX + 1
-                sta MAXIDX + 1
-                jmp -                   ;   try next guess
+        ;
+        ;   table entry greater than lnum
+        ;
+        MOVE16 CURIDX, MAXIDX
+        jmp -                   ;   try next guess
 +
 .ifdef debug
-                jsr DUMP_MINUS
+        jsr DUMP_MINUS
 .endif
-                ;
-                ;   table entry less than lnum
-                ;
-                lda CURIDX
-                sta MINIDX
-                lda CURIDX + 1
-                sta MINIDX + 1
-                jmp -                   ;   try next guess
+        ;
+        ;   table entry less than lnum
+        ;
+        MOVE16 CURIDX,MINIDX
+        jmp -                   ;   try next guess
 +
 .ifdef debug
-                jsr DUMP_FOUNDLINE
+        jsr DUMP_FOUNDLINE
 .endif
-                rts
+        rts

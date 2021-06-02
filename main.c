@@ -3,6 +3,7 @@
 // Created          : 02-23-2015
 //
 // ***********************************************************************
+// ReSharper disable CppClangTidyClangDiagnosticExtraSemiStmt
 #pragma warning(disable:4065)
 #pragma warning(disable:4996)
 
@@ -342,7 +343,7 @@ void ParseArguments(const int argc, char* argv[])
             continue;
         }
 
-        if ((StrICmp(argv[argIndex], "-d") == 0) || (StrICmp(argv[argIndex], "/d") == 0))
+        if (StrICmp(argv[argIndex], "-d") == 0 || (StrICmp(argv[argIndex], "/d") == 0))
         {
             argIndex++;
             if (argIndex >= argc)
