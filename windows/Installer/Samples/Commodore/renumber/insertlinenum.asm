@@ -7,6 +7,8 @@
 ;*                                          *
 ;********************************************
 INSERTLINENUM
+@BCDSZ  = 5
+
         PUSHAY
         ;
         ;   we found the line
@@ -24,13 +26,7 @@ INSERTLINENUM
         ;   add start line
         ;   store in BNVAR
         ;
-        clc
-        lda LSTART
-        adc PRODUCT
-        sta BNVAR
-        lda LSTART + 1
-        adc PRODUCT + 1
-        sta BNVAR + 1
+        ADD16 LSTART,PRODUCT,BNVAR
 
         jsr BINBCD16
 
@@ -63,7 +59,7 @@ INSERTLINENUM
         ;
 -
         sec
-        lda #5
+        lda #@BCDSZ
         sbc BCDLEN
         tax
         ;
@@ -74,7 +70,7 @@ INSERTLINENUM
         sta (NXTLN),y
         iny
         inx
-        cpx #5
+        cpx #@BCDSZ
         bne -
 
         tya

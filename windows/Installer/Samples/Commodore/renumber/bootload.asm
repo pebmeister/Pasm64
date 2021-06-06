@@ -34,8 +34,9 @@
         jmp EXECADDR            ;   start it
 
                                 ;   enter your (short!) text here
-MSG             .db " RENUM",0
-NAME            .str "RENUM"            ;   enter name of prg-to-load here
+MSG     db " RENUM",0
+NAME    .str "RENUM"            ;   enter name of prg-to-load here
+        
         NAMELEN = *-NAME
         EXECADDR = $C000        ;   set to the 1st instruction's address of prg-to-load
 
