@@ -34,7 +34,7 @@
         jmp EXECADDR            ;   start it
 
                                 ;   enter your (short!) text here
-MSG     db " RENUM",0
+MSG     .db " RENUM",0
 NAME    .str "RENUM"            ;   enter name of prg-to-load here
         
         NAMELEN = *-NAME
