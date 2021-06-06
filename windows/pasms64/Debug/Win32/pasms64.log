@@ -1,6 +1,5 @@
 ﻿  Process "pasm64.y" bison file
   Process "pasm64.l" flex file
-  genlist.c
   node.c
   pasm64.c
   pasm64.flex.c

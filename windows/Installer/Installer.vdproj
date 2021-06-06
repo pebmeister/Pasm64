@@ -64,12 +64,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_550080051AFC4749A30D5E2634BB17E9"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_5570C818CF414148B9E4557F3F505DDC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -101,12 +95,6 @@
         "Entry"
         {
         "MsmKey" = "8:_70F99E8FC58E42A5947A3F540516AA40"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_72DB934F175E4DF4AA8A6F1713CF1946"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -462,26 +450,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_550080051AFC4749A30D5E2634BB17E9"
-            {
-            "SourcePath" = "8:Readme.txt"
-            "TargetName" = "8:Readme.txt"
-            "Tag" = "8:"
-            "Folder" = "8:_179EE3A5E0A5499CA93650702624D684"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5570C818CF414148B9E4557F3F505DDC"
             {
             "SourcePath" = "8:Samples\\Commodore\\renumber\\vars.asm"
@@ -579,26 +547,6 @@
             "PackageAs" = "3:1"
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_72DB934F175E4DF4AA8A6F1713CF1946"
-            {
-            "SourcePath" = "8:Readme.txt"
-            "TargetName" = "8:Readme.txt"
-            "Tag" = "8:"
-            "Folder" = "8:_255A78A5FC6147629DC15EBC13B3B91B"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:TRUE"
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
@@ -1067,7 +1015,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Pasm64"
         "ProductCode" = "8:{A0509F75-7B6A-48E3-B33A-7E51BFB7647B}"
-        "PackageCode" = "8:{0B8FB371-A1FF-49F4-B4EB-E2B74B80DAC2}"
+        "PackageCode" = "8:{F9D3357E-BEB3-4ACB-94A6-12A35002D3F4}"
         "UpgradeCode" = "8:{F74C9B12-0F69-4C1E-863E-42F462B35FD8}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1574,7 +1522,7 @@
                 {
                     "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_8CD22B4BCB51453EA5875967EA4ED1E5"
                     {
-                    "Sequence" = "3:110"
+                    "Sequence" = "3:100"
                     "DisplayName" = "8:Finished"
                     "UseDynamicProperties" = "11:TRUE"
                     "IsDependency" = "11:FALSE"
@@ -1590,53 +1538,6 @@
                             "ContextData" = "8:Bitmap"
                             "Attributes" = "3:4"
                             "Setting" = "3:1"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                        }
-                    }
-                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_C707D8D1F1B84690B12969FB1EAACF3F"
-                    {
-                    "Sequence" = "3:100"
-                    "DisplayName" = "8:Read Me"
-                    "UseDynamicProperties" = "11:TRUE"
-                    "IsDependency" = "11:FALSE"
-                    "SourcePath" = "8:<VsdDialogDir>\\VsdAdminReadmeDlg.wid"
-                        "Properties"
-                        {
-                            "BannerBitmap"
-                            {
-                            "Name" = "8:BannerBitmap"
-                            "DisplayName" = "8:#1001"
-                            "Description" = "8:#1101"
-                            "Type" = "3:8"
-                            "ContextData" = "8:Bitmap"
-                            "Attributes" = "3:4"
-                            "Setting" = "3:1"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                            "ReadmeText"
-                            {
-                            "Name" = "8:ReadmeText"
-                            "DisplayName" = "8:#1010"
-                            "Description" = "8:#1110"
-                            "Type" = "3:6"
-                            "ContextData" = "8:"
-                            "Attributes" = "3:0"
-                            "Setting" = "3:2"
-                            "Value" = "8:_72DB934F175E4DF4AA8A6F1713CF1946"
-                            "UsePlugInResources" = "11:TRUE"
-                            }
-                            "Sunken"
-                            {
-                            "Name" = "8:Sunken"
-                            "DisplayName" = "8:#1007"
-                            "Description" = "8:#1107"
-                            "Type" = "3:5"
-                            "ContextData" = "8:4;True=4;False=0"
-                            "Attributes" = "3:0"
-                            "Setting" = "3:0"
-                            "Value" = "3:4"
-                            "DefaultValue" = "3:4"
                             "UsePlugInResources" = "11:TRUE"
                             }
                         }
