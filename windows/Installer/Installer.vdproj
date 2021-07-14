@@ -1574,7 +1574,7 @@
                 {
                     "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_8CD22B4BCB51453EA5875967EA4ED1E5"
                     {
-                    "Sequence" = "3:110"
+                    "Sequence" = "3:120"
                     "DisplayName" = "8:Finished"
                     "UseDynamicProperties" = "11:TRUE"
                     "IsDependency" = "11:FALSE"
@@ -1594,9 +1594,9 @@
                             }
                         }
                     }
-                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_C707D8D1F1B84690B12969FB1EAACF3F"
+                    "{688940B3-5CA9-4162-8DEE-2993FA9D8CBC}:_EC21DE2799C4439F8CECE41967B1AC88"
                     {
-                    "Sequence" = "3:100"
+                    "Sequence" = "3:110"
                     "DisplayName" = "8:Read Me"
                     "UseDynamicProperties" = "11:TRUE"
                     "IsDependency" = "11:FALSE"
