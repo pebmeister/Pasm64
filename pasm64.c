@@ -28,6 +28,9 @@
 #define INT16_MAX 32767
 #endif
 
+int PcAssigned = 0;
+int CodeGenerated = 0;
+
 int InMacroDef = 0;
 
 // for 6502 and 65C02
@@ -504,6 +507,7 @@ int ExOprVar(ParseNodePtr p)
 //
 int ExSymbol(ParseNodePtr p)
 {
+
     const char* method = "ExSymbol";
 
     CHECK_OPS(0, 0);
@@ -749,6 +753,9 @@ int ExData(ParseNodePtr p)
 
     CHECK_OPS(0, 0);
 
+    //if (PcAssigned > 0)
+    OriginSpecified = TRUE;
+
     ExpansionType = data_byte;
     DataSize = p->data.size;
     if (p->data.size == 0)
@@ -837,7 +844,10 @@ int ExOpCode(ParseNodePtr p)
     int opBytes;
     const char* method = "ExOpCode";
 
-    p->opcode.pc = PC;
+    if (PcAssigned > 0)
+        OriginSpecified = TRUE;
+
+    p->opcode.pc = PC;    
 
     switch (p->opcode.mode)
     {
@@ -885,7 +895,7 @@ int ExOpCode(ParseNodePtr p)
             break;
     }
 
-    if (!HasUnInitializedSymbol(p))
+    if (opBytes > 0 && !HasUnInitializedSymbol(p))
     {
         int outOfRange = 0;
         int largeOp = 0;
@@ -1004,6 +1014,7 @@ int ExOpCode(ParseNodePtr p)
     }
 
     PC += (GetOpByteCount(p) + 1);
+    CodeGenerated += (GetOpByteCount(p) + 1);
 
     p->opcode.opcode = saveOpCode;
     p->opcode.mode = saveMode;
@@ -1092,6 +1103,7 @@ int ExOprPcAssign(ParseNodePtr p)
 
     CHECK_OPS(1, 1);
 
+    PcAssigned++;
     const int op = Ex(p->op[0]);
 
     if (OriginSpecified)
@@ -1118,7 +1130,7 @@ int ExOprPcAssign(ParseNodePtr p)
             }
         }
     }
-    OriginSpecified = TRUE;
+
     PC = op;
     return 0;
 }
@@ -1131,7 +1143,7 @@ int ExOprPcAssign(ParseNodePtr p)
 int ExOprOrg(ParseNodePtr p)
 {
     const char* method = "ExOprOrg";
-
+    PcAssigned++;
     CHECK_OPS(1, 1);
 
     if (OriginSpecified)
@@ -1166,6 +1178,10 @@ int ExOprExpressionList(ParseNodePtr p)
             Ex(pp);
             continue;
         }
+
+        for (int iii = 0; iii < pp->nops; ++iii)
+            Ex(pp->op[iii]);
+
         switch (ExpansionType)  // NOLINT(hicpp-multiway-paths-covered)
         {
             case symbol:
@@ -1334,6 +1350,7 @@ struct macro_dict_entry
 /// </summary>
 struct macro_dict_entry* CreateMacroEntry(const char* name)
 {
+    // ReSharper disable once CppTooWideScope
     const char* module = "CreateMacroEntry";
     if (MacroDict == NULL)
         MacroDict = DictCreate(sizeof(struct macro_dict_entry*));
@@ -1358,6 +1375,8 @@ struct macro_dict_entry* CreateMacroEntry(const char* name)
 /// </summary>
 void ResetMacroDict(void)
 {
+    CodeGenerated = 0;
+
     if (MacroDict == NULL)
         return;
 
@@ -1685,23 +1704,9 @@ int ExOprDs(ParseNodePtr p)
     CHECK_OPS(0, 1);
 
     const int op = Ex(p->op[0]);
-    if (FinalPass)
-    {
-        if (GenByteNode == NULL)
-            GenByteNode = Data(1, Con(0, FALSE));
-        for (int index = 0; index < op; index++)
-        {
-            DataSize = 1;
-            GenerateListNode(GenByteNode);
-            GenerateOut(GenByteNode);
-            PC = PC + 1;
-        }
-    } 
-    else
-    {
-        PC = PC + op;
-    }
-    return 0;
+    PC = PC + op;
+
+    return op;
 }
 
 /// <summary>

@@ -244,8 +244,10 @@ char* FormatLocalSym(char* name, char* lastLabel)
 /// <returns>int.</returns>
 SymbolTablePtr AddSymbol(char* name)
 {
+
     if (name == NULL) return NULL;
     if (InMacroDef > 0) return NULL;
+    if (StrICmp(name, "A") == 0) return NULL;
 
     SymbolTable sym = { 0 };
     char* tempSection = CurrentScope;

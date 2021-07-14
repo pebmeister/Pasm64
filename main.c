@@ -128,6 +128,13 @@ void Usage(void)
 
 void ParseArguments(const int argc, char* argv[])
 {
+
+    for (int arg = 0; arg < argc; arg++)
+    {
+        printf("%s ", argv[arg]);
+    }
+    printf("\n");
+
     const char* module = "ParseArguments";
     InputFiles = (char**)ALLOCATE(sizeof(char*) * argc);
     int argIndex = 1;

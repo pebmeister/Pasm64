@@ -85,11 +85,11 @@ MOVELINESDOWN
         ;   add EOL and end of basic marker
         ;
         ADD16I CURIDX,4,CURIDX
-
+        
         ;
         ;   set max to new dest address
-        ;
-        clc
+        ;         
+        clc        
         lda MINIDX
         adc LASTIDX
         sta MAXIDX

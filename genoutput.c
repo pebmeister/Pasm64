@@ -14,6 +14,8 @@
 
 // number of byte written to output file
 int TotalBytesWritten = 0;
+int ByteDelta = 0;
+int Origin = 0;
 
 /// <summary>
 /// Generate output to the object file
@@ -35,11 +37,20 @@ int GenerateOut(ParseNodePtr p)
     // if there is no output file exit
     if (OutputFile == NULL)
         return 0;
-    
+
+    if (!OriginSpecified)
+        return 0;
+
+    if (TotalBytesWritten == 0)
+    {
+        Origin = PC;
+        ByteDelta = 0;
+    }
+
     if (TotalBytesWritten == 0 && OutFileFormat == c64)
     {
-        int hi = (unsigned char)((PC & 0xFF00) >> 8);
-        int lo = (unsigned char)(PC & 0xFF);
+        unsigned char hi = (unsigned char)((PC & 0xFF00) >> 8);
+        unsigned char lo = (unsigned char)(PC & 0xFF);
 
         bytesWritten = fwrite(&lo, 1, 1, OutputFile);
         if (bytesWritten < 1)
@@ -56,6 +67,16 @@ int GenerateOut(ParseNodePtr p)
             return 0;
         }
         TotalBytesWritten += (int)bytesWritten;
+        ByteDelta = 2;
+    }
+
+    const int delta = PC - Origin;
+
+    while (delta + ByteDelta > TotalBytesWritten)
+    {
+        char ch = 0;
+        fwrite(&ch, 1, 1, OutputFile);
+        ++TotalBytesWritten;
     }
 
     // output a string

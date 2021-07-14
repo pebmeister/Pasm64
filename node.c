@@ -364,6 +364,19 @@ ParseNodePtr Opcode(int opr, int mode, int nops, ...)
             p->op[index] = va_arg(ap, ParseNodePtr);
         va_end(ap);
     }
+
+    /* Take care of ASL A   etc */
+    if (p->opcode.mode == a && nops > 0)
+    {
+        const ParseNodePtr pp = p->op[0];
+        if (pp && pp->type == type_id && StrICmp(pp->id.name, "A") == 0)
+        {
+            mode = A;
+            p->nops--;
+            p->opcode.mode = mode;
+        }
+    }
+
     int code = GetOpCode(opr, mode);
     if (code == -1)
     {
@@ -415,7 +428,8 @@ ParseNodePtr Opcode(int opr, int mode, int nops, ...)
     }
     for (index = 0; index < nops; index++)
     {
-        Ex(p->op[index]);
+        if (p->op[index])
+            Ex(p->op[index]);
     }    
 
     p->opcode.opcode = code;

@@ -71,21 +71,15 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 "CPX"                       OP(cpx)
 "CPY"                       OP(cpy)
 "DEC"                       OP(dec)
-"DEC"[ /t]*"A"              OP(dec)
 "DEX"                       OP(dex)
 "DEY"                       OP(dey)
 "INC"                       OP(inc)
-"INC"[ /t]*"A"              OP(inc)
 "INX"                       OP(inx)
 "INY"                       OP(iny)
 "ASL"                       OP(asl)
-"ASL"[ /t]*"A"              OP(asl)
 "ROL"                       OP(rol)
-"ROL"[ /t]*"A"              OP(rol)
 "LSR"                       OP(lsr)
-"LSR"[ /t]*"A"              OP(lsr)
 "ROR"                       OP(ror)
-"ROR"[ /t]*"A"              OP(ror)
 "LDA"                       OP(lda)
 "STA"                       OP(sta)
 "LDX"                       OP(ldx)
@@ -161,7 +155,7 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 "SMB"[0-7]                  OP_65C02_REL(smb)
 
 [\xD\xA]|[\xA]|[\xD]        return EOL;
-".IFDEF"[ /t]+{SYMB}        {
+".IFDEF"[ \t]+{SYMB}        {
                                 if (ifdefcount >= MAX_INCLUDE_STACK -1) yyerror("Stack overflow");
 
                                 lastif = 0;
@@ -176,7 +170,7 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
                                     BEGIN(IF_DEF);
                                 }
                             }
-".IFNDEF"[ /t]+{SYMB}       {
+".IFNDEF"[ \t]+{SYMB}       {
                                 if (ifdefcount >= MAX_INCLUDE_STACK -1) yyerror("Stack overflow");
 
                                 lastif = 0;
@@ -236,6 +230,7 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 ".TO"                       return TO;
 ".DOWNTO"                   return DOWNTO;
 ".STR"						return STR;
+".TEXT"						return STR;
 ".STRING"				    return STR;
 ".ORG"                      return ORG;
 ".SECTION"                  return SECTION;
@@ -266,15 +261,15 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
 ".REGX"                     { return REGX; }
 ".REGY"                     { return REGY; }
 ".VAR"                      { return VAR;  }
-".6502"[ /t]*"ON"           { CPUMode = cpu_6502; }
-".65C02"[ /t]*"ON"          { CPUMode = cpu_65C02; }
-".ILLEGAL"[ /t]*"ON"        { AllowIllegalOpCodes = TRUE; }
-".ILLEGAL"[ /t]*"OFF"       { AllowIllegalOpCodes = FALSE; }
-".WARN"[ /t]*"ON"           { NoWarnings = FALSE; }
-".WARN"[ /t]*"OFF"          { NoWarnings = TRUE; }
+".6502"[ \t]*"ON"           { CPUMode = cpu_6502; }
+".65C02"[ \t]*"ON"          { CPUMode = cpu_65C02; }
+".ILLEGAL"[ \t]*"ON"        { AllowIllegalOpCodes = TRUE; }
+".ILLEGAL"[ \t]*"OFF"       { AllowIllegalOpCodes = FALSE; }
+".WARN"[ \t]*"ON"           { NoWarnings = FALSE; }
+".WARN"[ \t]*"OFF"          { NoWarnings = TRUE; }
 ".C64"                      { OutFileFormat = c64; }
-".PRINT"[ /t]"ON"           { return PRINTON; }
-".PRINT"[ /t]"OFF"          { return PRINTOFF; }
+".PRINT"[ \t]"ON"           { return PRINTON; }
+".PRINT"[ \t]"OFF"          { return PRINTOFF; }
 ^"-"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 ^"+"                        { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
 [\\][1-9]+[0-9]*            {
@@ -296,6 +291,8 @@ SYMB                        @?[A-Za-z_][A-Za-z0-9_.]*
                             }
 [\'].[\']                   INT_1BYTE
 [\'][\\].[\']               INT_1BYTE
+[\"].[\"]                   INT_1BYTE
+[\"][\\].[\'"]              INT_1BYTE
 $[0-9A-Fa-f]*               INT(1, 16)
 [\'][\\]x[0-9A-Fa-f]+[\']   INT(3, 16)
 [0-9]*                      INT(0, 10)
@@ -304,8 +301,8 @@ $[0-9A-Fa-f]*               INT(1, 16)
 [\'][\\][0-7]{3}[\']        INT(2, 8)
 
 {STRVALUE}					{ yylval.strValue = STR_DUP(yytext); return STRING_LITERAL; }
-"*"[ /t]*[=]                { unput('='); return PCASSIGN; }
-"*"[ /t]*".EQU"             { unput('='); return PCASSIGN; }
+"*"[ \t]*[=]                { unput('='); return PCASSIGN; }
+"*"[ \t]*".EQU"             { unput('='); return PCASSIGN; }
 "X"                         { return 'X'; }
 "Y"                         { return 'Y'; }
 {SYMB}:?                    { yylval.strValue = STR_DUP(yytext); return SYMBOL; }
